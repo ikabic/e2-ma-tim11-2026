@@ -5,14 +5,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.slagalica.app.R;
 import com.slagalica.app.viewmodel.AuthViewModel;
@@ -20,11 +21,12 @@ import com.slagalica.app.viewmodel.AuthViewModel;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etUsername, etPassword, etConfirmPassword;
-    private Spinner spinnerRegion;
+    private MaterialAutoCompleteTextView actvRegion;
     private MaterialButton btnRegister;
     private ProgressBar progressBar;
     private AuthViewModel authViewModel;
 
+    // change to eng?
     private final String[] regions = {
         "Beogradski region",
         "Region Vojvodine",
@@ -38,7 +40,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         initViews();
-        setupRegionSpinner();
+        setupRegionDropdown();
         setupViewModel();
         setupListeners();
     }
@@ -48,21 +50,35 @@ public class RegisterActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        spinnerRegion = findViewById(R.id.spinnerRegion);
+        actvRegion = findViewById(R.id.actvRegion);
         btnRegister = findViewById(R.id.btnRegister);
         progressBar = findViewById(R.id.progressBar);
 
-        TextView tvLogin = findViewById(R.id.tvLogin);
-        tvLogin.setOnClickListener(v -> {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout.selectTab(tabLayout.getTabAt(1));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(@NonNull TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                    finish();
+                    overridePendingTransition(0, 0);
+                }
+            }
+
+            @Override
+            public void onTabUnselected(@NonNull TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(@NonNull TabLayout.Tab tab) {}
         });
     }
 
-    private void setupRegionSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, regions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerRegion.setAdapter(adapter);
+    private void setupRegionDropdown() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+            this, android.R.layout.simple_dropdown_item_1line, regions
+        );
+        actvRegion.setAdapter(adapter);
     }
 
     private void setupViewModel() {
@@ -75,16 +91,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         authViewModel.getRegistrationSuccess().observe(this, success -> {
             if (success) {
-                Toast.makeText(this, "Registration successful! Check your email for verification.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Registration successful! Check your email to verify your account.", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
             }
         });
 
         authViewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
-            }
+            if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show();
         });
     }
 
@@ -92,18 +106,20 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String username = etUsername.getText().toString().trim();
-            String region = spinnerRegion.getSelectedItem().toString();
+            String region = actvRegion.getText().toString().trim();
             String password = etPassword.getText().toString();
             String confirmPassword = etConfirmPassword.getText().toString();
 
-            if (!validateInput(email, username, password, confirmPassword)) return;
+            if (!validateInput(email, username, region, password, confirmPassword)) return;
 
             authViewModel.register(email, username, region, password);
         });
     }
 
-    private boolean validateInput(String email, String username, String password, String confirmPassword) {
-        if (email.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+    private boolean validateInput(String email, String username, String region,
+                                  String password, String confirmPassword) {
+        if (email.isEmpty() || username.isEmpty() || region.isEmpty()
+                || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -112,7 +128,7 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
         if (password.length() < 6) {
-            Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Password must be at least 8 characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

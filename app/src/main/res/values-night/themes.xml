@@ -1,7 +1,55 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.Slagalica" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/accent_ink</item>
+        <item name="colorPrimaryContainer">@color/bg_card</item>
+        <item name="colorOnPrimaryContainer">@color/text</item>
+
+        <item name="colorSecondary">@color/token</item>
+        <item name="colorOnSecondary">@color/bg</item>
+        <item name="colorSecondaryContainer">@color/bg_card</item>
+        <item name="colorOnSecondaryContainer">@color/text</item>
+
+        <item name="colorTertiary">@color/success</item>
+        <item name="colorOnTertiary">@color/accent_ink</item>
+        <item name="colorTertiaryContainer">@color/bg_card</item>
+        <item name="colorOnTertiaryContainer">@color/text</item>
+
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:windowBackground">@color/bg</item>
+
+        <item name="colorSurface">@color/bg_elev</item>
+        <item name="colorOnSurface">@color/text</item>
+        <item name="colorSurfaceVariant">@color/bg_card</item>
+        <item name="colorOnSurfaceVariant">@color/text_mute</item>
+        <item name="colorSurfaceContainer">@color/bg_card</item>
+        <item name="colorSurfaceContainerLow">@color/bg_elev</item>
+        <item name="colorSurfaceContainerHigh">@color/bg_card</item>
+        <item name="colorSurfaceContainerHighest">@color/bg_card</item>
+
+        <item name="colorError">@color/danger</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="colorErrorContainer">@color/bg_card</item>
+        <item name="colorOnErrorContainer">@color/danger</item>
+
+        <item name="colorOutline">@color/border</item>
+        <item name="colorOutlineVariant">@color/border_strong</item>
+
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_mute</item>
+        <item name="android:textColorHint">@color/text_dim</item>
+    </style>
+
+    <style name="App.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/bg_input</item>
+    </style>
+
+    <style name="App.TextInput.Dropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/bg_input</item>
     </style>
 </resources>

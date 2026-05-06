@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.slagalica.app.R;
 import com.slagalica.app.ui.HomeActivity;
@@ -39,12 +40,24 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
 
-        TextView tvRegister = findViewById(R.id.tvRegister);
-        tvRegister.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegisterActivity.class));
-            finish();
-        });
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout.selectTab(tabLayout.getTabAt(0));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(@NonNull TabLayout.Tab tab) {
+                if (tab.getPosition() == 1) {
+                    startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                    finish();
+                    overridePendingTransition(0, 0);
+                }
+            }
 
+            @Override
+            public void onTabUnselected(@NonNull TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(@NonNull TabLayout.Tab tab) {}
+        });
     }
 
     private void setupViewModel() {
@@ -63,9 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         authViewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) {
-                android.widget.Toast.makeText(this, error, android.widget.Toast.LENGTH_LONG).show();
-            }
+            if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show();
         });
     }
 

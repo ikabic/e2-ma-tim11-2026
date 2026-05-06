@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navHome"
+        android:title="Home"
+        android:icon="@android:drawable/ic_menu_today"/>
+    <item
+        android:id="@+id/navRanks"
+        android:title="Ranks"
+        android:icon="@android:drawable/ic_menu_sort_by_size"/>
+    <item
+        android:id="@+id/navFriends"
+        android:title="Friends"
+        android:icon="@android:drawable/ic_menu_my_calendar"/>
+    <item
+        android:id="@+id/navRegions"
+        android:title="Regions"
+        android:icon="@android:drawable/ic_menu_mapmode"/>
+    <item
+        android:id="@+id/navProfile"
+        android:title="Profile"
+        android:icon="@android:drawable/ic_menu_myplaces"/>
+</menu>
