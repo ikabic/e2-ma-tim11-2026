@@ -18,6 +18,7 @@ import com.slagalica.app.ui.game.korakpokorak.KorakPoKorakActivity;
 import com.slagalica.app.ui.game.mojbroj.MojBrojActivity;
 import com.slagalica.app.ui.game.asocijacije.AsocijacijeActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
+import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.viewmodel.AuthViewModel;
 
 public class HomeActivity extends AppCompatActivity {
@@ -54,6 +55,11 @@ public class HomeActivity extends AppCompatActivity {
         MaterialCardView cardAsocijacije = findViewById(R.id.cardAsocijacije);
         cardAsocijacije.setOnClickListener(v ->
                 startActivity(new Intent(this, AsocijacijeActivity.class))
+        );
+
+        MaterialCardView cardSkocko = findViewById(R.id.cardSkocko);
+        cardSkocko.setOnClickListener(v ->
+                startActivity(new Intent(this, SkockoActivity.class))
         );
 
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);
