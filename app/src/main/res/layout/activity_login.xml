@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg"
+    android:paddingStart="22dp"
+    android:paddingEnd="22dp"
+    android:paddingTop="28dp"
+    android:paddingBottom="20dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_chip"
+        android:paddingStart="5dp"
+        android:paddingEnd="12dp"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:text="S"
+            android:textColor="@color/accent_ink"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:background="@drawable/bg_logo_circle"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SLAGALICA"
+            android:textColor="@color/text"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome back"
+        android:textColor="@color/text"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="6dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in and keep your winning streak alive."
+        android:textColor="@color/text_mute"
+        android:textSize="14sp"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginBottom="20dp"/>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/App.TabLayout.Pill"
+        android:layout_marginBottom="20dp">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign in"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Register"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="EMAIL OR USERNAME"
+        android:textColor="@color/text_mute"
+        android:textSize="11sp"
+        android:letterSpacing="0.04"
+        android:layout_marginBottom="6dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/App.TextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:hintEnabled="false"
+        android:layout_marginBottom="14dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmailOrUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:inputType="text"
+            android:hint="you@email.com"
+            android:textColor="@color/text"
+            android:textColorHint="@color/text_dim"
+            android:textSize="14sp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PASSWORD"
+        android:textColor="@color/text_mute"
+        android:textSize="11sp"
+        android:letterSpacing="0.04"
+        android:layout_marginBottom="6dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/App.TextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:hintEnabled="false"
+        app:endIconMode="password_toggle"
+        app:endIconTint="@color/text_mute"
+        android:layout_marginBottom="20dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:inputType="textPassword"
+            android:hint="Password"
+            android:textColor="@color/text"
+            android:textColorHint="@color/text_dim"
+            android:textSize="14sp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Sign in"
+        android:textColor="@color/accent_ink"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/accent"
+        app:cornerRadius="18dp"
+        app:elevation="0dp"
+        android:layout_marginBottom="10dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGuest"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Continue as guest"
+        android:textColor="@color/text"
+        android:textSize="14sp"
+        app:backgroundTint="@android:color/transparent"
+        app:strokeColor="@color/border_strong"
+        app:strokeWidth="1dp"
+        app:cornerRadius="18dp"
+        app:elevation="0dp"/>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Or continue without an account — limited features"
+        android:textColor="@color/text_mute"
+        android:textSize="13sp"
+        android:gravity="center"/>
+
+</LinearLayout>
