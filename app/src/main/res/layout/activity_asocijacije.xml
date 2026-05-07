@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/bg_elev"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClose"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:text="✕"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                android:padding="0dp"
+                app:backgroundTint="@color/bg_card"
+                app:cornerRadius="16dp"
+                app:elevation="0dp"
+                app:strokeColor="@color/border"
+                app:strokeWidth="1dp"
+                android:layout_marginEnd="10dp"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvRound"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ROUND 1 / 2"
+                    android:textColor="@color/accent"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.12"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Asocijacije"
+                    android:textColor="@color/text"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/chipTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_chip"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:gravity="center_vertical">
+
+                <View
+                    android:id="@+id/viewTimerDot"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/bg_logo_circle"
+                    android:layout_marginEnd="6dp"/>
+
+                <TextView
+                    android:id="@+id/tvTimer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2:00"
+                    android:textColor="@color/text"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_player_you"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvPlayer1Label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Player 1"
+                    android:textColor="@color/text"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:ellipsize="end"/>
+
+                <TextView
+                    android:id="@+id/tvScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/accent"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="vs"
+                android:textColor="@color/text_dim"
+                android:textSize="11sp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_player_other"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvScoreOpponent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/accent"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tvPlayer2Label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Player 2"
+                    android:textColor="@color/text"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="8dp"
+                    android:gravity="end"
+                    android:singleLine="true"
+                    android:ellipsize="end"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"/>
+
+    <TextView
+        android:id="@+id/tvActivePlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Player 1's turn"
+        android:textColor="@color/accent"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="@color/bg_elev"
+        android:letterSpacing="0.08"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="A"
+                        android:gravity="center"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldA0"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldA1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldA2"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldA3"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAnswerA"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/accent_ink"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="B"
+                        android:gravity="center"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldB0"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldB1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldB2"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldB3"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAnswerB"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/accent_ink"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="C"
+                        android:gravity="center"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldC0"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldC1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldC2"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldC3"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAnswerC"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/accent_ink"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="D"
+                        android:gravity="center"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldD0"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldD1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldD2"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFieldD3"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/text"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"
+                        android:layout_marginBottom="6dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAnswerD"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="?"
+                        android:textSize="10sp"
+                        android:textColor="@color/accent_ink"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="10dp"
+                        app:elevation="0dp"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFinalAnswer"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="\? \? \? \? \?"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text"
+                app:backgroundTint="@color/bg_card"
+                app:strokeColor="@color/accent"
+                app:strokeWidth="2dp"
+                app:cornerRadius="14dp"
+                app:elevation="0dp"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView
+                android:id="@+id/tvFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/accent"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="12dp"
+                android:minHeight="20dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/bg_elev"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/border"
+                app:strokeWidth="1dp"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GUESS"
+                        android:textColor="@color/text_mute"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.12"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:boxBackgroundColor="@color/bg_card"
+                        app:boxCornerRadiusTopStart="10dp"
+                        app:boxCornerRadiusTopEnd="10dp"
+                        app:boxCornerRadiusBottomStart="10dp"
+                        app:boxCornerRadiusBottomEnd="10dp"
+                        app:boxStrokeColor="@color/border"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="10dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etGuess"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Type your answer…"
+                            android:textColor="@color/text"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"
+                            android:textSize="14sp"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGuessColumn"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="Guess Column"
+                            android:textColor="@color/accent_ink"
+                            android:textSize="13sp"
+                            app:backgroundTint="@color/accent"
+                            app:cornerRadius="12dp"
+                            app:elevation="0dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGuessFinal"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="Guess Final"
+                            android:textColor="@color/text"
+                            android:textSize="13sp"
+                            app:backgroundTint="@color/bg_card"
+                            app:strokeColor="@color/accent"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="12dp"
+                            app:elevation="0dp"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layoutColumnSelector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnColA"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="A"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text"
+                            app:backgroundTint="@color/bg_card"
+                            app:strokeColor="@color/border"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="10dp"
+                            app:elevation="0dp"
+                            android:layout_marginEnd="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnColB"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="B"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text"
+                            app:backgroundTint="@color/bg_card"
+                            app:strokeColor="@color/border"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="10dp"
+                            app:elevation="0dp"
+                            android:layout_marginEnd="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnColC"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="C"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text"
+                            app:backgroundTint="@color/bg_card"
+                            app:strokeColor="@color/border"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="10dp"
+                            app:elevation="0dp"
+                            android:layout_marginEnd="4dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnColD"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="D"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text"
+                            app:backgroundTint="@color/bg_card"
+                            app:strokeColor="@color/border"
+                            app:strokeWidth="1dp"
+                            app:cornerRadius="10dp"
+                            app:elevation="0dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/sectionGameOver"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GAME OVER"
+            android:textColor="@color/text_mute"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="24dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/bg_player_you"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Player 1"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvFinalScoreP1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/accent"
+                    android:textSize="40sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pts"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VS"
+                android:textColor="@color/text_dim"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/bg_player_other"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Player 2"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="4dp"/>
+
+                <TextView
+                    android:id="@+id/tvFinalScoreP2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/accent"
+                    android:textSize="40sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pts"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvWinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Player 1 wins!"
+            android:textColor="@color/success"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGoHome"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Back to Home"
+            android:textColor="@color/accent_ink"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            app:backgroundTint="@color/accent"
+            app:cornerRadius="24dp"
+            app:elevation="0dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>
