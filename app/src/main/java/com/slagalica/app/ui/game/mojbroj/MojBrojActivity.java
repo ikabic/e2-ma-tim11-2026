@@ -7,16 +7,20 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.slagalica.app.util.GameToast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.slagalica.app.util.ConfirmDialog;
 
 import com.google.android.material.button.MaterialButton;
 import com.slagalica.app.R;
@@ -24,6 +28,7 @@ import com.slagalica.app.viewmodel.MojBrojViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MojBrojActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -37,12 +42,19 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
 
     private TextView tvRound, tvScore, tvScoreOpponent;
     private TextView tvTargetNumber;
-    private MaterialButton btnStopTarget, btnStopNumbers;
 
-    private TextView tvCurrentPlayer, tvCurrentPlayerPlaying, tvTimerPlaying, tvTargetNumberPlaying;
-    private LinearLayout llTokens;
+
+    private TextView tvAnimTarget;
+    private TextView[] tvAnimNums;
+
+    private TextView tvGameTitle, tvTimerHeader, tvTargetNumberPlaying;
+    private LinearLayout llTokens, panelPlayerYou, panelPlayerOpponent;
+    private LinearLayout panelFinalP1, panelFinalP2;
     private TextView tvFinalScoreP1, tvFinalScoreP2, tvWinner;
+    private TextView tvFinalNameP1, tvFinalNameP2;
+    private String playerUsername = "You";
     private TextView[] numberViews;
+    private TextView tvResult;
     private MaterialButton btnPlus, btnMinus, btnMultiply, btnDivide;
     private MaterialButton btnOpenParen, btnCloseParen;
     private MaterialButton btnBackspace, btnClear, btnSubmit;
@@ -52,6 +64,20 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     private Sensor accelerometer;
     private CountDownTimer roundTimer;
     private CountDownTimer autoStopTimer;
+
+    private final Handler animHandler = new Handler(Looper.getMainLooper());
+    private Runnable targetAnimRunnable;
+    private Runnable numbersAnimRunnable;
+    private final Random animRandom = new Random();
+
+    private static final int[][] ANIM_POOLS = {
+        {1,2,3,4,5,6,7,8,9},
+        {1,2,3,4,5,6,7,8,9},
+        {1,2,3,4,5,6,7,8,9},
+        {1,2,3,4,5,6,7,8,9},
+        {10,15,20},
+        {25,50,75,100}
+    };
 
     private final List<ExprToken> tokens = new ArrayList<>();
 
@@ -72,10 +98,11 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_moj_broj);
+        playerUsername = getIntent().getStringExtra("username");
+        if (playerUsername == null) playerUsername = "You";
         initViews();
         initSensor();
-        setupViewModel();
-        Toast.makeText(this, "My Number — game starting!", Toast.LENGTH_SHORT).show();
+        GameToast.showCountdown(this, this::setupViewModel);
     }
 
     private void initViews() {
@@ -83,6 +110,10 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         sectionStopNumbers = findViewById(R.id.sectionStopNumbers);
         sectionPlaying = findViewById(R.id.sectionPlaying);
         sectionGameOver = findViewById(R.id.sectionGameOver);
+        panelFinalP1 = findViewById(R.id.panelFinalP1);
+        panelFinalP2 = findViewById(R.id.panelFinalP2);
+        tvFinalNameP1 = findViewById(R.id.tvFinalNameP1);
+        tvFinalNameP2 = findViewById(R.id.tvFinalNameP2);
         tvFinalScoreP1 = findViewById(R.id.tvFinalScoreP1);
         tvFinalScoreP2 = findViewById(R.id.tvFinalScoreP2);
         tvWinner = findViewById(R.id.tvWinner);
@@ -91,12 +122,19 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         tvScore = findViewById(R.id.tvScore);
         tvScoreOpponent = findViewById(R.id.tvScoreOpponent);
         tvTargetNumber = findViewById(R.id.tvTargetNumber);
-        btnStopTarget = findViewById(R.id.btnStopTarget);
-        btnStopNumbers = findViewById(R.id.btnStopNumbers);
+        tvAnimTarget = findViewById(R.id.tvAnimTarget);
+        tvAnimNums = new TextView[]{
+            findViewById(R.id.tvAnimNum1), findViewById(R.id.tvAnimNum2),
+            findViewById(R.id.tvAnimNum3), findViewById(R.id.tvAnimNum4),
+            findViewById(R.id.tvAnimNum5), findViewById(R.id.tvAnimNum6)
+        };
 
-        tvCurrentPlayer = findViewById(R.id.tvCurrentPlayer);
-        tvCurrentPlayerPlaying = findViewById(R.id.tvCurrentPlayerPlaying);
-        tvTimerPlaying = findViewById(R.id.tvTimerPlaying);
+        tvGameTitle = findViewById(R.id.tvGameTitle);
+        tvGameTitle.setText("My number");
+        tvTimerHeader = findViewById(R.id.tvTimer);
+        tvTimerHeader.setText("--");
+        panelPlayerYou = findViewById(R.id.panelPlayerYou);
+        panelPlayerOpponent = findViewById(R.id.panelPlayerOpponent);
         tvTargetNumberPlaying = findViewById(R.id.tvTargetNumberPlaying);
         llTokens = findViewById(R.id.llTokens);
 
@@ -116,9 +154,17 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
             findViewById(R.id.tvNum5), findViewById(R.id.tvNum6)
         };
 
-        findViewById(R.id.btnClose).setOnClickListener(v -> finish());
-        btnStopTarget.setOnClickListener(v -> viewModel.stopTarget());
-        btnStopNumbers.setOnClickListener(v -> viewModel.stopNumbers());
+        findViewById(R.id.btnClose).setOnClickListener(v -> showExitConfirm());
+        sectionStopTarget.setOnClickListener(v -> {
+            if (autoStopTimer != null) autoStopTimer.cancel();
+            stopTargetAnimation();
+            viewModel.stopTarget();
+        });
+        sectionStopNumbers.setOnClickListener(v -> {
+            if (autoStopTimer != null) autoStopTimer.cancel();
+            stopNumbersAnimation();
+            viewModel.stopNumbers();
+        });
         btnSubmit.setOnClickListener(v -> submitCurrentExpression());
         btnClear.setOnClickListener(v -> clearTokens());
         btnBackspace.setOnClickListener(v -> backspace());
@@ -139,11 +185,13 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
             });
         }
 
+        tvResult = findViewById(R.id.tvResult);
         renderTokens();
+        showPhase(-1);
     }
 
     private void addNumToken(int value, int tileIndex) {
-        if (!tokens.isEmpty() && tokens.get(tokens.size() - 1).type == ExprToken.Type.NUM) return;
+        if (!canAddNumber()) return;
         tokens.add(new ExprToken(ExprToken.Type.NUM, String.valueOf(value), tileIndex));
         numberViews[tileIndex].setEnabled(false);
         numberViews[tileIndex].setAlpha(0.4f);
@@ -152,8 +200,37 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void addOpToken(String op) {
+        if (!canAddOp(op)) return;
         tokens.add(new ExprToken(ExprToken.Type.OP, op, -1));
         renderTokens();
+    }
+
+    private boolean canAddNumber() {
+        if (tokens.isEmpty()) return true;
+        String last = tokens.get(tokens.size() - 1).display;
+        return last.equals("+") || last.equals("−") || last.equals("×") || last.equals("÷") || last.equals("(");
+    }
+
+    private boolean canAddOp(String op) {
+        if (op.equals("(")) {
+            if (tokens.isEmpty()) return true;
+            String last = tokens.get(tokens.size() - 1).display;
+            return last.equals("+") || last.equals("−") || last.equals("×") || last.equals("÷") || last.equals("(");
+        }
+        if (op.equals(")")) {
+            if (tokens.isEmpty()) return false;
+            ExprToken lastTok = tokens.get(tokens.size() - 1);
+            if (lastTok.type != ExprToken.Type.NUM && !lastTok.display.equals(")")) return false;
+            int open = 0;
+            for (ExprToken t : tokens) {
+                if (t.display.equals("(")) open++;
+                else if (t.display.equals(")")) open--;
+            }
+            return open > 0;
+        }
+        if (tokens.isEmpty()) return false;
+        ExprToken lastTok = tokens.get(tokens.size() - 1);
+        return lastTok.type == ExprToken.Type.NUM || lastTok.display.equals(")");
     }
 
     private void backspace() {
@@ -181,29 +258,46 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
             hint.setTextColor(ContextCompat.getColor(this, R.color.text_dim));
             hint.setTextSize(14);
             llTokens.addView(hint);
+        } else {
+            for (ExprToken t : tokens) {
+                TextView chip = new TextView(this);
+                chip.setText(t.display);
+                chip.setTextSize(16);
+                chip.setPadding(dp(10), dp(4), dp(10), dp(4));
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                lp.setMarginEnd(dp(4));
+                lp.gravity = Gravity.CENTER_VERTICAL;
+                chip.setLayoutParams(lp);
+                if (t.type == ExprToken.Type.NUM) {
+                    chip.setTextColor(ContextCompat.getColor(this, R.color.token));
+                    chip.setTypeface(null, Typeface.BOLD);
+                    chip.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_token_num));
+                } else {
+                    chip.setTextColor(ContextCompat.getColor(this, R.color.text_mute));
+                    chip.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_token_op));
+                }
+                llTokens.addView(chip);
+            }
+        }
+        updateResult();
+    }
+
+    private void updateResult() {
+        if (tvResult == null || viewModel == null) return;
+        Integer result = viewModel.tryEvaluate(buildExpression());
+        if (result == null) {
+            tvResult.setText("");
             return;
         }
-        for (ExprToken t : tokens) {
-            TextView chip = new TextView(this);
-            chip.setText(t.display);
-            chip.setTextSize(16);
-            chip.setPadding(dp(10), dp(4), dp(10), dp(4));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            lp.setMarginEnd(dp(4));
-            lp.gravity = Gravity.CENTER_VERTICAL;
-            chip.setLayoutParams(lp);
-            if (t.type == ExprToken.Type.NUM) {
-                chip.setTextColor(ContextCompat.getColor(this, R.color.token));
-                chip.setTypeface(null, Typeface.BOLD);
-                chip.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_token_num));
-            } else {
-                chip.setTextColor(ContextCompat.getColor(this, R.color.text_mute));
-                chip.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_token_op));
-            }
-            llTokens.addView(chip);
+        tvResult.setText("= " + result);
+        Integer target = viewModel.getTargetNumber().getValue();
+        if (target != null && result.equals(target)) {
+            tvResult.setTextColor(ContextCompat.getColor(this, R.color.success));
+        } else {
+            tvResult.setTextColor(ContextCompat.getColor(this, R.color.text_mute));
         }
     }
 
@@ -299,28 +393,35 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         });
 
         viewModel.getMessage().observe(this, msg -> {
-            if (msg != null) Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            if (msg != null) GameToast.show(this, msg);
         });
 
         viewModel.getGameState().observe(this, state -> {
             switch (state) {
                 case SPINNING_TARGET:
+                    tvTimerHeader.setText("--");
                     showPhase(0);
-                    btnStopTarget.setEnabled(true);
-                    startAutoStopTimer(() -> viewModel.stopTarget());
+                    startTargetAnimation();
+                    startAutoStopTimer(() -> {
+                        stopTargetAnimation();
+                        viewModel.stopTarget();
+                    });
                     break;
 
                 case TARGET_REVEALED:
                     if (autoStopTimer != null) autoStopTimer.cancel();
+                    stopTargetAnimation();
                     showPhase(1);
-                    btnStopNumbers.setEnabled(true);
                     viewModel.startSpinningNumbers();
-                    startAutoStopTimer(() -> viewModel.stopNumbers());
+                    startAutoStopTimer(() -> {
+                        stopNumbersAnimation();
+                        viewModel.stopNumbers();
+                    });
                     break;
 
                 case SPINNING_NUMBERS:
                     showPhase(1);
-                    btnStopNumbers.setEnabled(true);
+                    startNumbersAnimation();
                     break;
 
                 case NUMBERS_REVEALED:
@@ -332,8 +433,7 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                 case PLAYER1_INPUT:
                     if (roundTimer != null) roundTimer.cancel();
                     showPhase(2);
-                    tvCurrentPlayer.setText("Player 1");
-                    tvCurrentPlayerPlaying.setText("Player 1");
+                    highlightPlayer(1);
                     clearTokens();
                     setInputEnabled(true);
                     startRoundTimer();
@@ -342,8 +442,7 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                 case PLAYER2_INPUT:
                     if (roundTimer != null) roundTimer.cancel();
                     showPhase(2);
-                    tvCurrentPlayer.setText("Player 2");
-                    tvCurrentPlayerPlaying.setText("Player 2");
+                    highlightPlayer(2);
                     clearTokens();
                     setInputEnabled(true);
                     startRoundTimer();
@@ -360,28 +459,87 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                     setInputEnabled(false);
                     int p1 = safeScore(viewModel.getPlayer1Score().getValue());
                     int p2 = safeScore(viewModel.getPlayer2Score().getValue());
+                    tvFinalNameP1.setText(playerUsername);
+                    tvFinalNameP2.setText("Opponent");
                     tvFinalScoreP1.setText(String.valueOf(p1));
                     tvFinalScoreP2.setText(String.valueOf(p2));
-                    if (p1 > p2) tvWinner.setText("Player 1 wins!");
-                    else if (p2 > p1) tvWinner.setText("Player 2 wins!");
-                    else tvWinner.setText("Draw!");
+                    if (p1 > p2) {
+                        tvWinner.setText(playerUsername + " wins!");
+                        panelFinalP1.setBackgroundResource(R.drawable.bg_player_you);
+                        panelFinalP2.setBackgroundResource(R.drawable.bg_player_other);
+                    } else if (p2 > p1) {
+                        tvWinner.setText("Opponent wins!");
+                        panelFinalP1.setBackgroundResource(R.drawable.bg_player_other);
+                        panelFinalP2.setBackgroundResource(R.drawable.bg_player_you);
+                    } else {
+                        tvWinner.setText("Draw!");
+                        panelFinalP1.setBackgroundResource(R.drawable.bg_player_other);
+                        panelFinalP2.setBackgroundResource(R.drawable.bg_player_other);
+                    }
                     showPhase(3);
                     break;
             }
         });
     }
 
+    private void startTargetAnimation() {
+        if (targetAnimRunnable != null) animHandler.removeCallbacks(targetAnimRunnable);
+        targetAnimRunnable = new Runnable() {
+            @Override public void run() {
+                tvAnimTarget.setText(String.valueOf(100 + animRandom.nextInt(900)));
+                animHandler.postDelayed(this, 80);
+            }
+        };
+        animHandler.post(targetAnimRunnable);
+    }
+
+    private void stopTargetAnimation() {
+        if (targetAnimRunnable != null) {
+            animHandler.removeCallbacks(targetAnimRunnable);
+            targetAnimRunnable = null;
+        }
+    }
+
+    private void startNumbersAnimation() {
+        if (numbersAnimRunnable != null) animHandler.removeCallbacks(numbersAnimRunnable);
+        numbersAnimRunnable = new Runnable() {
+            @Override public void run() {
+                for (int i = 0; i < tvAnimNums.length; i++) {
+                    int[] pool = ANIM_POOLS[i];
+                    tvAnimNums[i].setText(String.valueOf(pool[animRandom.nextInt(pool.length)]));
+                }
+                animHandler.postDelayed(this, 80);
+            }
+        };
+        animHandler.post(numbersAnimRunnable);
+    }
+
+    private void stopNumbersAnimation() {
+        if (numbersAnimRunnable != null) {
+            animHandler.removeCallbacks(numbersAnimRunnable);
+            numbersAnimRunnable = null;
+        }
+    }
+
+    private void highlightPlayer(int player) {
+        panelPlayerYou.setBackgroundResource(
+            player == 1 ? R.drawable.bg_player_you : R.drawable.bg_player_other);
+        panelPlayerOpponent.setBackgroundResource(
+            player == 2 ? R.drawable.bg_player_you : R.drawable.bg_player_other);
+    }
+
     private void startRoundTimer() {
         if (roundTimer != null) roundTimer.cancel();
+        tvTimerHeader.setText("60");
         roundTimer = new CountDownTimer(60000, 1000) {
             @Override
             public void onTick(long ms) {
-                tvTimerPlaying.setText(String.valueOf(ms / 1000));
+                tvTimerHeader.setText(String.valueOf(ms / 1000));
             }
 
             @Override
             public void onFinish() {
-                tvTimerPlaying.setText("0");
+                tvTimerHeader.setText("--");
                 submitCurrentExpression();
             }
         }.start();
@@ -402,19 +560,24 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         if (roundTimer != null) roundTimer.cancel();
         setInputEnabled(false);
         boolean exact = viewModel.submitExpression(buildExpression());
-        if (exact) Toast.makeText(this, "Exact! +10 pts", Toast.LENGTH_SHORT).show();
+        if (exact) GameToast.show(this, "Exact! +10 pts", GameToast.Type.SUCCESS);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (viewModel == null) return;
         float x = event.values[0], y = event.values[1], z = event.values[2];
         float accel = (float) Math.sqrt(x * x + y * y + z * z) - SensorManager.GRAVITY_EARTH;
         if (accel > SHAKE_THRESHOLD) {
             MojBrojViewModel.GameState state = viewModel.getGameState().getValue();
             if (state == MojBrojViewModel.GameState.SPINNING_TARGET) {
+                if (autoStopTimer != null) autoStopTimer.cancel();
+                stopTargetAnimation();
                 viewModel.stopTarget();
             } else if (state == MojBrojViewModel.GameState.SPINNING_NUMBERS ||
                        state == MojBrojViewModel.GameState.TARGET_REVEALED) {
+                if (autoStopTimer != null) autoStopTimer.cancel();
+                stopNumbersAnimation();
                 viewModel.stopNumbers();
             }
         }
@@ -437,10 +600,22 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         sensorManager.unregisterListener(this);
     }
 
+    private void showExitConfirm() {
+        ConfirmDialog.show(this, "Quit game?", "Your progress will be lost.",
+            "Quit", "Keep playing", this::finish);
+    }
+
+    @Override
+    public void onBackPressed() {
+        showExitConfirm();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (roundTimer != null) roundTimer.cancel();
         if (autoStopTimer != null) autoStopTimer.cancel();
+        stopTargetAnimation();
+        stopNumbersAnimation();
     }
 }

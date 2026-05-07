@@ -1,11 +1,19 @@
 package com.slagalica.app.ui.auth;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.TextView;
+import com.slagalica.app.util.GameToast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +24,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.slagalica.app.R;
+import com.slagalica.app.util.ConfirmDialog;
 import com.slagalica.app.viewmodel.AuthViewModel;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -26,12 +35,11 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private AuthViewModel authViewModel;
 
-    // change to eng?
     private final String[] regions = {
-        "Beogradski region",
-        "Region Vojvodine",
-        "Region Šumadije i Zapadne Srbije",
-        "Region Južne i Istočne Srbije"
+        "Belgrade Region",
+        "Vojvodina Region",
+        "Šumadija and Western Serbia Region",
+        "Southern and Eastern Serbia Region"
     };
 
     @Override
@@ -43,6 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
         setupRegionDropdown();
         setupViewModel();
         setupListeners();
+        setupTermsLink();
     }
 
     private void initViews() {
@@ -91,14 +100,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         authViewModel.getRegistrationSuccess().observe(this, success -> {
             if (success) {
-                Toast.makeText(this, "Registration successful! Check your email to verify your account.", Toast.LENGTH_LONG).show();
+                GameToast.show(this, "Account created! Check your email to verify.", GameToast.Type.SUCCESS);
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
             }
         });
 
         authViewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            if (error != null) GameToast.show(this, error, GameToast.Type.ERROR);
         });
     }
 
@@ -120,17 +129,48 @@ public class RegisterActivity extends AppCompatActivity {
                                   String password, String confirmPassword) {
         if (email.isEmpty() || username.isEmpty() || region.isEmpty()
                 || password.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show();
+            GameToast.show(this, "All fields are required.", GameToast.Type.ERROR);
             return false;
         }
         if (!password.equals(confirmPassword)) {
-            Toast.makeText(this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
+            GameToast.show(this, "Passwords do not match.", GameToast.Type.ERROR);
             return false;
         }
-        if (password.length() < 6) {
-            Toast.makeText(this, "Password must be at least 8 characters.", Toast.LENGTH_SHORT).show();
+        if (password.length() < 8) {
+            GameToast.show(this, "Password must be at least 8 characters.", GameToast.Type.ERROR);
             return false;
         }
         return true;
+    }
+
+    private void setupTermsLink() {
+        TextView tvTerms = findViewById(R.id.tvTerms);
+        String full = "By signing in you agree to our terms.";
+        SpannableString s = new SpannableString(full);
+        int start = full.indexOf("terms");
+        int end = start + "terms".length();
+        int accentColor = getResources().getColor(R.color.accent, null);
+
+        s.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                ConfirmDialog.showInfo(RegisterActivity.this,
+                    "Fair Play",
+                    "Play by the rules and keep it fun for everyone.\n\n" +
+                    "No cheating, no unsportsmanlike behavior.\n" +
+                    "Respect your opponents and enjoy the game!",
+                    "Got it!");
+            }
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                ds.setColor(accentColor);
+                ds.setUnderlineText(true);
+            }
+        }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        s.setSpan(new ForegroundColorSpan(accentColor), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        tvTerms.setText(s);
+        tvTerms.setMovementMethod(LinkMovementMethod.getInstance());
+        tvTerms.setHighlightColor(Color.TRANSPARENT);
     }
 }

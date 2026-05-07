@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_auth"
+    android:fillViewport="true">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/bg"
     android:paddingStart="22dp"
     android:paddingEnd="22dp"
     android:paddingTop="28dp"
@@ -44,16 +49,16 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome back"
+        android:text="Welcome back!"
         android:textColor="@color/text"
         android:textSize="30sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/fredoka_one"
         android:layout_marginBottom="6dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign in and keep your winning streak alive."
+        android:text="Your streak is waiting."
         android:textColor="@color/text_mute"
         android:textSize="14sp"
         android:lineSpacingMultiplier="1.4"
@@ -134,7 +139,8 @@
             android:hint="Password"
             android:textColor="@color/text"
             android:textColorHint="@color/text_dim"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:imeOptions="actionDone"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -142,10 +148,10 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="Sign in"
-        android:textColor="@color/accent_ink"
+        android:textColor="@color/text"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:backgroundTint="@color/accent"
+        app:backgroundTint="@color/button_bg"
         app:cornerRadius="18dp"
         app:elevation="0dp"
         android:layout_marginBottom="10dp"/>
@@ -178,9 +184,10 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Or continue without an account — limited features"
+        android:text="Just looking? Play as a guest."
         android:textColor="@color/text_mute"
         android:textSize="13sp"
         android:gravity="center"/>
 
 </LinearLayout>
+</androidx.core.widget.NestedScrollView>

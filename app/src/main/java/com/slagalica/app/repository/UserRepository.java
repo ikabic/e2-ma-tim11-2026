@@ -85,6 +85,12 @@ public class UserRepository {
             .addOnFailureListener(callback::onFailure);
     }
 
+    public void loginAsGuest(RepositoryCallback<FirebaseUser> callback) {
+        auth.signInAnonymously()
+            .addOnSuccessListener(result -> callback.onSuccess(result.getUser()))
+            .addOnFailureListener(callback::onFailure);
+    }
+
     public void logout() {
         auth.signOut();
     }

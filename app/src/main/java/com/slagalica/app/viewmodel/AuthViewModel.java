@@ -70,6 +70,23 @@ public class AuthViewModel extends ViewModel {
         }
     };
 
+    public void loginAsGuest() {
+        loading.setValue(true);
+        userRepository.loginAsGuest(new RepositoryCallback<FirebaseUser>() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                loading.setValue(false);
+                currentUser.setValue(user);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                loading.setValue(false);
+                errorMessage.setValue(e.getMessage());
+            }
+        });
+    }
+
     public void changePassword(String oldPassword, String newPassword) {
         loading.setValue(true);
         userRepository.changePassword(oldPassword, newPassword, new RepositoryCallback<Void>() {
