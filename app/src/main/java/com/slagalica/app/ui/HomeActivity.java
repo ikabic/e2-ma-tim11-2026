@@ -20,6 +20,7 @@ import com.slagalica.app.ui.game.mojbroj.MojBrojActivity;
 import com.slagalica.app.ui.game.asocijacije.AsocijacijeActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.game.skocko.SkockoActivity;
+import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.viewmodel.AuthViewModel;
 
 public class HomeActivity extends AppCompatActivity {
@@ -51,6 +52,10 @@ public class HomeActivity extends AppCompatActivity {
                         playerUsername = currentUser.getEmail();
                         tvWelcome.setText(playerUsername);
                     });
+
+                tvWelcome.setOnClickListener(v ->
+                        startActivity(new Intent(HomeActivity.this, ProfileActivity.class))
+                );
             }
         }
 

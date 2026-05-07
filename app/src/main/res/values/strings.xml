@@ -4,4 +4,7 @@
     <string name="divide">&#247;</string>
     <string name="target_placeholder">\?\?\?</string>
     <string name="number_placeholder">\?</string>
+    <string name="edit_avatar">Edit avatar</string>
+    <string name="log_out">Log out</string>
+    <string name="tokens">Tokens</string>
 </resources>

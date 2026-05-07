@@ -28,4 +28,12 @@
 
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+
+    <color name="league_unranked">#808080</color>
+    <color name="league_bronze">#B87333</color>
+    <color name="league_silver">#8E9AA7</color>
+    <color name="league_gold">#E6C97F</color>
+    <color name="league_platinum">#6B95C4</color>
+    <color name="league_diamond">#4FC3F7</color>
+
 </resources>

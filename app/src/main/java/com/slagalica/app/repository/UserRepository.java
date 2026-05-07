@@ -5,6 +5,7 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.model.Profile;
 import com.slagalica.app.model.User;
 
 public class UserRepository {
@@ -26,14 +27,19 @@ public class UserRepository {
                 String uid = firebaseUser.getUid();
 
                 User user = new User(uid, username, email, region);
+                Profile profile = new Profile(uid, "", 5, 0);
 
                 db.collection(USERS_COLLECTION).document(uid).set(user)
-                    .addOnSuccessListener(unused -> {
-                        firebaseUser.sendEmailVerification()
-                            .addOnSuccessListener(v -> callback.onSuccess(null))
-                            .addOnFailureListener(callback::onFailure);
-                    })
-                    .addOnFailureListener(callback::onFailure);
+                        .addOnSuccessListener(unused -> {
+                            db.collection("profiles").document(uid).set(profile)
+                                    .addOnSuccessListener(profileUnused -> {
+                                        firebaseUser.sendEmailVerification()
+                                                .addOnSuccessListener(v -> callback.onSuccess(null))
+                                                .addOnFailureListener(callback::onFailure);
+                                    })
+                                    .addOnFailureListener(callback::onFailure);
+                        })
+                        .addOnFailureListener(callback::onFailure);
             })
             .addOnFailureListener(callback::onFailure);
     }

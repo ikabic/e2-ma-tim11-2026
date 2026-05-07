@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Base: Dull Matte Grey -->
+    <path android:pathData="M12,2 L20,7 V17 L12,22 L4,17 V7 Z" android:fillColor="#808080"/>
+    <!-- Top Highlight: Low-contrast Matte -->
+    <path android:pathData="M12,2 L20,7 L12,12 L4,7 Z" android:fillColor="#A0A0A0"/>
+    <!-- Bottom Shadow: Darker Stone -->
+    <path android:pathData="M12,22 L4,17 L12,12 L20,17 Z" android:fillColor="#5A5A5A"/>
+    <!-- Center "Gem" Face: Flat Grey -->
+    <path android:pathData="M12,6 L17,9 V15 L12,18 L7,15 V9 Z" android:fillColor="#B8B8B8"/>
+</vector>
