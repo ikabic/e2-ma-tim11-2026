@@ -90,8 +90,7 @@ public class MojBrojViewModel extends ViewModel {
                 result = evaluate(expression);
                 exact = targetNumber.getValue() != null && result.equals(targetNumber.getValue());
             } catch (Exception e) {
-                message.setValue("Invalid expression.");
-                return false;
+                result = null;
             }
         }
 
@@ -140,6 +139,9 @@ public class MojBrojViewModel extends ViewModel {
                 player1Score.setValue(player1Score.getValue() + CLOSER_POINTS);
             } else if (diff2 < diff1) {
                 player2Score.setValue(player2Score.getValue() + CLOSER_POINTS);
+            } else {
+                if (roundStarter == 1) player1Score.setValue(player1Score.getValue() + CLOSER_POINTS);
+                else player2Score.setValue(player2Score.getValue() + CLOSER_POINTS);
             }
         }
     }
@@ -158,6 +160,15 @@ public class MojBrojViewModel extends ViewModel {
 
     public void startNextRound() {
         gameState.setValue(GameState.SPINNING_TARGET);
+    }
+
+    public Integer tryEvaluate(String expression) {
+        if (expression.isEmpty()) return null;
+        try {
+            return evaluate(expression);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private int evaluate(String expression) {

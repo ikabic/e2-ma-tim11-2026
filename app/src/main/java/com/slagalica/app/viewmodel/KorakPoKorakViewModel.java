@@ -66,12 +66,21 @@ public class KorakPoKorakViewModel extends ViewModel {
         KorakPoKorakQuestion q = question.getValue();
         if (q == null || userAnswer.isEmpty()) return false;
 
-        if (userAnswer.equalsIgnoreCase(q.getAnswer())) {
+        if (isCorrect(userAnswer, q)) {
             int step = currentStep.getValue();
             int points = MAX_POINTS - (step * POINTS_PER_STEP);
             addPointsToCurrentPlayer(points);
             advanceRound();
             return true;
+        }
+        return false;
+    }
+
+    private boolean isCorrect(String userAnswer, KorakPoKorakQuestion q) {
+        if (q.getAnswers() == null) return false;
+        String trimmed = userAnswer.trim();
+        for (String accepted : q.getAnswers()) {
+            if (accepted.equalsIgnoreCase(trimmed)) return true;
         }
         return false;
     }
@@ -92,7 +101,7 @@ public class KorakPoKorakViewModel extends ViewModel {
 
         gameState.setValue(GameState.LOADING);
 
-        if (!userAnswer.isEmpty() && userAnswer.equalsIgnoreCase(q.getAnswer())) {
+        if (!userAnswer.isEmpty() && isCorrect(userAnswer, q)) {
             addPointsToOpponent(BONUS_POINTS);
             advanceRound();
             return true;

@@ -45,7 +45,16 @@
         <item name="android:textColorHint">@color/text_dim</item>
     </style>
 
-    <style name="Theme.Slagalica" parent="Base.Theme.Slagalica" />
+    <style name="Theme.Slagalica" parent="Base.Theme.Slagalica">
+        <item name="android:fontFamily">@font/nunito</item>
+        <item name="fontFamily">@font/nunito</item>
+    </style>
+
+    <style name="TextAppearance.Slagalica.Heading" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:fontFamily">@font/fredoka_one</item>
+        <item name="fontFamily">@font/fredoka_one</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
 
     <style name="App.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/bg_input</item>
@@ -55,16 +64,23 @@
         <item name="boxBackgroundColor">@color/bg_input</item>
     </style>
 
+    <style name="App.Tab.Text" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">@font/nunito</item>
+        <item name="fontFamily">@font/nunito</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="App.TabLayout.Pill" parent="Widget.Material3.TabLayout">
         <item name="android:background">@drawable/bg_tab_container</item>
         <item name="tabIndicatorColor">@android:color/transparent</item>
         <item name="tabIndicatorHeight">0dp</item>
-        <item name="tabSelectedTextColor">@color/accent_ink</item>
+        <item name="tabSelectedTextColor">@color/accent</item>
         <item name="tabTextColor">@color/text_mute</item>
         <item name="tabBackground">@drawable/bg_tab_selector</item>
         <item name="tabMode">fixed</item>
         <item name="tabGravity">fill</item>
-        <item name="tabTextAppearance">@style/TextAppearance.Material3.TitleSmall</item>
+        <item name="tabTextAppearance">@style/App.Tab.Text</item>
         <item name="tabRippleColor">@android:color/transparent</item>
 
         <item name="android:minHeight">46dp</item>

@@ -3,8 +3,8 @@ package com.slagalica.app.ui.auth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +15,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.slagalica.app.R;
 import com.slagalica.app.ui.HomeActivity;
+import com.slagalica.app.util.GameToast;
 import com.slagalica.app.viewmodel.AuthViewModel;
 
 public class LoginActivity extends AppCompatActivity {
@@ -76,21 +77,33 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         authViewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            if (error != null) GameToast.show(this, error, GameToast.Type.ERROR);
         });
     }
 
     private void setupListeners() {
-        btnLogin.setOnClickListener(v -> {
-            String emailOrUsername = etEmailOrUsername.getText().toString().trim();
-            String password = etPassword.getText().toString();
+        btnLogin.setOnClickListener(v -> attemptLogin());
 
-            if (emailOrUsername.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show();
-                return;
+        etPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                attemptLogin();
+                return true;
             }
-
-            authViewModel.login(emailOrUsername, password);
+            return false;
         });
+
+        findViewById(R.id.btnGuest).setOnClickListener(v -> authViewModel.loginAsGuest());
+    }
+
+    private void attemptLogin() {
+        String emailOrUsername = etEmailOrUsername.getText().toString().trim();
+        String password = etPassword.getText().toString();
+
+        if (emailOrUsername.isEmpty() || password.isEmpty()) {
+            GameToast.show(this, "All fields are required.", GameToast.Type.ERROR);
+            return;
+        }
+
+        authViewModel.login(emailOrUsername, password);
     }
 }

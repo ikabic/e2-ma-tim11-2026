@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg">
+    android:background="@drawable/bg_gradient_auth">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -47,16 +47,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Join the arena"
+            android:text="Join the game."
             android:textColor="@color/text"
             android:textSize="30sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/fredoka_one"
             android:layout_marginBottom="6dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Please come up with something i cannot do this right now."
+            android:text="Quick setup, big fun."
             android:textColor="@color/text_mute"
             android:textSize="14sp"
             android:lineSpacingMultiplier="1.4"
@@ -248,11 +248,11 @@
                 android:id="@+id/btnRegister"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:text="Create account"
-                android:textColor="@color/accent_ink"
+                android:text="Let's go"
+                android:textColor="@color/text"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:backgroundTint="@color/accent"
+                app:backgroundTint="@color/button_bg"
                 app:cornerRadius="18dp"
                 app:elevation="0dp"
                 android:layout_marginBottom="16dp"/>
@@ -265,11 +265,11 @@
                 android:visibility="gone"/>
 
             <TextView
+                android:id="@+id/tvTerms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="By registering you agree to our terms."
                 android:textColor="@color/text_mute"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:gravity="center"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

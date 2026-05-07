@@ -6,7 +6,10 @@
     android:background="@color/bg"
     android:orientation="horizontal">
 
+    <include layout="@layout/header_game"/>
+
     <LinearLayout
+        android:id="@+id/sectionGame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/bg_elev"
@@ -38,11 +41,13 @@
                 app:strokeColor="@color/border"
                 app:strokeWidth="1dp" />
 
-            <LinearLayout
+            <View
+                android:id="@+id/progressStep1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="4dp"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:background="@drawable/bg_clue_active"
+                android:layout_marginEnd="4dp"/>
 
                 <TextView
                     android:id="@+id/tvRound"
@@ -91,14 +96,15 @@
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:id="@+id/cluesContainer"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/bg_player_you"
@@ -110,8 +116,8 @@
                 android:paddingBottom="8dp">
 
                 <TextView
-                    android:id="@+id/tvPlayerName"
-                    android:layout_width="0dp"
+                    android:id="@+id/tvStep"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ellipsize="end"
@@ -121,9 +127,9 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvScore"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/cardClue1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textColor="@color/accent"
@@ -251,7 +257,6 @@
         android:layout_weight="1">
 
         <LinearLayout
-            android:id="@+id/cluesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -272,7 +277,6 @@
                 android:textStyle="bold" />
 
             <LinearLayout
-                android:id="@+id/cardClue1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -295,8 +299,8 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvClue1"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAnswer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
@@ -305,14 +309,15 @@
                     android:paddingTop="3dp"
                     android:text="?"
                     android:textColor="@color/text"
+                    android:textColorHint="@color/text_dim"
                     android:textSize="14sp"
 
                     android:textStyle="italic" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/cardClue2"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvPointsWorth"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:alpha="0.4"
@@ -349,8 +354,8 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/cardClue3"
-                android:layout_width="match_parent"
+                android:id="@+id/panelFinalP1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:alpha="0.4"
@@ -373,8 +378,8 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvClue3"
-                    android:layout_width="0dp"
+                    android:id="@+id/tvFinalNameP1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -411,8 +416,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvClue4"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -423,9 +427,8 @@
                     android:textStyle="italic" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/cardClue5"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:alpha="0.4"
@@ -461,8 +464,8 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/cardClue6"
-                android:layout_width="match_parent"
+                android:id="@+id/panelFinalP2"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:alpha="0.4"
@@ -485,8 +488,8 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvClue6"
-                    android:layout_width="0dp"
+                    android:id="@+id/tvFinalNameP2"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -521,8 +524,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvClue7"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -589,7 +591,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tvPointsWorth"
+            android:id="@+id/tvWinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
@@ -597,4 +599,5 @@
             android:textColor="@color/text_mute"
             android:textSize="12sp" />
     </LinearLayout>
+
 </LinearLayout>

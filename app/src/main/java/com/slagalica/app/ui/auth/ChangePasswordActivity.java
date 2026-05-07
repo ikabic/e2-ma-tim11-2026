@@ -3,7 +3,7 @@ package com.slagalica.app.ui.auth;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import com.slagalica.app.util.GameToast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +31,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         etOldPassword = findViewById(R.id.etOldPassword);
         etNewPassword = findViewById(R.id.etNewPassword);
         etConfirmNewPassword = findViewById(R.id.etConfirmNewPassword);
@@ -48,15 +49,13 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         authViewModel.getPasswordChangeSuccess().observe(this, success -> {
             if (success) {
-                Toast.makeText(this, "Password changed successfully.", Toast.LENGTH_SHORT).show();
+                GameToast.show(this, "Password changed successfully.", GameToast.Type.SUCCESS);
                 finish();
             }
         });
 
         authViewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
-            }
+            if (error != null) GameToast.show(this, error, GameToast.Type.ERROR);
         });
     }
 
@@ -67,15 +66,15 @@ public class ChangePasswordActivity extends AppCompatActivity {
             String confirmNewPassword = etConfirmNewPassword.getText().toString();
 
             if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
-                Toast.makeText(this, "All fields are required.", Toast.LENGTH_SHORT).show();
+                GameToast.show(this, "All fields are required.", GameToast.Type.ERROR);
                 return;
             }
             if (!newPassword.equals(confirmNewPassword)) {
-                Toast.makeText(this, "New passwords do not match.", Toast.LENGTH_SHORT).show();
+                GameToast.show(this, "New passwords do not match.", GameToast.Type.ERROR);
                 return;
             }
-            if (newPassword.length() < 6) {
-                Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+            if (newPassword.length() < 8) {
+                GameToast.show(this, "Password must be at least 8 characters.", GameToast.Type.ERROR);
                 return;
             }
 
