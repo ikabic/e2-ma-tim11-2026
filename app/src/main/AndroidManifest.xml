@@ -63,6 +63,9 @@
             android:name=".ui.game.skocko.SkockoActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.notifications.NotificationsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

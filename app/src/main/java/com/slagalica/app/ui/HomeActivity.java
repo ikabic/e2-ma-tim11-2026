@@ -3,6 +3,8 @@ package com.slagalica.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,10 +26,15 @@ import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.viewmodel.AuthViewModel;
+import com.slagalica.app.viewmodel.NotificationViewModel;
+import com.slagalica.app.ui.notifications.NotificationsActivity;
 
 public class HomeActivity extends AppCompatActivity {
 
     private String playerUsername = "You";
+    private TextView    tvNotifBadge;
+    private FrameLayout frameBell;
+    private NotificationViewModel notifViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +67,25 @@ public class HomeActivity extends AppCompatActivity {
                 );
             }
         }
+
+        frameBell = findViewById(R.id.frameBell);
+        tvNotifBadge  = findViewById(R.id.tvNotifBadge);
+        MaterialButton btnNotifications = findViewById(R.id.btnNotifications);
+
+        notifViewModel = new ViewModelProvider(this).get(NotificationViewModel.class);
+        notifViewModel.getUnreadCount().observe(this, count -> {
+            if (count != null && count > 0) {
+                tvNotifBadge.setVisibility(View.VISIBLE);
+                tvNotifBadge.setText(count > 9 ? "9+" : String.valueOf(count));
+            } else {
+                tvNotifBadge.setVisibility(View.GONE);
+            }
+        });
+
+        View.OnClickListener openNotifs = v ->
+                startActivity(new Intent(this, NotificationsActivity.class));
+        frameBell.setOnClickListener(openNotifs);
+        btnNotifications.setOnClickListener(openNotifs);
 
         MaterialCardView cardKorakPoKorak = findViewById(R.id.cardKorakPoKorak);
         cardKorakPoKorak.setOnClickListener(v -> {
