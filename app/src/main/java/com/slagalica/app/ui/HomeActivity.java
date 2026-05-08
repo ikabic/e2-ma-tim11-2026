@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
+import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
 import com.slagalica.app.util.ConfirmDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -81,6 +83,16 @@ public class HomeActivity extends AppCompatActivity {
         MaterialCardView cardSkocko = findViewById(R.id.cardSkocko);
         cardSkocko.setOnClickListener(v ->
                 startActivity(new Intent(this, SkockoActivity.class))
+        );
+
+        MaterialCardView cardKoZnaZna = findViewById(R.id.cardKoZnaZna);
+        cardKoZnaZna.setOnClickListener(v ->
+                startActivity(new Intent(this, KoZnaZnaActivity.class))
+        );
+
+        MaterialCardView cardSpojnice = findViewById(R.id.cardSpojnice);
+        cardSpojnice.setOnClickListener(v ->
+                startActivity(new Intent(this, SpojniceActivity.class))
         );
 
         MaterialButton btnChangePassword = findViewById(R.id.btnChangePassword);

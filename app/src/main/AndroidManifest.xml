@@ -16,6 +16,14 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".ui.game.koznazna.KoZnaZnaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.game.spojnice.SpojniceActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.game.mojbroj.MojBrojActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

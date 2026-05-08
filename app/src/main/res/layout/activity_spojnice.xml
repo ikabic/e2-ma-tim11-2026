@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <include
+        android:id="@+id/header"
+        layout="@layout/header_game"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@color/bg_elev"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@+id/tvActivePlayer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Opponent's turn"
+            android:textColor="@color/accent"
+            android:textSize="12sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/tvQuestion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Hemijske formule organskih jedinjenja"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/text"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="26dp"/>
+
+
+        <!-- Columns -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- Left column -->
+            <LinearLayout
+                android:id="@+id/columnLeft"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="10dp">
+
+                <!-- Item 1 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/leftItem1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvLeft1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="C6H6"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 2 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/leftItem2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvLeft2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="C2H2"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 3 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/leftItem3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvLeft3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="C6H8O7"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 4 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/leftItem4"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvLeft4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="CH4"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 5 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/leftItem5"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvLeft5"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="C2H5OH"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- Right column -->
+            <LinearLayout
+                android:id="@+id/columnRight"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="10dp">
+
+                <!-- Item 1 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/rightItem1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvRight1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="BENZEN"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 2 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/rightItem2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvRight2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="ETANOL"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 3 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/rightItem3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvRight3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="LIMUNSKA KISELINA"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 4 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/rightItem4"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvRight4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="ACETILEN"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Item 5 -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/rightItem5"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/bg_card"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp">
+
+                    <TextView
+                        android:id="@+id/tvRight5"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="METAN"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
