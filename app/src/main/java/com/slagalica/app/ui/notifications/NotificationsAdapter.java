@@ -37,8 +37,7 @@ public class NotificationsAdapter extends
     @NonNull
     @Override
     public NotifViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_notification, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
         return new NotifViewHolder(v);
     }
 
@@ -98,6 +97,7 @@ public class NotificationsAdapter extends
                 case NotificationItem.CHANNEL_CHAT:    return "💬";
                 case NotificationItem.CHANNEL_RANKING: return "📊";
                 case NotificationItem.CHANNEL_REWARD:  return "🎁";
+                case NotificationItem.CHANNEL_MATCH:   return "🎮";
                 default:                               return "🔔";
             }
         }

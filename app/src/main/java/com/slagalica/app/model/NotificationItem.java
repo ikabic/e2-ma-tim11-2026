@@ -6,6 +6,7 @@ public class NotificationItem {
     public static final String CHANNEL_RANKING = "ranking";
     public static final String CHANNEL_REWARD  = "reward";
     public static final String CHANNEL_OTHER   = "other";
+    public static final String CHANNEL_MATCH   = "match";
 
     private String  id;
     private String  channel;
@@ -13,6 +14,9 @@ public class NotificationItem {
     private String  body;
     private long    timestampMs;
     private boolean read;
+    private String actionType;
+    private String actionPayload;
+    private String actionStatus;
 
     public NotificationItem() {}
 
@@ -43,4 +47,13 @@ public class NotificationItem {
 
     public boolean isRead()                      { return read; }
     public void setRead(boolean read)         { this.read = read; }
+
+    public String getActionType()              { return actionType; }
+    public void   setActionType(String v)      { this.actionType = v; }
+
+    public String getActionPayload()           { return actionPayload; }
+    public void   setActionPayload(String v)   { this.actionPayload = v; }
+
+    public String getActionStatus()            { return actionStatus; }
+    public void   setActionStatus(String v)    { this.actionStatus = v; }
 }
