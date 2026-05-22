@@ -28,7 +28,15 @@ import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
+import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.viewmodel.NotificationViewModel;
+import com.slagalica.app.viewmodel.RankingViewModel;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.ProgressBar;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -49,6 +57,18 @@ public class HomeActivity extends AppCompatActivity {
     private ImageView navIconHome, navIconGames, navIconRanks, navIconRegions, navIconProfile;
     private TextView navLabelHome, navLabelGames, navLabelRanks, navLabelRegions, navLabelProfile;
 
+    private LinearLayout sectionRanks;
+    private RecyclerView rvRanking;
+    private ProgressBar  pbRankLoading;
+    private LinearLayout layoutRankEmpty;
+    private TextView tvCycleDateRange;
+    private TextView tvRankRefreshCountdown;
+    private MaterialButton btnTabWeekly, btnTabMonthly;
+    private RankingViewModel rankingViewModel;
+    private RankingAdapter rankingAdapter;
+    private Handler countdownHandler  = new Handler(Looper.getMainLooper());
+    private long nextRefreshAtMs = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +76,54 @@ public class HomeActivity extends AppCompatActivity {
 
         sectionHome  = findViewById(R.id.sectionHome);
         sectionGames = findViewById(R.id.sectionGames);
+
+        sectionRanks  = findViewById(R.id.sectionRanks);
+        rvRanking  = findViewById(R.id.rvRanking);
+        pbRankLoading  = findViewById(R.id.pbRankLoading);
+        layoutRankEmpty = findViewById(R.id.layoutRankEmpty);
+        tvCycleDateRange = findViewById(R.id.tvCycleDateRange);
+        tvRankRefreshCountdown = findViewById(R.id.tvRankRefreshCountdown);
+        btnTabWeekly = findViewById(R.id.btnTabWeekly);
+        btnTabMonthly = findViewById(R.id.btnTabMonthly);
+
+        rankingAdapter = new RankingAdapter();
+        rvRanking.setLayoutManager(new LinearLayoutManager(this));
+        rvRanking.setAdapter(rankingAdapter);
+
+        rankingViewModel = new ViewModelProvider(this).get(RankingViewModel.class);
+
+        rankingViewModel.getEntries().observe(this, list -> {
+            boolean empty = list == null || list.isEmpty();
+            rvRanking.setVisibility(empty ? View.GONE : View.VISIBLE);
+            layoutRankEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+            if (!empty) rankingAdapter.submitList(list);
+            nextRefreshAtMs = System.currentTimeMillis() + 2 * 60 * 1000L;
+        });
+
+        rankingViewModel.getLoading().observe(this, isLoading ->
+                pbRankLoading.setVisibility(isLoading != null && isLoading ? View.VISIBLE : View.GONE));
+
+        rankingViewModel.getCycle().observe(this, cycle -> {
+            if (cycle != null && cycle.getStartDate() != null && cycle.getEndDate() != null) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("d MMM", java.util.Locale.getDefault());
+                String range = sdf.format(cycle.getStartDate().toDate()) + " – " + sdf.format(cycle.getEndDate().toDate());
+                tvCycleDateRange.setText(range);
+            }
+        });
+
+        rankingViewModel.getActiveType().observe(this, type -> {
+            boolean weekly = type == RankingViewModel.CycleType.WEEKLY;
+            setTabActive(btnTabWeekly, weekly);
+            setTabActive(btnTabMonthly, !weekly);
+        });
+
+        btnTabWeekly.setOnClickListener(v ->
+                rankingViewModel.selectType(RankingViewModel.CycleType.WEEKLY));
+        btnTabMonthly.setOnClickListener(v ->
+                rankingViewModel.selectType(RankingViewModel.CycleType.MONTHLY));
+
+        nextRefreshAtMs = System.currentTimeMillis() + 2 * 60 * 1000L;
+        countdownHandler.post(countdownTick);
 
         navBtnHome    = findViewById(R.id.navBtnHome);
         navBtnGames   = findViewById(R.id.navBtnGames);
@@ -193,7 +261,7 @@ public class HomeActivity extends AppCompatActivity {
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
         navBtnHome.setOnClickListener(v -> selectTab(0));
         navBtnGames.setOnClickListener(v -> selectTab(1));
-        navBtnRanks.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        navBtnRanks.setOnClickListener(v -> selectTab(2));
         navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
         navBtnProfile.setOnClickListener(v -> {
             if (isGuest) {
@@ -211,6 +279,7 @@ public class HomeActivity extends AppCompatActivity {
         // Show/hide sections
         sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
 
         // Update icon tints and label colours
         int accent = ContextCompat.getColor(this, R.color.accent);
@@ -227,5 +296,34 @@ public class HomeActivity extends AppCompatActivity {
         navLabelRanks.setTextColor(index == 2 ? accent : mute);
         navLabelRegions.setTextColor(index == 3 ? accent : mute);
         navLabelProfile.setTextColor(index == 4 ? accent : mute);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countdownHandler.removeCallbacks(countdownTick);
+    }
+
+    private final Runnable countdownTick = new Runnable() {
+        @Override public void run() {
+            long remaining = nextRefreshAtMs - System.currentTimeMillis();
+            if (remaining < 0) remaining = 0;
+            long min = remaining / 60000;
+            long sec = (remaining % 60000) / 1000;
+            tvRankRefreshCountdown.setText(String.format(java.util.Locale.getDefault(), "↻ %d:%02d", min, sec));
+            countdownHandler.postDelayed(this, 1000);
+        }
+    };
+
+    private void setTabActive(MaterialButton btn, boolean active) {
+        if (active) {
+            btn.setBackgroundTintList(getResources().getColorStateList(R.color.accent, null));
+            btn.setTextColor(getResources().getColor(R.color.accent_ink, null));
+            btn.setStrokeColor(getResources().getColorStateList(R.color.accent, null));
+        } else {
+            btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+            btn.setTextColor(getResources().getColor(R.color.text_mute, null));
+            btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
+        }
     }
 }
