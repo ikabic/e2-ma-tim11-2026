@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/bg_elev"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/border"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- Top row: avatar + info + status dot -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Avatar with online indicator -->
+            <FrameLayout
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginEnd="12dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivFriendAvatar"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    app:shapeAppearanceOverlay="@style/CircleAppearance"
+                    tools:srcCompat="@tools:sample/avatars"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="2dp" />
+
+                <!-- Online status dot -->
+                <View
+                    android:id="@+id/viewOnlineDot"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="1dp"
+                    android:background="@drawable/bg_status_online"
+                    android:visibility="visible" />
+
+            </FrameLayout>
+
+            <!-- Username + league + stars -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Username -->
+                <TextView
+                    android:id="@+id/tvFriendUsername"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="quizmaster99"
+                    android:textColor="@color/text"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="3dp" />
+
+                <!-- League badge + rank -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp">
+
+                    <ImageView
+                        android:id="@+id/ivFriendLeagueBadge"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/league_gold"
+                        android:layout_marginEnd="5dp"
+                        android:contentDescription="League badge" />
+
+                    <TextView
+                        android:id="@+id/tvFriendLeague"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gold League"
+                        android:textColor="@color/league_gold"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" · "
+                        android:textColor="@color/text_mute"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvFriendRank"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="#14 this month"
+                        android:textColor="@color/text_mute"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+                <!-- Stars count -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_star"
+                        app:tint="@color/accent"
+                        android:layout_marginEnd="4dp"
+                        android:contentDescription="Stars" />
+
+                    <TextView
+                        android:id="@+id/tvFriendStars"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="284 stars"
+                        android:textColor="@color/text_mute"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Play / Unavailable button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnChallenge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Play"
+                android:textColor="@color/text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/button_bg"
+                app:cornerRadius="14dp"
+                app:elevation="0dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+        </LinearLayout>
+
+        <!-- In-game status label -->
+        <LinearLayout
+            android:id="@+id/rowFriendStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="10dp"
+            android:visibility="gone">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border"
+                android:layout_marginBottom="10dp" />
+        </LinearLayout>
+
+        <!-- "In a game" chip -->
+        <LinearLayout
+            android:id="@+id/chipInGame"
+            android:layout_width="wrap_content"
+            android:layout_height="28dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_chip"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_nav_games"
+                app:tint="@color/text_mute"
+                android:layout_marginEnd="5dp"
+                android:contentDescription="In game" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Currently in a game"
+                android:textColor="@color/text_mute"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
