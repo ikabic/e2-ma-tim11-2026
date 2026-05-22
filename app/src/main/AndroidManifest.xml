@@ -12,6 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Slagalica">
         <activity
+            android:name=".ui.profile.FriendsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Slagalica" />
+        <activity
             android:name=".ui.profile.ProfileActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

@@ -26,6 +26,7 @@ import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.mojbroj.MojBrojActivity;
 import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
+import com.slagalica.app.util.UserStatusManager;
 
 public class MatchActivity extends AppCompatActivity {
 

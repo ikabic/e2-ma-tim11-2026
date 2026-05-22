@@ -3,21 +3,16 @@ package com.slagalica.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
+import com.slagalica.app.databinding.ActivityHomeBinding;
 import com.slagalica.app.ui.game.asocijacije.AsocijacijeActivity;
 import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.korakpokorak.KorakPoKorakActivity;
@@ -27,73 +22,34 @@ import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
 import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
+import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends BaseActivity {
 
     private String playerUsername = "You";
-    private TextView tvNotifBadge;
-    private FrameLayout frameBell;
+    private ActivityHomeBinding binding;
     private NotificationViewModel notifViewModel;
-
-    private LinearLayout sectionHome;
-    private LinearLayout sectionGames;
-
-    private LinearLayout navBtnHome;
-    private LinearLayout navBtnGames;
-    private LinearLayout navBtnRanks;
-    private LinearLayout navBtnRegions;
-    private LinearLayout navBtnProfile;
-
-    private ImageView navIconHome, navIconGames, navIconRanks, navIconRegions, navIconProfile;
-    private TextView navLabelHome, navLabelGames, navLabelRanks, navLabelRegions, navLabelProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        sectionHome  = findViewById(R.id.sectionHome);
-        sectionGames = findViewById(R.id.sectionGames);
-
-        navBtnHome    = findViewById(R.id.navBtnHome);
-        navBtnGames   = findViewById(R.id.navBtnGames);
-        navBtnRanks   = findViewById(R.id.navBtnRanks);
-        navBtnRegions = findViewById(R.id.navBtnRegions);
-        navBtnProfile = findViewById(R.id.navBtnProfile);
-
-        navIconHome    = findViewById(R.id.navIconHome);
-        navIconGames   = findViewById(R.id.navIconGames);
-        navIconRanks   = findViewById(R.id.navIconRanks);
-        navIconRegions = findViewById(R.id.navIconRegions);
-        navIconProfile = findViewById(R.id.navIconProfile);
-
-        navLabelHome    = findViewById(R.id.navLabelHome);
-        navLabelGames   = findViewById(R.id.navLabelGames);
-        navLabelRanks   = findViewById(R.id.navLabelRanks);
-        navLabelRegions = findViewById(R.id.navLabelRegions);
-        navLabelProfile = findViewById(R.id.navLabelProfile);
-
-        TextView tvWelcome    = findViewById(R.id.tvWelcome);
-        TextView tvTokenCount = findViewById(R.id.tvTokenCount);
-        TextView tvStarCount  = findViewById(R.id.tvStarCount);
-        TextView tvTokenInfo  = findViewById(R.id.tvTokenInfo);
-        LinearLayout chipTokensHeader = findViewById(R.id.chipTokensHeader);
-        LinearLayout chipStarsHeader  = findViewById(R.id.chipStarsHeader);
-        LinearLayout rowTokenInfo     = findViewById(R.id.rowTokenInfo);
-        MaterialButton btnGuestLogin  = findViewById(R.id.btnGuestLogin);
+        binding = ActivityHomeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             if (currentUser.isAnonymous()) {
                 playerUsername = "Guest";
-                tvWelcome.setText("Guest");
-                chipTokensHeader.setVisibility(View.GONE);
-                chipStarsHeader.setVisibility(View.GONE);
-                rowTokenInfo.setVisibility(View.GONE);
-                btnGuestLogin.setVisibility(View.VISIBLE);
-                btnGuestLogin.setOnClickListener(v -> {
+                binding.tvWelcome.setText("Guest");
+                binding.chipTokensHeader.setVisibility(View.GONE);
+                binding.chipStarsHeader.setVisibility(View.GONE);
+                binding.rowTokenInfo.setVisibility(View.GONE);
+                binding.btnGuestLogin.setVisibility(View.VISIBLE);
+                binding.btnGuestLogin.setOnClickListener(v -> {
                     FirebaseAuth.getInstance().signOut();
                     startActivity(new Intent(this, LoginActivity.class));
                     finish();
@@ -105,11 +61,11 @@ public class HomeActivity extends AppCompatActivity {
                     .addOnSuccessListener(doc -> {
                         String username = doc.getString("username");
                         playerUsername = username != null ? username : currentUser.getEmail();
-                        tvWelcome.setText(playerUsername);
+                        binding.tvWelcome.setText(playerUsername);
                     })
                     .addOnFailureListener(e -> {
                         playerUsername = currentUser.getEmail();
-                        tvWelcome.setText(playerUsername);
+                        binding.tvWelcome.setText(playerUsername);
                     });
 
                 db.collection("profiles").document(currentUser.getUid()).get()
@@ -119,71 +75,63 @@ public class HomeActivity extends AppCompatActivity {
                             Long stars  = doc.getLong("stars");
                             int t = tokens != null ? tokens.intValue() : 5;
                             int s = stars  != null ? stars.intValue()  : 0;
-                            tvTokenCount.setText(String.valueOf(t));
-                            tvStarCount.setText(String.valueOf(s));
-                            tvTokenInfo.setText(t + " left");
+                            binding.tvTokenCount.setText(String.valueOf(t));
+                            binding.tvStarCount.setText(String.valueOf(s));
+                            binding.tvTokenInfo.setText(t + " left");
                         }
                     });
             }
         }
 
-        // Notification bell
-        frameBell    = findViewById(R.id.frameBell);
-        tvNotifBadge = findViewById(R.id.tvNotifBadge);
-        MaterialButton btnNotifications = findViewById(R.id.btnNotifications);
+        binding.btnFriends.setOnClickListener(v ->
+                startActivity(new Intent(this, FriendsActivity.class))
+        );
 
         notifViewModel = new ViewModelProvider(this).get(NotificationViewModel.class);
         notifViewModel.getUnreadCount().observe(this, count -> {
             if (count != null && count > 0) {
-                tvNotifBadge.setVisibility(View.VISIBLE);
-                tvNotifBadge.setText(count > 9 ? "9+" : String.valueOf(count));
+                binding.tvNotifBadge.setVisibility(View.VISIBLE);
+                binding.tvNotifBadge.setText(count > 9 ? "9+" : String.valueOf(count));
             } else {
-                tvNotifBadge.setVisibility(View.GONE);
+                binding.tvNotifBadge.setVisibility(View.GONE);
             }
         });
 
         View.OnClickListener openNotifs = v ->
                 startActivity(new Intent(this, NotificationsActivity.class));
-        frameBell.setOnClickListener(openNotifs);
-        btnNotifications.setOnClickListener(openNotifs);
+        binding.frameBell.setOnClickListener(openNotifs);
+        binding.btnNotifications.setOnClickListener(openNotifs);
 
         // Game card click listeners
-        MaterialCardView cardKorakPoKorak = findViewById(R.id.cardKorakPoKorak);
-        cardKorakPoKorak.setOnClickListener(v -> {
+        binding.cardKorakPoKorak.setOnClickListener(v -> {
             Intent i = new Intent(this, KorakPoKorakActivity.class);
             i.putExtra("username", playerUsername);
             startActivity(i);
         });
 
-        MaterialCardView cardMojBroj = findViewById(R.id.cardMojBroj);
-        cardMojBroj.setOnClickListener(v -> {
+        binding.cardMojBroj.setOnClickListener(v -> {
             Intent i = new Intent(this, MojBrojActivity.class);
             i.putExtra("username", playerUsername);
             startActivity(i);
         });
 
-        MaterialCardView cardAsocijacije = findViewById(R.id.cardAsocijacije);
-        cardAsocijacije.setOnClickListener(v ->
+        binding.cardAsocijacije.setOnClickListener(v ->
                 startActivity(new Intent(this, AsocijacijeActivity.class))
         );
 
-        MaterialCardView cardSkocko = findViewById(R.id.cardSkocko);
-        cardSkocko.setOnClickListener(v ->
+        binding.cardSkocko.setOnClickListener(v ->
                 startActivity(new Intent(this, SkockoActivity.class))
         );
 
-        MaterialCardView cardKoZnaZna = findViewById(R.id.cardKoZnaZna);
-        cardKoZnaZna.setOnClickListener(v ->
+        binding.cardKoZnaZna.setOnClickListener(v ->
                 startActivity(new Intent(this, KoZnaZnaActivity.class))
         );
 
-        MaterialCardView cardSpojnice = findViewById(R.id.cardSpojnice);
-        cardSpojnice.setOnClickListener(v ->
+        binding.cardSpojnice.setOnClickListener(v ->
                 startActivity(new Intent(this, SpojniceActivity.class))
         );
 
-        MaterialButton btnFindMatch = findViewById(R.id.btnFindMatch);
-        btnFindMatch.setOnClickListener(v -> {
+        binding.btnFindMatch.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, MatchmakingActivity.class);
             i.putExtra("username", playerUsername);
             startActivity(i);
@@ -191,11 +139,11 @@ public class HomeActivity extends AppCompatActivity {
 
         // Bottom navigation
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
-        navBtnHome.setOnClickListener(v -> selectTab(0));
-        navBtnGames.setOnClickListener(v -> selectTab(1));
-        navBtnRanks.setOnClickListener(v -> { /* placeholder — coming soon */ });
-        navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
-        navBtnProfile.setOnClickListener(v -> {
+        binding.navBtnHome.setOnClickListener(v -> selectTab(0));
+        binding.navBtnGames.setOnClickListener(v -> selectTab(1));
+        binding.navBtnRanks.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        binding.navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        binding.navBtnProfile.setOnClickListener(v -> {
             if (isGuest) {
                 android.widget.Toast.makeText(this,
                     "Register to access your profile", android.widget.Toast.LENGTH_SHORT).show();
@@ -209,23 +157,23 @@ public class HomeActivity extends AppCompatActivity {
 
     private void selectTab(int index) {
         // Show/hide sections
-        sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
-        sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        binding.sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
 
         // Update icon tints and label colours
         int accent = ContextCompat.getColor(this, R.color.accent);
         int mute   = ContextCompat.getColor(this, R.color.text_mute);
 
-        navIconHome.setImageTintList(android.content.res.ColorStateList.valueOf(index == 0 ? accent : mute));
-        navIconGames.setImageTintList(android.content.res.ColorStateList.valueOf(index == 1 ? accent : mute));
-        navIconRanks.setImageTintList(android.content.res.ColorStateList.valueOf(index == 2 ? accent : mute));
-        navIconRegions.setImageTintList(android.content.res.ColorStateList.valueOf(index == 3 ? accent : mute));
-        navIconProfile.setImageTintList(android.content.res.ColorStateList.valueOf(index == 4 ? accent : mute));
+        binding.navIconHome.setImageTintList(android.content.res.ColorStateList.valueOf(index == 0 ? accent : mute));
+        binding.navIconGames.setImageTintList(android.content.res.ColorStateList.valueOf(index == 1 ? accent : mute));
+        binding.navIconRanks.setImageTintList(android.content.res.ColorStateList.valueOf(index == 2 ? accent : mute));
+        binding.navIconRegions.setImageTintList(android.content.res.ColorStateList.valueOf(index == 3 ? accent : mute));
+        binding.navIconProfile.setImageTintList(android.content.res.ColorStateList.valueOf(index == 4 ? accent : mute));
 
-        navLabelHome.setTextColor(index == 0 ? accent : mute);
-        navLabelGames.setTextColor(index == 1 ? accent : mute);
-        navLabelRanks.setTextColor(index == 2 ? accent : mute);
-        navLabelRegions.setTextColor(index == 3 ? accent : mute);
-        navLabelProfile.setTextColor(index == 4 ? accent : mute);
+        binding.navLabelHome.setTextColor(index == 0 ? accent : mute);
+        binding.navLabelGames.setTextColor(index == 1 ? accent : mute);
+        binding.navLabelRanks.setTextColor(index == 2 ? accent : mute);
+        binding.navLabelRegions.setTextColor(index == 3 ? accent : mute);
+        binding.navLabelProfile.setTextColor(index == 4 ? accent : mute);
     }
 }

@@ -14,6 +14,7 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.util.UserStatusManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -289,6 +290,7 @@ public class MatchRepository {
     }
 
     public void finishMatch(String matchId, String myUid, int myScore, int opponentScore) {
+        UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
         updateStars(myUid, myScore, opponentScore);
     }
@@ -498,6 +500,7 @@ public class MatchRepository {
     }
 
     public void writeForfeit(String matchId, String uid) {
+        UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("forfeit").setValue(uid);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
     }

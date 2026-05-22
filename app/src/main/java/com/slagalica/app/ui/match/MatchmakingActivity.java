@@ -9,9 +9,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.R;
 import com.slagalica.app.repository.MatchRepository;
 import com.slagalica.app.repository.RepositoryCallback;
+import com.slagalica.app.util.UserStatusManager;
 
 public class MatchmakingActivity extends AppCompatActivity {
 
@@ -47,6 +49,8 @@ public class MatchmakingActivity extends AppCompatActivity {
                 boolean isGuest = currentUser == null || currentUser.isAnonymous();
 
                 Runnable launchMatch = () -> {
+                    UserStatusManager.setInGame(FirebaseAuth.getInstance(), true);
+
                     Intent intent = new Intent(this, MatchActivity.class);
                     intent.putExtra("matchId",          matchId);
                     intent.putExtra("isPlayer1",         isPlayer1);

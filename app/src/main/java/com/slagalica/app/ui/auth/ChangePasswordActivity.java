@@ -3,6 +3,8 @@ package com.slagalica.app.ui.auth;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import com.slagalica.app.BaseActivity;
 import com.slagalica.app.util.GameToast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +15,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.slagalica.app.R;
 import com.slagalica.app.viewmodel.AuthViewModel;
 
-public class ChangePasswordActivity extends AppCompatActivity {
+public class ChangePasswordActivity extends BaseActivity {
 
     private TextInputEditText etOldPassword, etNewPassword, etConfirmNewPassword;
     private MaterialButton btnChangePassword;

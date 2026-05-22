@@ -3,17 +3,17 @@ package com.slagalica.app.ui.notifications;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel.Filter;
 
-public class NotificationsActivity extends AppCompatActivity
+public class NotificationsActivity extends BaseActivity
         implements NotificationsAdapter.OnMarkReadListener {
 
     private NotificationViewModel viewModel;
