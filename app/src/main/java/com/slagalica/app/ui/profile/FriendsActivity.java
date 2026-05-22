@@ -163,6 +163,7 @@ public class FriendsActivity extends BaseActivity {
                         .setPrompt("Scan a friend's QR code")
                         .setBeepEnabled(true)
                         .setBarcodeImageEnabled(false)
+                        .setOrientationLocked(true)
         ));
     }
 

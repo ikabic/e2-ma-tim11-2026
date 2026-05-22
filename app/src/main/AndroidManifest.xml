@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Slagalica">
         <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="android:screenOrientation"
+            android:stateNotNeeded="true"/>
+        <activity
             android:name=".ui.profile.FriendsActivity"
             android:exported="false"
             android:theme="@style/Theme.Slagalica" />
