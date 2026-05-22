@@ -27,6 +27,7 @@ public class MojBrojViewModel extends ViewModel {
     private boolean player1HasSubmitted = false;
     private boolean player2HasSubmitted = false;
     private int roundStarter = 1;
+    private boolean matchMode = false;
     private final Random random = new Random();
 
     public enum GameState {
@@ -48,6 +49,8 @@ public class MojBrojViewModel extends ViewModel {
     public LiveData<GameState> getGameState() { return gameState; }
     public LiveData<String> getMessage() { return message; }
     public int getRoundStarter() { return roundStarter; }
+
+    public void setMatchMode(boolean enabled) { this.matchMode = enabled; }
 
     public void stopTarget() {
         if (gameState.getValue() != GameState.SPINNING_TARGET) return;
@@ -116,6 +119,12 @@ public class MojBrojViewModel extends ViewModel {
         int target = targetNumber.getValue();
         boolean p1Exact = player1Result != null && player1Result == target;
         boolean p2Exact = player2Result != null && player2Result == target;
+
+        if (matchMode) {
+            if (p1Exact) player1Score.setValue(player1Score.getValue() + EXACT_POINTS);
+            if (p2Exact) player2Score.setValue(player2Score.getValue() + EXACT_POINTS);
+            return;
+        }
 
         if (p1Exact && p2Exact) {
             player1Score.setValue(player1Score.getValue() + EXACT_POINTS);

@@ -17,11 +17,13 @@ public class KorakPoKorakViewModel extends ViewModel {
 
     private final KorakPoKorakRepository repository;
 
-    private final MutableLiveData<KorakPoKorakQuestion> question = new MutableLiveData<>();
+    private final MutableLiveData<KorakPoKorakQuestion> question     = new MutableLiveData<>();
+    private final MutableLiveData<KorakPoKorakQuestion> stealQuestion = new MutableLiveData<>();
     private final MutableLiveData<Integer> currentStep = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> currentRound = new MutableLiveData<>(1);
     private final MutableLiveData<Integer> player1Score = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> player2Score = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> soloStealBonus = new MutableLiveData<>(0);
     private final MutableLiveData<GameState> gameState = new MutableLiveData<>(GameState.LOADING);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
@@ -29,6 +31,9 @@ public class KorakPoKorakViewModel extends ViewModel {
         LOADING,
         PLAYER_TURN,
         OPPONENT_BONUS,
+        STEAL_ATTEMPT,
+        SOLO_STEAL,
+        SOLO_STEAL_DONE,
         ROUND_OVER,
         GAME_OVER
     }
@@ -38,10 +43,12 @@ public class KorakPoKorakViewModel extends ViewModel {
     }
 
     public LiveData<KorakPoKorakQuestion> getQuestion() { return question; }
+    public LiveData<KorakPoKorakQuestion> getStealQuestion() { return stealQuestion; }
     public LiveData<Integer> getCurrentStep() { return currentStep; }
     public LiveData<Integer> getCurrentRound() { return currentRound; }
     public LiveData<Integer> getPlayer1Score() { return player1Score; }
     public LiveData<Integer> getPlayer2Score() { return player2Score; }
+    public LiveData<Integer> getSoloStealBonus() { return soloStealBonus; }
     public LiveData<GameState> getGameState() { return gameState; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
 
@@ -138,5 +145,61 @@ public class KorakPoKorakViewModel extends ViewModel {
 
     public void startNextRound() {
         loadQuestion();
+    }
+
+    public void skipToRound2() {
+        currentRound.setValue(2);
+        loadQuestion();
+    }
+
+    public void loadQuestionByIdForSteal(String id) {
+        gameState.setValue(GameState.LOADING);
+        repository.getQuestionById(id, new RepositoryCallback<KorakPoKorakQuestion>() {
+            @Override
+            public void onSuccess(KorakPoKorakQuestion q) {
+                stealQuestion.setValue(q);
+                gameState.setValue(GameState.STEAL_ATTEMPT);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                loadQuestion();
+            }
+        });
+    }
+
+    public void submitStealAttempt(String answer) {
+        if (gameState.getValue() != GameState.STEAL_ATTEMPT) return;
+        KorakPoKorakQuestion sq = stealQuestion.getValue();
+        if (sq != null && !answer.isEmpty() && isCorrect(answer, sq)) {
+            player2Score.setValue((player2Score.getValue() != null ? player2Score.getValue() : 0) + BONUS_POINTS);
+        }
+        loadQuestion();
+    }
+
+    public void startSoloSteal(String questionId) {
+        gameState.setValue(GameState.LOADING);
+        repository.getQuestionById(questionId, new RepositoryCallback<KorakPoKorakQuestion>() {
+            @Override
+            public void onSuccess(KorakPoKorakQuestion q) {
+                stealQuestion.setValue(q);
+                gameState.setValue(GameState.SOLO_STEAL);
+            }
+            @Override
+            public void onFailure(Exception e) {
+                soloStealBonus.setValue(0);
+                gameState.setValue(GameState.SOLO_STEAL_DONE);
+            }
+        });
+    }
+
+    public void submitSoloSteal(String answer) {
+        if (gameState.getValue() != GameState.SOLO_STEAL) return;
+        KorakPoKorakQuestion sq = stealQuestion.getValue();
+        int bonus = 0;
+        if (sq != null && !answer.isEmpty() && isCorrect(answer, sq)) {
+            bonus = BONUS_POINTS;
+        }
+        soloStealBonus.setValue(bonus);
+        gameState.setValue(GameState.SOLO_STEAL_DONE);
     }
 }

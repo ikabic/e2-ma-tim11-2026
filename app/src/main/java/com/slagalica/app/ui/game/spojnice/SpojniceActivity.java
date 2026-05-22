@@ -1,5 +1,6 @@
 package com.slagalica.app.ui.game.spojnice;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +48,18 @@ public class SpojniceActivity extends AppCompatActivity {
 
         viewModel.getP1Score().observe(this, s -> binding.header.tvScore.setText(String.valueOf(s)));
         viewModel.getP2Score().observe(this, s -> binding.header.tvScoreOpponent.setText(String.valueOf(s)));
+
+        viewModel.getGameOver().observe(this, done -> {
+            if (!Boolean.TRUE.equals(done)) return;
+            if (!getIntent().getBooleanExtra("isMatchGame", false)) return;
+            int p1 = viewModel.getP1Score().getValue() != null ? viewModel.getP1Score().getValue() : 0;
+            int p2 = viewModel.getP2Score().getValue() != null ? viewModel.getP2Score().getValue() : 0;
+            Intent result = new Intent();
+            result.putExtra("p1Score", p1);
+            result.putExtra("p2Score", p2);
+            setResult(RESULT_OK, result);
+            finish();
+        });
     }
 
     private void renderQuestion() {

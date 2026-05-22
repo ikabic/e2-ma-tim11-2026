@@ -359,12 +359,22 @@ public class AsocijacijeActivity extends AppCompatActivity {
     }
 
     private void showGameOver() {
+        int p1 = viewModel.getPlayer1Score().getValue() != null ? viewModel.getPlayer1Score().getValue() : 0;
+        int p2 = viewModel.getPlayer2Score().getValue() != null ? viewModel.getPlayer2Score().getValue() : 0;
+
+        if (getIntent().getBooleanExtra("isMatchGame", false)) {
+            Intent matchResult = new Intent();
+            matchResult.putExtra("p1Score", p1);
+            matchResult.putExtra("p2Score", p2);
+            setResult(RESULT_OK, matchResult);
+            finish();
+            return;
+        }
+
         View scroll = findViewById(R.id.nestedScrollView);
         if (scroll != null) scroll.setVisibility(View.GONE);
         sectionGameOver.setVisibility(View.VISIBLE);
 
-        int p1 = viewModel.getPlayer1Score().getValue() != null ? viewModel.getPlayer1Score().getValue() : 0;
-        int p2 = viewModel.getPlayer2Score().getValue() != null ? viewModel.getPlayer2Score().getValue() : 0;
         tvFinalScoreP1.setText(String.valueOf(p1));
         tvFinalScoreP2.setText(String.valueOf(p2));
 

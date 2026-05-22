@@ -1994,6 +1994,45 @@
                 android:layout_height="1dp"
                 android:background="@color/border"/>
 
+            <!-- Account section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="22dp"
+                android:paddingEnd="22dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ACCOUNT"
+                    android:textColor="@color/text_mute"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnChangePassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Change password"
+                    android:textColor="@color/text"
+                    android:textSize="14sp"
+                    app:backgroundTint="@android:color/transparent"
+                    app:strokeColor="@color/border_strong"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="14dp"
+                    app:elevation="0dp"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border"/>
+
             <!-- QR Code -->
             <LinearLayout
                 android:layout_width="match_parent"

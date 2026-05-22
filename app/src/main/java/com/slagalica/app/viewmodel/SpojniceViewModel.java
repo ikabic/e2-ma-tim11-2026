@@ -34,11 +34,14 @@ public class SpojniceViewModel extends ViewModel {
         loadQuestions();
     }
 
+    private final MutableLiveData<Boolean> gameOver = new MutableLiveData<>(false);
+
     public LiveData<List<SpojniceQuestion>> getQuestions() { return questions; }
     public LiveData<Integer> getP1Score() { return p1Score; }
     public LiveData<Integer> getP2Score() { return p2Score; }
     public LiveData<Integer> getCurrentIndex() { return currentIndex; }
     public LiveData<Long> getTimeLeft()  { return timeLeft; }
+    public LiveData<Boolean> getGameOver() { return gameOver; }
 
     private void loadQuestions() {
         repository.getRandomQuestions(new RepositoryCallback<List<SpojniceQuestion>>() {
@@ -76,6 +79,11 @@ public class SpojniceViewModel extends ViewModel {
         //boolean p1Correct = p1Answer != null && p1Answer.getAnswerIndex() == q.getCorrectAnswerIndex();
         //boolean p2Correct = p2Answer != null && p2Answer.getAnswerIndex() == q.getCorrectAnswerIndex();
 
-        currentIndex.setValue(Math.min(currentIndex.getValue() + 1, 1));
+        int nextIndex = currentIndex.getValue() + 1;
+        if (nextIndex >= 2) {
+            gameOver.setValue(true);
+        } else {
+            currentIndex.setValue(nextIndex);
+        }
     }
 }

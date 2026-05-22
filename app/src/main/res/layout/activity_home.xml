@@ -6,48 +6,123 @@
     android:orientation="vertical"
     android:background="@color/bg">
 
+    <!-- Persistent header: tokens + stars + spacer + bell -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/bg_elev"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
         android:gravity="center_vertical">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGuestLogin"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:text="Log in"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/accent_ink"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            app:backgroundTint="@color/accent"
+            app:cornerRadius="18dp"
+            app:elevation="0dp"
+            android:visibility="gone"/>
+
+        <!-- Token chip -->
+        <LinearLayout
+            android:id="@+id/chipTokensHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_chip"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center_vertical"
+            android:layout_marginEnd="8dp">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_token"
+                app:tint="@color/accent"
+                android:layout_marginEnd="5dp"
+                android:contentDescription="@string/tokens"/>
 
             <TextView
+                android:id="@+id/tvTokenCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome,"
-                android:textColor="@color/text_mute"
-                android:textSize="12sp"/>
-
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="player"
+                android:text="5"
                 android:textColor="@color/text"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"/>
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" tokens"
+                android:textColor="@color/text_mute"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
+        <!-- Stars chip -->
+        <LinearLayout
+            android:id="@+id/chipStarsHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_chip"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_star"
+                app:tint="@color/accent"
+                android:layout_marginEnd="5dp"
+                android:contentDescription="@string/stars"/>
+
+            <TextView
+                android:id="@+id/tvStarCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/text"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" stars"
+                android:textColor="@color/text_mute"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"/>
+
+        <!-- Bell -->
         <FrameLayout
             android:id="@+id/frameBell"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless">
@@ -74,26 +149,9 @@
                 android:textColor="#FFFFFF"
                 android:textSize="9sp"
                 android:textStyle="bold"
-                android:text="3"
-                android:visibility="visible"/>
+                android:text="0"
+                android:visibility="gone"/>
         </FrameLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Log out"
-            android:textColor="@color/text_mute"
-            android:textSize="13sp"
-            app:backgroundTint="@android:color/transparent"
-            app:strokeColor="@color/border_strong"
-            app:strokeWidth="1dp"
-            app:cornerRadius="18dp"
-            app:elevation="0dp"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"/>
     </LinearLayout>
 
     <View
@@ -101,360 +159,638 @@
         android:layout_height="1dp"
         android:background="@color/border"/>
 
+    <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="18dp"
-            android:paddingEnd="18dp"
-            android:paddingTop="22dp"
-            android:paddingBottom="32dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GAMES"
-                android:textColor="@color/text_mute"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.1"
-                android:layout_marginBottom="12dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardKorakPoKorak"
+            <!-- ===== HOME SECTION ===== -->
+            <LinearLayout
+                android:id="@+id/sectionHome"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
+                android:orientation="vertical"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="32dp"
+                android:visibility="visible">
 
+                <!-- Greeting -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome back,"
+                    android:textColor="@color/text_mute"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="2dp"/>
+
+                <TextView
+                    android:id="@+id/tvWelcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="player"
+                    android:textColor="@color/text"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="28dp"/>
+
+                <!-- Hero CTA: orange gradient card -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Step by step"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Guess the word from clues"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
-                    </LinearLayout>
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_hero"
+                    android:padding="22dp"
+                    android:layout_marginBottom="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="→"
-                        android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardMojBroj"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="My number"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Reach the target using numbers"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
-                    </LinearLayout>
+                        android:text="READY TO COMPETE?"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.12"
+                        android:alpha="0.78"
+                        android:layout_marginBottom="6dp"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="→"
-                        android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardAsocijacije"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Asocijacije"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Guess the final word from clues"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
-                    </LinearLayout>
+                        android:text="Start a Match"
+                        android:textColor="#FFFFFF"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="→"
-                        android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
+                        android:text="Play all 6 games against a real opponent"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:alpha="0.82"
+                        android:layout_marginBottom="22dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFindMatch"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Find Opponent"
+                        android:textColor="#FF7A2F"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="#FFFFFF"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"/>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSkocko"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
-
+                <!-- Token info row -->
                 <LinearLayout
+                    android:id="@+id/rowTokenInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:gravity="center_vertical">
 
-                    <LinearLayout
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_token"
+                        app:tint="@color/accent"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="@string/tokens"/>
+
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Skocko"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Guess the correct combination"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
-                    </LinearLayout>
+                        android:text="Tokens refresh daily · 5 per day"
+                        android:textColor="@color/text_mute"
+                        android:textSize="13sp"/>
 
                     <TextView
+                        android:id="@+id/tvTokenInfo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="→"
+                        android:text="5 left"
                         android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
+                        android:textSize="13sp"
+                        android:textStyle="bold"/>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardKoZnaZna"
+            <!-- ===== GAMES SECTION ===== -->
+            <LinearLayout
+                android:id="@+id/sectionGames"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
+                android:orientation="vertical"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="22dp"
+                android:paddingBottom="32dp"
+                android:visibility="gone">
 
-                <LinearLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GAMES"
+                    android:textColor="@color/text_mute"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardKorakPoKorak"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Step by step"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Guess the word from clues"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Who knows, knows"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Rapid-fire general knowledge trivia round"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="→"
-                        android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardSpojnice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/bg_elev"
-                app:cardCornerRadius="18dp"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cardElevation="0dp"
-                android:layout_marginBottom="12dp">
-
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMojBroj"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="18dp">
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My number"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Reach the target using numbers"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Connections"
-                            android:textColor="@color/text"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Match related pairs of words or concepts"
-                            android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardAsocijacije"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="→"
-                        android:textColor="@color/accent"
-                        android:textSize="20sp"
-                        android:layout_marginStart="12dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnChangePassword"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:text="Change password"
-                android:textColor="@color/text_mute"
-                android:textSize="14sp"
-                app:backgroundTint="@android:color/transparent"
-                app:strokeColor="@color/border"
-                app:strokeWidth="1dp"
-                app:cornerRadius="14dp"
-                app:elevation="0dp"/>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMojBroj"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Asocijacije"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnKorakPoKorak"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Guess the final word from clues"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSkocko"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Skocko"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Guess the correct combination"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardKoZnaZna"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Who knows, knows"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Rapid-fire general knowledge trivia"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSpojnice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/border"
+                    app:strokeWidth="1dp"
+                    app:cardElevation="0dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="18dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Connections"
+                                android:textColor="@color/text"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Match related pairs of words or concepts"
+                                android:textColor="@color/text_mute"
+                                android:textSize="13sp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textColor="@color/accent"
+                            android:textSize="20sp"
+                            android:layout_marginStart="12dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom navigation divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"/>
+
+    <!-- Bottom navigation bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:orientation="horizontal"
+        android:background="@color/bg_elev">
+
+        <!-- Home tab -->
+        <LinearLayout
+            android:id="@+id/navBtnHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navIconHome"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_home"
+                app:tint="@color/accent"
+                android:contentDescription="Home"/>
+
+            <TextView
+                android:id="@+id/navLabelHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+
+        <!-- Games tab -->
+        <LinearLayout
+            android:id="@+id/navBtnGames"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navIconGames"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_games"
+                app:tint="@color/text_mute"
+                android:contentDescription="Games"/>
+
+            <TextView
+                android:id="@+id/navLabelGames"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Games"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_mute"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+
+        <!-- Ranks tab -->
+        <LinearLayout
+            android:id="@+id/navBtnRanks"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navIconRanks"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_ranks"
+                app:tint="@color/text_mute"
+                android:contentDescription="Ranks"/>
+
+            <TextView
+                android:id="@+id/navLabelRanks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ranks"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_mute"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+
+        <!-- Regions tab -->
+        <LinearLayout
+            android:id="@+id/navBtnRegions"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navIconRegions"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_regions"
+                app:tint="@color/text_mute"
+                android:contentDescription="Regions"/>
+
+            <TextView
+                android:id="@+id/navLabelRegions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Regions"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_mute"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+
+        <!-- Profile tab -->
+        <LinearLayout
+            android:id="@+id/navBtnProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/navIconProfile"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_nav_profile"
+                app:tint="@color/text_mute"
+                android:contentDescription="Profile"/>
+
+            <TextView
+                android:id="@+id/navLabelProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_mute"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

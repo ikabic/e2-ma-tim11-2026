@@ -37,11 +37,14 @@ public class KoZnaZnaViewModel extends ViewModel {
         loadQuestions();
     }
 
+    private final MutableLiveData<Boolean> gameOver = new MutableLiveData<>(false);
+
     public LiveData<List<KoZnaZnaQuestion>> getQuestions() { return questions; }
     public LiveData<Integer> getP1Score() { return p1Score; }
     public LiveData<Integer> getP2Score() { return p2Score; }
     public LiveData<Integer> getCurrentIndex() { return currentIndex; }
     public LiveData<Long> getTimeLeft()  { return timeLeft; }
+    public LiveData<Boolean> getGameOver() { return gameOver; }
 
     private void loadQuestions() {
         repository.getRandomQuestions(new RepositoryCallback<List<KoZnaZnaQuestion>>() {
@@ -109,6 +112,11 @@ public class KoZnaZnaViewModel extends ViewModel {
         p1Score.setValue(Math.max(-25, Math.min(50, p1Score.getValue() + p1Delta)));
         p2Score.setValue(Math.max(-25, Math.min(50, p2Score.getValue() + p2Delta)));
 
-        currentIndex.setValue(Math.min(currentIndex.getValue() + 1, 4));
+        int nextIndex = currentIndex.getValue() + 1;
+        if (nextIndex >= 5) {
+            gameOver.setValue(true);
+        } else {
+            currentIndex.setValue(nextIndex);
+        }
     }
 }

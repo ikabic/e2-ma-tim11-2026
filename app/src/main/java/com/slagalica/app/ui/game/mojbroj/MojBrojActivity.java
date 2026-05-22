@@ -1,5 +1,6 @@
 package com.slagalica.app.ui.game.mojbroj;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -52,7 +53,8 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     private LinearLayout panelFinalP1, panelFinalP2;
     private TextView tvFinalScoreP1, tvFinalScoreP2, tvWinner;
     private TextView tvFinalNameP1, tvFinalNameP2;
-    private String playerUsername = "You";
+    private String playerUsername   = "You";
+    private String opponentUsername = "Opponent";
     private TextView[] numberViews;
     private TextView tvResult;
     private MaterialButton btnPlus, btnMinus, btnMultiply, btnDivide;
@@ -100,6 +102,8 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         setContentView(R.layout.activity_moj_broj);
         playerUsername = getIntent().getStringExtra("username");
         if (playerUsername == null) playerUsername = "You";
+        String oppName = getIntent().getStringExtra("opponentUsername");
+        if (oppName != null) opponentUsername = oppName;
         initViews();
         initSensor();
         GameToast.showCountdown(this, this::setupViewModel);
@@ -364,7 +368,11 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void setupViewModel() {
+        boolean isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
+        boolean isPlayer1   = getIntent().getBooleanExtra("isPlayer1", true);
+
         viewModel = new ViewModelProvider(this).get(MojBrojViewModel.class);
+        viewModel.setMatchMode(isMatchGame);
 
         viewModel.getCurrentRound().observe(this, round ->
             tvRound.setText("Round " + round + " / 2")
@@ -431,6 +439,10 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                     break;
 
                 case PLAYER1_INPUT:
+                    if (isMatchGame && !isPlayer1) {
+                        viewModel.submitExpression("");
+                        return;
+                    }
                     if (roundTimer != null) roundTimer.cancel();
                     showPhase(2);
                     highlightPlayer(1);
@@ -440,9 +452,13 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                     break;
 
                 case PLAYER2_INPUT:
+                    if (isMatchGame && isPlayer1) {
+                        viewModel.submitExpression("");
+                        return;
+                    }
                     if (roundTimer != null) roundTimer.cancel();
                     showPhase(2);
-                    highlightPlayer(2);
+                    highlightPlayer(isMatchGame ? 1 : 2);
                     clearTokens();
                     setInputEnabled(true);
                     startRoundTimer();
@@ -459,8 +475,16 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                     setInputEnabled(false);
                     int p1 = safeScore(viewModel.getPlayer1Score().getValue());
                     int p2 = safeScore(viewModel.getPlayer2Score().getValue());
+                    if (getIntent().getBooleanExtra("isMatchGame", false)) {
+                        Intent matchResult = new Intent();
+                        matchResult.putExtra("p1Score", p1);
+                        matchResult.putExtra("p2Score", p2);
+                        setResult(RESULT_OK, matchResult);
+                        finish();
+                        return;
+                    }
                     tvFinalNameP1.setText(playerUsername);
-                    tvFinalNameP2.setText("Opponent");
+                    tvFinalNameP2.setText(opponentUsername);
                     tvFinalScoreP1.setText(String.valueOf(p1));
                     tvFinalScoreP2.setText(String.valueOf(p2));
                     if (p1 > p2) {
@@ -468,7 +492,7 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
                         panelFinalP1.setBackgroundResource(R.drawable.bg_player_you);
                         panelFinalP2.setBackgroundResource(R.drawable.bg_player_other);
                     } else if (p2 > p1) {
-                        tvWinner.setText("Opponent wins!");
+                        tvWinner.setText(opponentUsername + " wins!");
                         panelFinalP1.setBackgroundResource(R.drawable.bg_player_other);
                         panelFinalP2.setBackgroundResource(R.drawable.bg_player_you);
                     } else {

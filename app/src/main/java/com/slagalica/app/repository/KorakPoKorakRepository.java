@@ -37,6 +37,17 @@ public class KorakPoKorakRepository {
             .addOnFailureListener(callback::onFailure);
     }
 
+    public void getQuestionById(String id, RepositoryCallback<KorakPoKorakQuestion> callback) {
+        db.collection(COLLECTION).document(id).get()
+            .addOnSuccessListener(doc -> {
+                if (!doc.exists()) { callback.onFailure(new Exception("Question not found")); return; }
+                KorakPoKorakQuestion q = doc.toObject(KorakPoKorakQuestion.class);
+                if (q != null) q.setId(doc.getId());
+                callback.onSuccess(q);
+            })
+            .addOnFailureListener(callback::onFailure);
+    }
+
     private void seedAndFetch(RepositoryCallback<KorakPoKorakQuestion> callback) {
         Log.d("KPK", "Collection empty, seeding...");
         WriteBatch batch = db.batch();

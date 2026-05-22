@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.slagalica.app.R;
 import com.slagalica.app.databinding.ActivityProfileBinding;
+import com.slagalica.app.ui.auth.ChangePasswordActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.util.ConfirmDialog;
 import com.slagalica.app.util.QRCodeGenerator;
@@ -36,17 +37,26 @@ public class ProfileActivity extends AppCompatActivity {
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || user.isAnonymous()) {
+            android.widget.Toast.makeText(this,
+                "Register to access your profile", android.widget.Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         setupViewModel();
         viewModel.loadProfile();
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
 
         Bitmap qrBitmap = QRCodeGenerator.generateQRCode(user.getUid());
         binding.ivQrCode.setImageBitmap(qrBitmap);
 
         binding.btnEditAvatar.setOnClickListener(v ->
                 pickImageLauncher.launch("image/*")
+        );
+
+        binding.btnChangePassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ChangePasswordActivity.class))
         );
 
         AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
