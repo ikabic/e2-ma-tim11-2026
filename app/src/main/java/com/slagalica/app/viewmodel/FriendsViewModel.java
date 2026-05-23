@@ -14,6 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.slagalica.app.model.Friend;
 import com.slagalica.app.repository.FriendsRepository;
 import com.slagalica.app.repository.MatchRepository;
+import com.slagalica.app.repository.NotificationRepository;
 import com.slagalica.app.repository.RepositoryCallback;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class FriendsViewModel extends ViewModel {
 
     private final FriendsRepository friendsRepository;
     private final MatchRepository matchRepository;
+    private final NotificationRepository notificationRepository;
 
     private final MutableLiveData<List<Friend>> friends = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Friend>> searchResults = new MutableLiveData<>();
@@ -34,6 +36,7 @@ public class FriendsViewModel extends ViewModel {
     private final MutableLiveData<String> pendingInviteId = new MutableLiveData<>();
     private final MutableLiveData<String> pendingInviteUsername = new MutableLiveData<>();
     private final MutableLiveData<String> pendingMatchId = new MutableLiveData<>();
+    private final MutableLiveData<String> pendingNotifId = new MutableLiveData<>();
     private final MutableLiveData<String> inviteResult = new MutableLiveData<>();   // "accepted"|"declined"|"cancelled"|"expired"
 
     private static final FirebaseDatabase rtdb = FirebaseDatabase.getInstance("https://slagalica-66578-default-rtdb.europe-west1.firebasedatabase.app/");
@@ -44,6 +47,7 @@ public class FriendsViewModel extends ViewModel {
     public FriendsViewModel() {
         friendsRepository = new FriendsRepository();
         matchRepository = new MatchRepository();
+        notificationRepository = new NotificationRepository();
     }
 
     public LiveData<List<Friend>> getFriends() { return friends; }
@@ -143,6 +147,15 @@ public class FriendsViewModel extends ViewModel {
                             new RepositoryCallback<String>() {
                                 @Override public void onSuccess(String inviteId) {
                                     pendingInviteId.setValue(inviteId);
+
+                                    notificationRepository.createMatchInviteNotif(friend.getUid(), resolvedUsername, inviteId,
+                                            new RepositoryCallback<String>() {
+                                                @Override public void onSuccess(String notifId) {
+                                                    pendingNotifId.setValue(notifId);
+                                                    rtdb.getReference("invites").child(inviteId).child("notifId").setValue(notifId);
+                                                }
+                                                @Override public void onFailure(Exception e) {}
+                                            });
                                     listenToOutgoingInvite(inviteId);
                                 }
                                 @Override public void onFailure(Exception e) { error.setValue(e.getMessage()); }
@@ -161,6 +174,15 @@ public class FriendsViewModel extends ViewModel {
         String id = pendingInviteId.getValue();
         if (id == null) return;
         friendsRepository.updateInviteStatus(id, "expired");
+        String notifId = pendingNotifId.getValue();
+        if (notifId != null) {
+            notificationRepository.expireMatchInvite(notifId, new RepositoryCallback<Void>() {
+                @Override
+                public void onSuccess(Void v) {}
+                @Override
+                public void onFailure(Exception e) {}
+            });
+        }
     }
 
     private void listenToOutgoingInvite(String inviteId) {
@@ -177,6 +199,15 @@ public class FriendsViewModel extends ViewModel {
                     String fromUsername = snapshot.child("fromUsername").getValue(String.class);
                     String toUsername = snapshot.child("toUsername").getValue(String.class);
 
+                    String notifId = pendingNotifId.getValue();
+                    if (notifId != null) {
+                        notificationRepository.respondToMatchInvite(notifId, "accepted",
+                                new RepositoryCallback<Void>() {
+                                    @Override public void onSuccess(Void v) {}
+                                    @Override public void onFailure(Exception e) {}
+                                });
+                    }
+
                     matchRepository.createInviteMatch(inviteId, myUid, opponentUid, fromUsername, toUsername,
                             new RepositoryCallback<String>() {
                                 @Override public void onSuccess(String matchId) {
@@ -191,6 +222,14 @@ public class FriendsViewModel extends ViewModel {
                                 }
                             });
                 } else if ("declined".equals(status) || "expired".equals(status) || "cancelled".equals(status)) {
+                    String notifId = pendingNotifId.getValue();
+                    if (notifId != null) {
+                        notificationRepository.respondToMatchInvite(notifId, status,
+                                new RepositoryCallback<Void>() {
+                                    @Override public void onSuccess(Void v) {}
+                                    @Override public void onFailure(Exception e) {}
+                                });
+                    }
                     inviteResult.postValue(status);
                     clearPendingInvite();
                 }
@@ -212,6 +251,7 @@ public class FriendsViewModel extends ViewModel {
         pendingInviteId.postValue(null);
         pendingInviteUsername.postValue(null);
         pendingMatchId.postValue(null);
+        pendingNotifId.postValue(null);
     }
 
     public void clearInviteResult() { inviteResult.setValue(null); }

@@ -12,6 +12,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.repository.NotificationRepository;
+import com.slagalica.app.repository.RepositoryCallback;
 import com.slagalica.app.util.InviteManager;
 import com.slagalica.app.util.IncomingInviteDialog;
 import com.slagalica.app.util.UserStatusManager;
@@ -19,6 +21,8 @@ import com.slagalica.app.util.UserStatusManager;
 public abstract class BaseActivity extends AppCompatActivity implements IncomingInviteDialog.InviteResponseListener {
 
     private static final FirebaseDatabase rtdb = FirebaseDatabase.getInstance("https://slagalica-66578-default-rtdb.europe-west1.firebasedatabase.app/");
+
+    private final NotificationRepository notificationRepository = new NotificationRepository();
 
     private DatabaseReference cancelListenerRef;
     private ValueEventListener cancelListener;
@@ -127,6 +131,15 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
                 String fromUsername = snapshot.child("fromUsername").getValue(String.class);
                 String toUsername = snapshot.child("toUsername").getValue(String.class);
 
+                String notifId = snapshot.child("notifId").getValue(String.class);
+                if (notifId != null) {
+                    notificationRepository.respondToMatchInvite(notifId, "accepted",
+                            new RepositoryCallback<Void>() {
+                                @Override public void onSuccess(Void v) {}
+                                @Override public void onFailure(Exception e) {}
+                            });
+                }
+
                 removeMatchIdListener();
                 if (isFinishing() || isDestroyed()) return;
 
@@ -149,6 +162,18 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
         InviteManager.get().setShownInviteId(null);
         InviteManager.get().clearIncomingInvite();
         removeCancelListener();
+
+        DatabaseReference inviteRef = rtdb.getReference("invites").child(inviteId);
+        inviteRef.get().addOnSuccessListener(snapshot -> {
+            String notifId = snapshot.child("notifId").getValue(String.class);
+            if (notifId != null) {
+                notificationRepository.respondToMatchInvite(notifId, "declined",
+                        new RepositoryCallback<Void>() {
+                            @Override public void onSuccess(Void v) {}
+                            @Override public void onFailure(Exception e) {}
+                        });
+            }
+        });
 
         rtdb.getReference("invites").child(inviteId).child("status").setValue("declined");
     }
