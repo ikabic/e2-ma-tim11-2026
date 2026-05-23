@@ -12,6 +12,7 @@ import com.google.android.material.button.MaterialButton;
 import com.slagalica.app.R;
 import com.slagalica.app.repository.MatchRepository;
 import com.slagalica.app.repository.RepositoryCallback;
+import com.slagalica.app.util.UserStatusManager;
 
 public class MatchmakingActivity extends AppCompatActivity {
 
@@ -24,11 +25,30 @@ public class MatchmakingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_matchmaking);
 
-        String username = getIntent().getStringExtra("username");
-        if (username == null) username = "Player";
+        String inviteMatchId = getIntent().getStringExtra("inviteMatchId");
+        boolean inviteIsPlayer1 = getIntent().getBooleanExtra("isPlayer1", true);
+        String inviteOpponentUsername = getIntent().getStringExtra("opponentUsername");
+        String usernameExtra = getIntent().getStringExtra("username");
+        final String username = usernameExtra != null ? usernameExtra : "Player";
 
         matchRepository = new MatchRepository();
         uid = matchRepository.getUid();
+
+        if (inviteMatchId != null) {
+            matchFound = true;
+            Runnable launchMatch = () -> {
+                UserStatusManager.setInGame(FirebaseAuth.getInstance(), true);
+                Intent intent = new Intent(this, MatchActivity.class);
+                intent.putExtra("matchId", inviteMatchId);
+                intent.putExtra("isPlayer1", inviteIsPlayer1);
+                intent.putExtra("username", username);
+                intent.putExtra("opponentUsername", inviteOpponentUsername);
+                startActivity(intent);
+                finish();
+            };
+            launchMatch.run();
+            return;
+        }
 
         MaterialButton btnCancel = findViewById(R.id.btnCancel);
         btnCancel.setOnClickListener(v -> {
@@ -36,10 +56,8 @@ public class MatchmakingActivity extends AppCompatActivity {
             finish();
         });
 
-        final String finalUsername = username;
-
         matchRepository.joinQueue(
-            finalUsername,
+            username,
             (matchId, isPlayer1, opponentUsername) -> {
                 if (matchFound) return;
                 matchFound = true;
@@ -47,10 +65,12 @@ public class MatchmakingActivity extends AppCompatActivity {
                 boolean isGuest = currentUser == null || currentUser.isAnonymous();
 
                 Runnable launchMatch = () -> {
+                    UserStatusManager.setInGame(FirebaseAuth.getInstance(), true);
+
                     Intent intent = new Intent(this, MatchActivity.class);
                     intent.putExtra("matchId",          matchId);
                     intent.putExtra("isPlayer1",         isPlayer1);
-                    intent.putExtra("username",          finalUsername);
+                    intent.putExtra("username",          username);
                     intent.putExtra("opponentUsername",  opponentUsername);
                     startActivity(intent);
                     finish();

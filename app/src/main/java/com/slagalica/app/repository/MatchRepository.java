@@ -14,6 +14,7 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.util.UserStatusManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -157,6 +158,35 @@ public class MatchRepository {
             .addOnFailureListener(errCallback::onFailure);
     }
 
+    public void createInviteMatch(String inviteId, String player1Uid, String player2Uid, String player1Username, String player2Username, RepositoryCallback<String> callback) {
+        String matchId = rtdb.child(MATCHES_PATH).push().getKey();
+
+        Map<String, Object> match = new HashMap<>();
+        match.put("p1Uid", player1Uid);
+        match.put("p1Username", player1Username);
+        match.put("p2Uid", player2Uid);
+        match.put("p2Username", player2Username);
+        match.put("status", "active");
+        match.put("invite", true);
+
+        Map<String, Object> scores = new HashMap<>();
+        for (int i = 0; i < 6; i++) {
+            Map<String, Object> gs = new HashMap<>();
+            gs.put("p1", -1);
+            gs.put("p2", -1);
+            scores.put(String.valueOf(i), gs);
+        }
+        match.put("scores", scores);
+
+        rtdb.child(MATCHES_PATH).child(matchId).setValue(match)
+                .addOnSuccessListener(unused -> {
+                    rtdb.child("invites").child(inviteId).child("matchId").setValue(matchId)
+                            .addOnSuccessListener(v -> callback.onSuccess(matchId))
+                            .addOnFailureListener(callback::onFailure);
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
     private void listenForMatch(String uid, MatchFoundCallback matchCallback) {
         DatabaseReference matchIdRef = rtdb.child(QUEUE_PATH).child(uid).child("matchId");
         final boolean[] resolved = {false};
@@ -289,6 +319,7 @@ public class MatchRepository {
     }
 
     public void finishMatch(String matchId, String myUid, int myScore, int opponentScore) {
+        UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
         updateStars(myUid, myScore, opponentScore);
     }
@@ -498,6 +529,7 @@ public class MatchRepository {
     }
 
     public void writeForfeit(String matchId, String uid) {
+        UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("forfeit").setValue(uid);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
     }

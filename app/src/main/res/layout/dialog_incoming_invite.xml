@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/bg_elev"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="32dp">
+
+    <!-- Drag handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_chip"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Sender avatar + name row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivInviterAvatar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:shapeAppearanceOverlay="@style/CircleAppearance"
+            tools:srcCompat="@tools:sample/avatars"
+            app:strokeColor="@color/accent"
+            app:strokeWidth="2dp"
+            android:layout_marginEnd="14dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvInviterUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="quizmaster99"
+                android:textColor="@color/text"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="3dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Challenges you to a match!"
+                android:textColor="@color/text_dim"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+
+        <!-- Countdown ring -->
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp">
+
+            <ProgressBar
+                android:id="@+id/progressInviteTimer"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:max="100"
+                android:progress="100"
+                android:progressTint="@color/accent"
+                android:rotation="-90" />
+
+            <TextView
+                android:id="@+id/tvInviteTimerCount"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="10"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Accept / Decline buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAcceptInvite"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Accept"
+            android:textColor="@color/accent_ink"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/accent"
+            app:cornerRadius="14dp"
+            app:elevation="0dp"
+            android:layout_marginEnd="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeclineInvite"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Decline"
+            android:textColor="@color/text_mute"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@android:color/transparent"
+            app:strokeColor="@color/border_strong"
+            app:strokeWidth="1dp"
+            app:cornerRadius="14dp"
+            app:elevation="0dp" />
+    </LinearLayout>
+
+</LinearLayout>

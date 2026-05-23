@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.model.Profile;
 import com.slagalica.app.model.User;
+import com.slagalica.app.util.UserStatusManager;
 
 public class UserRepository {
 
@@ -52,6 +53,7 @@ public class UserRepository {
                     auth.signOut();
                     callback.onFailure(new Exception("Email not verified. Check your inbox."));
                 } else {
+                    UserStatusManager.goOnline(auth);
                     callback.onSuccess(firebaseUser);
                 }
             })
@@ -97,9 +99,7 @@ public class UserRepository {
             .addOnFailureListener(callback::onFailure);
     }
 
-    public void logout() {
-        auth.signOut();
-    }
+    public void logout() { UserStatusManager.goOffline(auth); }
 
     public FirebaseUser getCurrentUser() {
         return auth.getCurrentUser();
