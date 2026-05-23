@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,13 +25,23 @@ import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
+import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.viewmodel.NotificationViewModel;
+import com.slagalica.app.viewmodel.RankingViewModel;
+import android.os.Handler;
+import android.os.Looper;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class HomeActivity extends BaseActivity {
 
     private String playerUsername = "You";
     private ActivityHomeBinding binding;
     private NotificationViewModel notifViewModel;
+    private RankingViewModel rankingViewModel;
+    private RankingAdapter rankingAdapter;
+    private Handler countdownHandler  = new Handler(Looper.getMainLooper());
+    private long nextRefreshAtMs = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +50,45 @@ public class HomeActivity extends BaseActivity {
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        rankingAdapter = new RankingAdapter();
+        binding.rvRanking.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvRanking.setAdapter(rankingAdapter);
+
+        rankingViewModel = new ViewModelProvider(this).get(RankingViewModel.class);
+
+        rankingViewModel.getEntries().observe(this, list -> {
+            boolean empty = list == null || list.isEmpty();
+            binding.rvRanking.setVisibility(empty ? View.GONE : View.VISIBLE);
+            binding.layoutRankEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+            if (!empty) rankingAdapter.submitList(list);
+            nextRefreshAtMs = System.currentTimeMillis() + 2 * 60 * 1000L;
+        });
+
+        rankingViewModel.getLoading().observe(this, isLoading ->
+                binding.pbRankLoading.setVisibility(isLoading != null && isLoading ? View.VISIBLE : View.GONE));
+
+        rankingViewModel.getCycle().observe(this, cycle -> {
+            if (cycle != null && cycle.getStartDate() != null && cycle.getEndDate() != null) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("d MMM", java.util.Locale.getDefault());
+                String range = sdf.format(cycle.getStartDate().toDate()) + " – " + sdf.format(cycle.getEndDate().toDate());
+                binding.tvCycleDateRange.setText(range);
+            }
+        });
+
+        rankingViewModel.getActiveType().observe(this, type -> {
+            boolean weekly = type == RankingViewModel.CycleType.WEEKLY;
+            setTabActive(binding.btnTabWeekly, weekly);
+            setTabActive(binding.btnTabMonthly, !weekly);
+        });
+
+        binding.btnTabWeekly.setOnClickListener(v ->
+                rankingViewModel.selectType(RankingViewModel.CycleType.WEEKLY));
+        binding.btnTabMonthly.setOnClickListener(v ->
+                rankingViewModel.selectType(RankingViewModel.CycleType.MONTHLY));
+
+        nextRefreshAtMs = System.currentTimeMillis() + 2 * 60 * 1000L;
+        countdownHandler.post(countdownTick);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -141,7 +191,7 @@ public class HomeActivity extends BaseActivity {
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
         binding.navBtnHome.setOnClickListener(v -> selectTab(0));
         binding.navBtnGames.setOnClickListener(v -> selectTab(1));
-        binding.navBtnRanks.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        binding.navBtnRanks.setOnClickListener(v -> selectTab(2));
         binding.navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
         binding.navBtnProfile.setOnClickListener(v -> {
             if (isGuest) {
@@ -156,9 +206,9 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void selectTab(int index) {
-        // Show/hide sections
         binding.sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
 
         // Update icon tints and label colours
         int accent = ContextCompat.getColor(this, R.color.accent);
@@ -175,5 +225,34 @@ public class HomeActivity extends BaseActivity {
         binding.navLabelRanks.setTextColor(index == 2 ? accent : mute);
         binding.navLabelRegions.setTextColor(index == 3 ? accent : mute);
         binding.navLabelProfile.setTextColor(index == 4 ? accent : mute);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countdownHandler.removeCallbacks(countdownTick);
+    }
+
+    private final Runnable countdownTick = new Runnable() {
+        @Override public void run() {
+            long remaining = nextRefreshAtMs - System.currentTimeMillis();
+            if (remaining < 0) remaining = 0;
+            long min = remaining / 60000;
+            long sec = (remaining % 60000) / 1000;
+            binding.tvRankRefreshCountdown.setText(String.format(java.util.Locale.getDefault(), "↻ %d:%02d", min, sec));
+            countdownHandler.postDelayed(this, 1000);
+        }
+    };
+
+    private void setTabActive(MaterialButton btn, boolean active) {
+        if (active) {
+            btn.setBackgroundTintList(getResources().getColorStateList(R.color.accent, null));
+            btn.setTextColor(getResources().getColor(R.color.accent_ink, null));
+            btn.setStrokeColor(getResources().getColorStateList(R.color.accent, null));
+        } else {
+            btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+            btn.setTextColor(getResources().getColor(R.color.text_mute, null));
+            btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
+        }
     }
 }
