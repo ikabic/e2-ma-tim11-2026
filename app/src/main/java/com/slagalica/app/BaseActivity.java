@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -13,6 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.util.InviteManager;
 import com.slagalica.app.util.IncomingInviteDialog;
+import com.slagalica.app.util.UserStatusManager;
 
 public abstract class BaseActivity extends AppCompatActivity implements IncomingInviteDialog.InviteResponseListener {
 
@@ -20,6 +22,9 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
 
     private DatabaseReference cancelListenerRef;
     private ValueEventListener cancelListener;
+
+    private DatabaseReference matchIdListenerRef;
+    private ValueEventListener matchIdListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
     protected void onDestroy() {
         super.onDestroy();
         removeCancelListener();
+        removeMatchIdListener();
     }
 
     private void listenForCancellation(String inviteId) {
@@ -68,6 +74,13 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
 
         cancelListenerRef = null;
         cancelListener = null;
+    }
+
+    private void removeMatchIdListener() {
+        if (matchIdListenerRef != null && matchIdListener != null) matchIdListenerRef.removeEventListener(matchIdListener);
+
+        matchIdListenerRef = null;
+        matchIdListener    = null;
     }
 
     private void loadInviterProfileThenShowDialog(String inviteId, String fromUid) {
@@ -100,8 +113,35 @@ public abstract class BaseActivity extends AppCompatActivity implements Incoming
         InviteManager.get().clearIncomingInvite();
         removeCancelListener();
 
-        rtdb.getReference("invites").child(inviteId).child("status").setValue("accepted");
-        startActivity(new android.content.Intent(this, com.slagalica.app.ui.match.MatchmakingActivity.class));
+        DatabaseReference inviteRef = rtdb.getReference("invites").child(inviteId);
+        inviteRef.child("status").setValue("accepted");
+
+        removeMatchIdListener();
+        matchIdListenerRef = inviteRef;
+        matchIdListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String matchId = snapshot.child("matchId").getValue(String.class);
+                if (matchId == null || matchId.isEmpty()) return;
+
+                String fromUsername = snapshot.child("fromUsername").getValue(String.class);
+                String toUsername = snapshot.child("toUsername").getValue(String.class);
+
+                removeMatchIdListener();
+                if (isFinishing() || isDestroyed()) return;
+
+                UserStatusManager.setInGame(FirebaseAuth.getInstance(), true);
+
+                android.content.Intent intent = new android.content.Intent(BaseActivity.this, com.slagalica.app.ui.match.MatchmakingActivity.class);
+                intent.putExtra("inviteMatchId", matchId);
+                intent.putExtra("isPlayer1", false);
+                intent.putExtra("username", toUsername != null ? toUsername : "Player");
+                intent.putExtra("opponentUsername", fromUsername != null ? fromUsername : "Opponent");
+                startActivity(intent);
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        };
+        matchIdListenerRef.addValueEventListener(matchIdListener);
     }
 
     @Override

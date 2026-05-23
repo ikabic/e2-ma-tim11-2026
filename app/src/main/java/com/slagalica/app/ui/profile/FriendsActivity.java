@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.adapter.FriendsAdapter;
 import com.slagalica.app.adapter.SearchResultsAdapter;
@@ -32,7 +34,9 @@ public class FriendsActivity extends BaseActivity {
     private FriendsAdapter friendsAdapter;
     private SearchResultsAdapter searchAdapter;
     private CountDownTimer outgoingTimer;
-    private String shownInviteId;
+
+    private String resolvedMatchId;
+    private String username = "Player";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,13 @@ public class FriendsActivity extends BaseActivity {
         setupSearch();
         setupQrScan();
         setupOutgoingBanner();
+
+        FirebaseFirestore.getInstance()
+                .collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    String name = doc.getString("username");
+                    if (name != null && !name.isEmpty()) username = name;
+                });
 
         viewModel.loadFriends();
     }
@@ -105,16 +116,30 @@ public class FriendsActivity extends BaseActivity {
             else stopOutgoingCountdown();
         });
 
-        viewModel.getPendingInviteUsername().observe(this, name -> {
-            if (name != null)
-                binding.tvPendingInviteLabel.setText("Waiting for " + name + "…");
+        viewModel.getPendingMatchId().observe(this, id -> {
+            if (id != null) resolvedMatchId = id;
         });
 
         viewModel.getInviteResult().observe(this, result -> {
             if (result == null) return;
             switch (result) {
                 case "accepted":
-                    startActivity(new Intent(this, MatchmakingActivity.class));
+                    String matchId = viewModel.getPendingMatchId().getValue();
+
+                    if (matchId == null) {
+                        Toast.makeText(this, "Match setup failed, try again", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                    Intent intent = new Intent(this, MatchmakingActivity.class);
+                    intent.putExtra("inviteMatchId", matchId);
+                    intent.putExtra("isPlayer1", true);
+                    intent.putExtra("opponentUsername", viewModel.getPendingInviteUsername().getValue());
+                    intent.putExtra("username", username);
+                    startActivity(intent);
+
+                    viewModel.clearPendingInvite();
+
                     break;
                 case "declined":
                     Toast.makeText(this, "Invite was declined", Toast.LENGTH_SHORT).show();

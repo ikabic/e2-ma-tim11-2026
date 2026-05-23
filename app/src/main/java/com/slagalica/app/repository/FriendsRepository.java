@@ -171,7 +171,7 @@ public class FriendsRepository {
                 .addOnFailureListener(callback::onFailure);
     }
 
-    public void sendInvite(String toUid, RepositoryCallback<String> callback) {
+    public void sendInvite(String toUid, String toUsername, String fromUsername, RepositoryCallback<String> callback) {
         FirebaseUser me = auth.getCurrentUser();
         if (me == null) { callback.onFailure(new Exception("Not logged in")); return; }
 
@@ -185,6 +185,8 @@ public class FriendsRepository {
         values.put("toUid", toUid);
         values.put("status", "pending");
         values.put("createdAt", System.currentTimeMillis());
+        values.put("fromUsername", fromUsername);
+        values.put("toUsername", toUsername);
 
         ref.setValue(values)
                 .addOnSuccessListener(unused -> callback.onSuccess(inviteId))
