@@ -34,7 +34,7 @@ public class MatchRepository {
     }
 
     public interface ScoreCallback {
-        void onScoreReady(int p1Score, int p2Score);
+        void onScoreReady(int p1Score, int p2Score, boolean bothDone);
     }
 
     public interface Game4ResolvedCallback {
@@ -144,8 +144,10 @@ public class MatchRepository {
         Map<String, Object> scores = new HashMap<>();
         for (int i = 0; i < 6; i++) {
             Map<String, Object> gs = new HashMap<>();
-            gs.put("p1", -1);
-            gs.put("p2", -1);
+            gs.put("p1", -999);
+            gs.put("p2", -999);
+            gs.put("p1Done", false);
+            gs.put("p2Done", false);
             scores.put(String.valueOf(i), gs);
         }
         match.put("scores", scores);
@@ -172,8 +174,10 @@ public class MatchRepository {
         Map<String, Object> scores = new HashMap<>();
         for (int i = 0; i < 6; i++) {
             Map<String, Object> gs = new HashMap<>();
-            gs.put("p1", -1);
-            gs.put("p2", -1);
+            gs.put("p1", -999);
+            gs.put("p2", -999);
+            gs.put("p1Done", false);
+            gs.put("p2Done", false);
             scores.put(String.valueOf(i), gs);
         }
         match.put("scores", scores);
@@ -250,6 +254,8 @@ public class MatchRepository {
         Map<String, Object> scores = new HashMap<>();
         scores.put("p1", p1Score);
         scores.put("p2", p2Score);
+        scores.put("p1Done", true);
+        scores.put("p2Done", true);
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
             .setValue(scores)
@@ -260,9 +266,15 @@ public class MatchRepository {
     public void writePlayerScore(String matchId, int gameIdx, boolean isPlayer1,
                                   int score, RepositoryCallback<Void> callback) {
         String key = isPlayer1 ? "p1" : "p2";
+        String doneKey = isPlayer1 ? "p1Done" : "p2Done";
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(key, score);
+        updates.put(doneKey, true);
+
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
-            .child(key).setValue(score)
+            .updateChildren(updates)
             .addOnSuccessListener(v -> callback.onSuccess(null))
             .addOnFailureListener(callback::onFailure);
     }
@@ -278,9 +290,17 @@ public class MatchRepository {
                 if (p1v == null || p2v == null) return;
                 int p1 = ((Number) p1v).intValue();
                 int p2 = ((Number) p2v).intValue();
-                if (p1 < 0 || p2 < 0) return;
-                ref.removeEventListener(this);
-                callback.onScoreReady(p1, p2);
+
+                Boolean p1Done = snap.child("p1Done").getValue(Boolean.class);
+                Boolean p2Done = snap.child("p2Done").getValue(Boolean.class);
+
+                callback.onScoreReady(p1, p2, p1Done && p2Done);
+
+                if (p1Done != null && p2Done != null) {
+                    if (p1Done && p2Done) ref.removeEventListener(this);
+                } else { // fallback
+                    if (p1 >= 0 && p2 >= 0) ref.removeEventListener(this);
+                }
             }
             @Override public void onCancelled(DatabaseError e) {}
         };
@@ -290,15 +310,15 @@ public class MatchRepository {
 
     public ValueEventListener listenForP1Done(String matchId, int gameIdx, Runnable onReady) {
         DatabaseReference ref = rtdb.child(MATCHES_PATH).child(matchId)
-            .child("scores").child(String.valueOf(gameIdx)).child("p1");
+            .child("scores").child(String.valueOf(gameIdx)).child("p1Done");
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snap) {
                 Object val = snap.getValue();
-                if (val == null) return;
-                if (((Number) val).intValue() < 0) return;
-                ref.removeEventListener(this);
-                onReady.run();
+                if (Boolean.TRUE.equals(val)) {
+                    ref.removeEventListener(this);
+                    onReady.run();
+                }
             }
             @Override public void onCancelled(DatabaseError e) {}
         };
@@ -308,7 +328,7 @@ public class MatchRepository {
 
     public void removeP1DoneListener(String matchId, int gameIdx, ValueEventListener listener) {
         rtdb.child(MATCHES_PATH).child(matchId)
-            .child("scores").child(String.valueOf(gameIdx)).child("p1")
+            .child("scores").child(String.valueOf(gameIdx)).child("p1Done")
             .removeEventListener(listener);
     }
 
@@ -526,6 +546,35 @@ public class MatchRepository {
     public void removeMojBrojResultsListener(String matchId, int round, ValueEventListener listener) {
         rtdb.child(MATCHES_PATH).child(matchId).child("mojBroj")
             .child("round" + round).removeEventListener(listener);
+    }
+
+    public void writeKzzStarted(String matchId) {
+        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").child("data").child("started").setValue(true);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("p1", 0);
+        updates.put("p2", 0);
+        updates.put("p1Done", false);
+        updates.put("p2Done", false);
+        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").updateChildren(updates);
+    }
+
+    public ValueEventListener listenForKzzStarted(String matchId, Runnable onStarted) {
+        DatabaseReference ref = rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").child("data").child("started");
+        ValueEventListener listener = new ValueEventListener() {
+            private boolean fired = false;
+            @Override public void onDataChange(DataSnapshot snap) {
+                if (fired) return;
+                if (Boolean.TRUE.equals(snap.getValue(Boolean.class))) {
+                    fired = true;
+                    ref.removeEventListener(this);
+                    onStarted.run();
+                }
+            }
+            @Override public void onCancelled(DatabaseError e) {}
+        };
+        ref.addValueEventListener(listener);
+        return listener;
     }
 
     public void writeForfeit(String matchId, String uid) {

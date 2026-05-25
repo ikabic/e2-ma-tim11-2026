@@ -30,6 +30,7 @@ import com.slagalica.app.util.UserStatusManager;
 
 public class MatchActivity extends AppCompatActivity {
 
+    private static final int GAME_KZZ = 0;
     private static final int GAME_KPK = 4;
 
     private static final String[] GAME_NAMES = {
@@ -182,11 +183,10 @@ public class MatchActivity extends AppCompatActivity {
                     returnedP2 = result.getData().getIntExtra("p2Score", 0);
                     stealQId  = result.getData().getStringExtra("kpkStealQuestionId");
                 }
+
                 int myScore = isPlayer1 ? returnedP1 : returnedP2;
 
-                ivStateIcon.setImageResource(R.drawable.ic_hourglass);
-                tvGameStatus.setText("Waiting for " + opponentUsername + "...");
-                btnPlayGame.setVisibility(View.GONE);
+                showWaitingForOpponent("Waiting for " + opponentUsername + "...");
 
                 final String finalStealQId = stealQId;
                 final int finalMyScore = myScore;
@@ -216,10 +216,16 @@ public class MatchActivity extends AppCompatActivity {
         );
     }
 
+    private void showWaitingForOpponent(String statusText) {
+        ivStateIcon.setImageResource(R.drawable.ic_hourglass);
+        tvGameStatus.setText(statusText);
+        btnPlayGame.setVisibility(View.GONE);
+    }
+
     private void afterMyScoreWritten(int idx, int myScore) {
         if (opponentForfeited) {
             if (isPlayer1) totalP1 += myScore;
-            else           totalP2 += myScore;
+            else totalP2 += myScore;
             updateScoreDisplay();
             showMatchOver();
         } else {
@@ -238,12 +244,22 @@ public class MatchActivity extends AppCompatActivity {
 
         tvCurrentGame.setText("GAME " + (idx + 1) + " / 6");
 
+        if (idx == GAME_KZZ) {
+            if (isPlayer1) showPlayButton(idx);
+            else {
+                showWaitingForOpponent("Waiting for " + opponentUsername + " to start " + GAME_NAMES[idx] + "...");
+                currentTurnListener = matchRepository.listenForKzzStarted(matchId, () -> {
+                    currentTurnListener = null;
+                    launchGame(idx);
+                });
+            }
+            return;
+        }
+
         if (isPlayer1) {
             showPlayButton(idx);
         } else {
-            ivStateIcon.setImageResource(R.drawable.ic_hourglass);
-            tvGameStatus.setText("Waiting for " + opponentUsername + " to play " + GAME_NAMES[idx] + "...");
-            btnPlayGame.setVisibility(View.GONE);
+            showWaitingForOpponent("Waiting for " + opponentUsername + " to play " + GAME_NAMES[idx] + "...");
             currentTurnListener = matchRepository.listenForP1Done(matchId, idx, () -> {
                 currentTurnListener = null;
                 if (idx == GAME_KPK) {
@@ -303,7 +319,7 @@ public class MatchActivity extends AppCompatActivity {
     private void listenForBothScores(int idx) {
         if (idx == GAME_KPK) {
             if (isPlayer1) {
-                currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2) -> {
+                currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2, ignored) -> {
                     currentScoreListener = null;
                     handleGame4P1Side(p1, p2);
                 });
@@ -317,12 +333,25 @@ public class MatchActivity extends AppCompatActivity {
                 });
             }
         } else {
-            currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2) -> {
-                currentScoreListener = null;
-                totalP1 += p1;
-                totalP2 += p2;
-                updateScoreDisplay();
-                advanceToGame(idx + 1);
+            currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2, bothDone) -> {
+                if (bothDone) {
+                    currentScoreListener = null;
+
+                    totalP1 += p1;
+                    totalP2 += p2;
+
+                    updateScoreDisplay();
+                    advanceToGame(idx + 1);
+                } else {
+                    int tempTotalP1 = totalP1 + p1;
+                    int tempTotalP2 = totalP2 + p2;
+
+                    int myDisplayTotal  = isPlayer1 ? tempTotalP1 : tempTotalP2;
+                    int oppDisplayTotal = isPlayer1 ? tempTotalP2 : tempTotalP1;
+
+                    tvMyScore.setText(String.valueOf(myDisplayTotal));
+                    tvOpponentScore.setText(String.valueOf(oppDisplayTotal));
+                }
             });
         }
     }

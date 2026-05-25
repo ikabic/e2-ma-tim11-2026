@@ -194,6 +194,8 @@ public class FriendsViewModel extends ViewModel {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String status = snapshot.child("status").getValue(String.class);
                 if ("accepted".equals(status)) {
+                    stopOutgoingListener();
+
                     String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     String opponentUid = snapshot.child("toUid").getValue(String.class);
                     String fromUsername = snapshot.child("fromUsername").getValue(String.class);
@@ -214,11 +216,9 @@ public class FriendsViewModel extends ViewModel {
                                     pendingInviteUsername.postValue(toUsername);
                                     pendingMatchId.postValue(matchId);
                                     inviteResult.postValue("accepted");
-                                    stopOutgoingListener();
                                 }
                                 @Override public void onFailure(Exception e) {
                                     inviteResult.postValue("accepted");
-                                    stopOutgoingListener();
                                 }
                             });
                 } else if ("declined".equals(status) || "expired".equals(status) || "cancelled".equals(status)) {
