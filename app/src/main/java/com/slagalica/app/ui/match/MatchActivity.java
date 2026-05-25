@@ -343,8 +343,8 @@ public class MatchActivity extends AppCompatActivity {
                     updateScoreDisplay();
                     advanceToGame(idx + 1);
                 } else {
-                    int tempTotalP1 = totalP1 + Math.max(0, p1);
-                    int tempTotalP2 = totalP2 + Math.max(0, p2);
+                    int tempTotalP1 = totalP1 + p1;
+                    int tempTotalP2 = totalP2 + p2;
 
                     int myDisplayTotal  = isPlayer1 ? tempTotalP1 : tempTotalP2;
                     int oppDisplayTotal = isPlayer1 ? tempTotalP2 : tempTotalP1;
