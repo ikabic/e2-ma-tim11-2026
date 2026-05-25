@@ -113,7 +113,7 @@
             android:id="@+id/btnAnswerD"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="12dp"
             android:gravity="start|center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
@@ -123,6 +123,25 @@
             android:textStyle="bold"
             app:backgroundTint="@color/bg_card"
             app:cornerRadius="16dp"
+            app:elevation="0dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="1dp"
+            app:icon="@null"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSkip"
+            android:layout_width="wrap_content"
+            android:layout_height="46dp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="24dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="Skip"
+            android:textColor="@color/text"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/bg_card"
+            app:cornerRadius="12dp"
             app:elevation="0dp"
             app:strokeColor="@color/border"
             app:strokeWidth="1dp"
@@ -142,15 +161,14 @@
             android:gravity="center_vertical"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/tvResultIcon"
+            <ImageView
+                android:id="@+id/ivResultIcon"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:gravity="center"
-                android:text="✓"
-                android:textColor="@color/accent_ink"
-                android:textSize="14sp"
-                android:textStyle="bold"
+                android:src="@drawable/ic_check"
+                android:padding="4dp"
+                app:tint="@color/accent_ink"
                 android:background="@drawable/bg_logo_circle"
                 android:layout_marginEnd="12dp"/>
 
@@ -164,7 +182,7 @@
                     android:id="@+id/tvResultTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tačan odgovor!"
+                    android:text="Correct answer!"
                     android:textColor="@color/text"
                     android:textSize="13sp"
                     android:textStyle="bold"/>
@@ -173,7 +191,7 @@
                     android:id="@+id/tvResultSub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+10 bodova"
+                    android:text="+10 points"
                     android:textColor="@color/accent"
                     android:textSize="12sp"/>
             </LinearLayout>
