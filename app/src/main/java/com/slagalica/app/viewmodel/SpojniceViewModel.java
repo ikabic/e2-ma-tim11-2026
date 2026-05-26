@@ -53,6 +53,10 @@ public class SpojniceViewModel extends ViewModel {
 
     private final Map<Integer, Integer> myPairs = new HashMap<>();
     private final Map<Integer, Integer> opponentPairs = new HashMap<>();
+
+    private int prevMyScore = 0;
+    private int prevOpponentScore = 0;
+
     private int p1TotalGuesses = 0;
     private int p2TotalGuesses = 0;
 
@@ -83,7 +87,7 @@ public class SpojniceViewModel extends ViewModel {
         opponentScoreListener = spojRepo.listenForOpponentScore(isPlayer1,
                 new RepositoryCallback<Integer>() {
                     @Override public void onSuccess(Integer score) {
-                        opponentRunningScore.postValue(score);
+                        opponentRunningScore.postValue(score + prevOpponentScore);
                     }
                     @Override public void onFailure(Exception e) { }
                 });
@@ -249,11 +253,12 @@ public class SpojniceViewModel extends ViewModel {
             owners.put(activeLeft, isPlayer1);
             pairOwners.postValue(owners);
 
-            int score = myRunningScore.getValue() != null ? myRunningScore.getValue() : 0;
-            score += 2;
-            myRunningScore.postValue(score);
+            int currentGameScore = myPairs.size() * 2;
+
+            myRunningScore.postValue(currentGameScore + prevMyScore);
+
             if (isMatchGame) {
-                spojRepo.writeRunningScore(isPlayer1, score);
+                spojRepo.writeRunningScore(isPlayer1, currentGameScore);
                 spojRepo.writePairs(isPlayer1, round, myPairs);
             }
 
@@ -502,10 +507,10 @@ public class SpojniceViewModel extends ViewModel {
     }
 
     private void finishGame() {
-        int my = myRunningScore.getValue() != null ? myRunningScore.getValue() : 0;
+        int myCumulative = myRunningScore.getValue() != null ? myRunningScore.getValue() : prevMyScore;
 
         if (!isMatchGame) {
-            finalScores.postValue(isPlayer1 ? new int[]{my, 0} : new int[]{0, my});
+            finalScores.postValue(isPlayer1 ? new int[]{myCumulative, 0} : new int[]{0, myCumulative});
             return;
         }
 
@@ -604,6 +609,14 @@ public class SpojniceViewModel extends ViewModel {
             opponentWaitTimer.cancel();
             opponentWaitTimer = null;
         }
+    }
+
+    public void setPreviousScores(int myPrev, int oppPrev) {
+        this.prevMyScore = myPrev;
+        this.prevOpponentScore = oppPrev;
+
+        this.myRunningScore.setValue(myPrev);
+        this.opponentRunningScore.setValue(oppPrev);
     }
 
     @Override

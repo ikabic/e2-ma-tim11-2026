@@ -46,6 +46,11 @@ public class SpojniceActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(SpojniceViewModel.class);
 
+        int prevTotalP1 = getIntent().getIntExtra("prevTotalP1", 0);
+        int prevTotalP2 = getIntent().getIntExtra("prevTotalP2", 0);
+        if (isPlayer1) viewModel.setPreviousScores(prevTotalP1, prevTotalP2);
+        else viewModel.setPreviousScores(prevTotalP2, prevTotalP1);
+
         if (isMatchGame && matchId != null)
             viewModel.initMatchMode(matchId, isPlayer1);
         else

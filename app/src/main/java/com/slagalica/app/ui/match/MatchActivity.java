@@ -297,6 +297,8 @@ public class MatchActivity extends AppCompatActivity {
         intent.putExtra("matchId", matchId);
         intent.putExtra("username", myUsername);
         intent.putExtra("opponentUsername", opponentUsername);
+        intent.putExtra("prevTotalP1", totalP1);
+        intent.putExtra("prevTotalP2", totalP2);
         if (idx == GAME_KPK && pendingStealQuestionId != null) {
             intent.putExtra("kpkStealQuestionId", pendingStealQuestionId);
             pendingStealQuestionId = null;
