@@ -55,6 +55,7 @@ public class KoZnaZnaActivity extends AppCompatActivity {
 
         binding.header.tvGameTitle.setText("Who knows, knows");
         binding.header.btnClose.setOnClickListener(v -> showExitConfirm());
+        binding.header.tvOpponentName.setText(opponentUsername);
 
         binding.btnSkip.setOnClickListener(v -> viewModel.submitAnswer(-1, 1));
 

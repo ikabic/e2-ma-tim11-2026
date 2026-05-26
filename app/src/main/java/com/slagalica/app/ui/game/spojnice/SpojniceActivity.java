@@ -53,6 +53,7 @@ public class SpojniceActivity extends AppCompatActivity {
 
         binding.header.tvGameTitle.setText("Connections");
         binding.header.btnClose.setOnClickListener(v -> showExitConfirm());
+        binding.header.tvOpponentName.setText(opponent);
 
         setupRightCardListeners();
         setupObservers();
@@ -146,7 +147,7 @@ public class SpojniceActivity extends AppCompatActivity {
 
         viewModel.getOpponentLeft().observe(this, left -> {
             if (Boolean.TRUE.equals(left)) {
-                binding.tvActivePlayer.setText("Opponent disconnected");
+                binding.tvActivePlayer.setText(opponent + " disconnected");
             }
         });
 
