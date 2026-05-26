@@ -60,7 +60,7 @@ public class KoZnaZnaViewModel extends ViewModel {
 
         kzzRepo.initMatch(matchId);
 
-        if (isPlayer1) matchRepo.writeKzzStarted(matchId);
+        if (isPlayer1) matchRepo.writeKzzOrCnnStarted(matchId, "0");
 
         opponentScoreListener = kzzRepo.listenForOpponentScore(isPlayer1,
                 new RepositoryCallback<Integer>() {
