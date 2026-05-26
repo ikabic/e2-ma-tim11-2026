@@ -43,6 +43,10 @@ public class KoZnaZnaActivity extends AppCompatActivity {
         isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
         isPlayer1 = getIntent().getBooleanExtra("isPlayer1", true);
         String matchId = getIntent().getStringExtra("matchId");
+
+        String yourUsername = getIntent().getStringExtra("username");
+        String you = yourUsername == null ? "You" : yourUsername;
+
         opponentUsername = getIntent().getStringExtra("opponentUsername");
         if (opponentUsername == null) opponentUsername = "Opponent";
 
@@ -55,6 +59,8 @@ public class KoZnaZnaActivity extends AppCompatActivity {
 
         binding.header.tvGameTitle.setText("Who knows, knows");
         binding.header.btnClose.setOnClickListener(v -> showExitConfirm());
+
+        binding.header.tvPlayerName.setText(you);
         binding.header.tvOpponentName.setText(opponentUsername);
 
         binding.btnSkip.setOnClickListener(v -> viewModel.submitAnswer(-1, 1));
