@@ -64,6 +64,8 @@ public class SpojniceViewModel extends ViewModel {
     private boolean inLeftoverChance = false;
     private boolean leftoverAlreadyPlayed = false;
     private boolean isInRevealPhase = false;
+    private int round1MyScore = 0;
+    private int round1OpponentScore = 0;
 
     private CountDownTimer roundTimer;
     private CountDownTimer opponentWaitTimer;
@@ -170,6 +172,11 @@ public class SpojniceViewModel extends ViewModel {
     private void startRound(int round) {
         currentRound.postValue(round);
 
+        if (round == 1) {
+            round1MyScore = myPairs.size() * 2;
+            round1OpponentScore = opponentPairs.size() * 2;
+        }
+
         myPairs.clear();
         opponentPairs.clear();
 
@@ -242,6 +249,9 @@ public class SpojniceViewModel extends ViewModel {
         Map<String, String> correct = q.getCorrectPairs();
         boolean isCorrect = rightTerm.equals(correct.get(leftTerm));
 
+        int currentScore = round1MyScore + (myPairs.size() * 2);
+        myRunningScore.postValue(currentScore + prevMyScore);
+
         if (isMatchGame) spojRepo.writeLastGuess(isPlayer1, rightIdx, isCorrect);
 
         if (isCorrect) {
@@ -253,7 +263,7 @@ public class SpojniceViewModel extends ViewModel {
             owners.put(activeLeft, isPlayer1);
             pairOwners.postValue(owners);
 
-            int currentGameScore = myPairs.size() * 2;
+            int currentGameScore = round1MyScore + (myPairs.size() * 2);
 
             myRunningScore.postValue(currentGameScore + prevMyScore);
 
