@@ -31,6 +31,7 @@ import com.slagalica.app.util.UserStatusManager;
 public class MatchActivity extends AppCompatActivity {
 
     private static final int GAME_KZZ = 0;
+    private static final int GAME_CONN = 1;
     private static final int GAME_KPK = 4;
 
     private static final String[] GAME_NAMES = {
@@ -244,11 +245,11 @@ public class MatchActivity extends AppCompatActivity {
 
         tvCurrentGame.setText("GAME " + (idx + 1) + " / 6");
 
-        if (idx == GAME_KZZ) {
+        if (idx == GAME_KZZ || idx == GAME_CONN) {
             if (isPlayer1) showPlayButton(idx);
             else {
                 showWaitingForOpponent("Waiting for " + opponentUsername + " to start " + GAME_NAMES[idx] + "...");
-                currentTurnListener = matchRepository.listenForKzzStarted(matchId, () -> {
+                currentTurnListener = matchRepository.listenForKzzOrConnStarted(matchId, String.valueOf(idx), () -> {
                     currentTurnListener = null;
                     launchGame(idx);
                 });
@@ -296,6 +297,8 @@ public class MatchActivity extends AppCompatActivity {
         intent.putExtra("matchId", matchId);
         intent.putExtra("username", myUsername);
         intent.putExtra("opponentUsername", opponentUsername);
+        intent.putExtra("prevTotalP1", totalP1);
+        intent.putExtra("prevTotalP2", totalP2);
         if (idx == GAME_KPK && pendingStealQuestionId != null) {
             intent.putExtra("kpkStealQuestionId", pendingStealQuestionId);
             pendingStealQuestionId = null;

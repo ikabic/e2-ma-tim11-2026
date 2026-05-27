@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SpojniceQuestion {
+
+    private String id;
     private String text;
     private List<String> leftTerms;
     private List<String> rightTerms;
@@ -11,12 +13,17 @@ public class SpojniceQuestion {
 
     public SpojniceQuestion() {}
 
-    public SpojniceQuestion(String text, List<String> leftTerms, List<String> rightTerms, Map<String, String> correctPairs) {
+    public SpojniceQuestion(String id, String text, List<String> leftTerms, List<String> rightTerms, Map<String, String> correctPairs) {
+        this.id = id;
         this.text = text;
         this.leftTerms = leftTerms;
         this.rightTerms = rightTerms;
         this.correctPairs = correctPairs;
     }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
 
     public String getText() {
         return text;

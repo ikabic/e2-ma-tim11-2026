@@ -548,19 +548,19 @@ public class MatchRepository {
             .child("round" + round).removeEventListener(listener);
     }
 
-    public void writeKzzStarted(String matchId) {
-        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").child("data").child("started").setValue(true);
+    public void writeKzzOrCnnStarted(String matchId, String game) {
+        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child(game).child("data").child("started").setValue(true);
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("p1", 0);
         updates.put("p2", 0);
         updates.put("p1Done", false);
         updates.put("p2Done", false);
-        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").updateChildren(updates);
+        rtdb.child(MATCHES_PATH).child(matchId).child("scores").child(game).updateChildren(updates);
     }
 
-    public ValueEventListener listenForKzzStarted(String matchId, Runnable onStarted) {
-        DatabaseReference ref = rtdb.child(MATCHES_PATH).child(matchId).child("scores").child("0").child("data").child("started");
+    public ValueEventListener listenForKzzOrConnStarted(String matchId, String game, Runnable onStarted) {
+        DatabaseReference ref = rtdb.child(MATCHES_PATH).child(matchId).child("scores").child(game).child("data").child("started");
         ValueEventListener listener = new ValueEventListener() {
             private boolean fired = false;
             @Override public void onDataChange(DataSnapshot snap) {
