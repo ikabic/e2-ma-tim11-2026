@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.slagalica.app.R;
 import com.slagalica.app.databinding.ItemFriendSearchResultBinding;
 import com.slagalica.app.model.Friend;
+import com.slagalica.app.util.ProfileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
         } else {
             h.binding.ivResultAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
         }
+
+        ProfileUtils.applyRegionFrame(h.binding.ivResultRegionAwardFrame, item.getPrevCycleRegionRank(), h.binding.ivResultAvatar);
 
         String league = item.getLeagueName();
         h.binding.tvResultLeague.setText(league + " League");

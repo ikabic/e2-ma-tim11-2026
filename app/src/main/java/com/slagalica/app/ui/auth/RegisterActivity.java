@@ -39,7 +39,8 @@ public class RegisterActivity extends AppCompatActivity {
         "Belgrade Region",
         "Vojvodina Region",
         "Šumadija and Western Serbia Region",
-        "Southern and Eastern Serbia Region"
+        "Southern and Eastern Serbia Region",
+        "Kosovo and Metohija Region"
     };
 
     @Override
@@ -90,6 +91,23 @@ public class RegisterActivity extends AppCompatActivity {
         actvRegion.setAdapter(adapter);
     }
 
+    private String mapRegionToKey(String uiRegion) {
+        switch (uiRegion) {
+            case "Belgrade Region":
+                return "beogradski_region";
+            case "Vojvodina Region":
+                return "vojvodina";
+            case "Šumadija and Western Serbia Region":
+                return "sumadija_i_zapadna_srbija";
+            case "Southern and Eastern Serbia Region":
+                return "juzna_i_istocna_srbija";
+            case "Kosovo and Metohija Region":
+                return "kosovo_i_metohija";
+            default:
+                return "";
+        }
+    }
+
     private void setupViewModel() {
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
@@ -121,7 +139,8 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (!validateInput(email, username, region, password, confirmPassword)) return;
 
-            authViewModel.register(email, username, region, password);
+            String regionKey = mapRegionToKey(region);
+            authViewModel.register(email, username, regionKey, password);
         });
     }
 

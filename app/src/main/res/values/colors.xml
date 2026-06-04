@@ -15,6 +15,7 @@
     <color name="accent">#FF7A2F</color>
     <color name="accent2">#FFB347</color>
     <color name="accent_ink">#0F0F0F</color>
+    <color name="accent_alpha">#55FF7A2F</color>
 
     <color name="navy_primary">#FF7A2F</color>
     <color name="navy_dark">#CC5500</color>
@@ -36,4 +37,13 @@
     <color name="league_platinum">#6B95C4</color>
     <color name="league_diamond">#4FC3F7</color>
 
+    <color name="mountain">#8B4513</color>
+    <color name="grass">#4D7C33</color>
+    <color name="forest">#004400</color>
+    <color name="monastery">#B22222</color>
+    <color name="building">#5C5C5C</color>
+
+    <color name="gold">#FFB300</color>
+    <color name="silver">#BFC5CC</color>
+    <color name="bronze">#A0522D</color>
 </resources>

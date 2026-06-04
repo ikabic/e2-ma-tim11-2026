@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.slagalica.app.R;
 import com.slagalica.app.databinding.ItemFriendBinding;
 import com.slagalica.app.model.Friend;
+import com.slagalica.app.util.ProfileUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +108,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.VH> {
         } else {
             h.binding.ivFriendAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
         }
+
+        ProfileUtils.applyRegionFrame(h.binding.ivFriendRegionAwardFrame, item.getPrevCycleRegionRank(), h.binding.ivFriendAvatar);
 
         bindStatus(h, item);
     }

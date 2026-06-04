@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.regions.RegionFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="22dp"
+                android:paddingBottom="4dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Regions"
+                    android:textColor="@color/text"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Map -->
+            <LinearLayout
+                android:id="@+id/layoutMap"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <!-- MapView card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    android:layout_marginBottom="14dp"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <org.osmdroid.views.MapView
+                            android:id="@+id/mapView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:clickable="true"
+                            android:focusable="true"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="12dp"
+                            android:layout_marginBottom="12dp">
+
+                            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                                android:id="@+id/fabZoomIn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:fabCustomSize="40dp"
+                                app:shapeAppearanceOverlay="@style/FabShape"
+                                android:src="@drawable/ic_plus"
+                                app:fabSize="mini"
+                                app:backgroundTint="@color/accent"
+                                app:tint="@color/text"
+                                android:contentDescription="Zoom In"/>
+
+                            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                                android:id="@+id/fabZoomOut"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:fabCustomSize="40dp"
+                                app:shapeAppearanceOverlay="@style/FabShape"
+                                android:src="@drawable/ic_minus"
+                                app:fabSize="mini"
+                                app:backgroundTint="@color/accent"
+                                app:tint="@color/text"
+                                android:contentDescription="Zoom Out"/>
+                        </LinearLayout>
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Map hint -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tap a region to view it's statistics"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"
+                    android:gravity="center" />
+
+                <!-- Region statistics -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardRegionDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="@color/bg_elev"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/border"
+                    android:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Hero header -->
+                        <LinearLayout
+                            android:id="@+id/heroDetail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="@color/grass"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp"
+                            android:gravity="center_vertical">
+
+                            <LinearLayout
+                                android:layout_width="52dp"
+                                android:layout_height="52dp"
+                                android:background="@drawable/bg_card"
+                                android:layout_marginEnd="14dp"
+                                android:gravity="center">
+
+                                <ImageView
+                                    android:id="@+id/ivDetailIcon"
+                                    android:layout_width="35dp"
+                                    android:layout_height="35dp"
+                                    android:src="@drawable/ic_grass"
+                                    android:elevation="4dp"
+                                    app:tint="@color/grass"
+                                    android:gravity="center"/>
+
+                            </LinearLayout>
+
+                            <!-- Name + subtitle -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvDetailName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Šumadija i Zapadna Srbija"
+                                    android:textColor="@color/text"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"/>
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
+
+                                    <ImageView
+                                        android:id="@+id/tvDetailSubtitleIcon"
+                                        android:layout_width="14dp"
+                                        android:layout_height="14dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_top_award"
+                                        app:tint="@color/gold" />
+
+                                    <TextView
+                                        android:id="@+id/tvDetailSubtitle"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="1st Place"
+                                        android:textColor="@color/text"
+                                        android:textSize="12sp"
+                                        android:layout_marginTop="2dp"/>
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <!-- Close button -->
+                            <ImageView
+                                android:id="@+id/btnCloseDetail"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_x"
+                                app:tint="@color/text"
+                                android:padding="4dp"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:foreground="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="Close"/>
+                        </LinearLayout>
+
+                        <!-- Body -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingVertical="16dp"
+                            android:paddingHorizontal="16dp">
+
+                            <!-- Stat chips: active / registered / stars -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="3"
+                                android:layout_marginBottom="10dp">
+
+                                <!-- Active -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical"
+                                    android:gravity="center_horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingHorizontal="4dp"
+                                    android:paddingVertical="14dp">
+
+                                    <ImageView
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:src="@drawable/ic_player_dot"
+                                            app:tint="@color/accent"
+                                            android:contentDescription="Active"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailActive"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="—"
+                                        android:textColor="@color/text"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Active"
+                                        android:textColor="@color/text"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="2dp"/>
+                                </LinearLayout>
+
+                                <!-- Registered -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical"
+                                    android:gravity="center_horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingHorizontal="4dp"
+                                    android:paddingVertical="14dp"
+                                    android:layout_marginHorizontal="16dp">
+
+                                    <ImageView
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:src="@drawable/ic_nav_profile"
+                                            app:tint="@color/text_mute"
+                                            android:contentDescription="Registered"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailTotal"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="—"
+                                        android:textColor="@color/text"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Registered"
+                                        android:textColor="@color/text"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="2dp"/>
+                                </LinearLayout>
+
+                                <!-- Stars -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical"
+                                    android:gravity="center_horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingStart="8dp"
+                                    android:paddingEnd="8dp"
+                                    android:paddingTop="14dp"
+                                    android:paddingBottom="14dp">
+
+                                    <ImageView
+                                            android:layout_width="28dp"
+                                            android:layout_height="28dp"
+                                            android:src="@drawable/ic_star"
+                                            app:tint="@color/accent"
+                                            android:contentDescription="Stars"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailStars"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="—"
+                                        android:textColor="@color/text"
+                                        android:textSize="18sp"
+                                        android:textStyle="bold"/>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Stars"
+                                        android:textColor="@color/text"
+                                        android:textSize="11sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginTop="2dp"/>
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/border"
+                                android:layout_marginBottom="10dp"/>
+
+                            <!-- Podium counts row -->
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:weightSum="3">
+
+                                <!-- Gold -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingStart="0dp"
+                                    android:paddingEnd="0dp"
+                                    android:paddingTop="10dp"
+                                    android:paddingBottom="10dp"
+                                    android:gravity="center">
+
+                                    <ImageView
+                                        android:layout_width="18dp"
+                                        android:layout_height="18dp"
+                                        android:src="@drawable/ic_top_award"
+                                        app:tint="@color/gold"
+                                        android:layout_marginEnd="5dp"
+                                        android:contentDescription="Gold"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailGold"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="0"
+                                        android:gravity="center"
+                                        android:textColor="@color/text"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold"/>
+                                </LinearLayout>
+
+                                <!-- Silver -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingStart="0dp"
+                                    android:paddingEnd="0dp"
+                                    android:paddingTop="10dp"
+                                    android:paddingBottom="10dp"
+                                    android:gravity="center"
+                                    android:layout_marginHorizontal="16dp">
+
+                                    <ImageView
+                                        android:layout_width="18dp"
+                                        android:layout_height="18dp"
+                                        android:src="@drawable/ic_award"
+                                        app:tint="@color/silver"
+                                        android:layout_marginEnd="5dp"
+                                        android:contentDescription="Silver"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailSilver"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="0"
+                                        android:textColor="@color/text"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold"/>
+                                </LinearLayout>
+
+                                <!-- Bronze -->
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="horizontal"
+                                    android:background="@drawable/bg_card"
+                                    android:paddingStart="0dp"
+                                    android:paddingEnd="0dp"
+                                    android:paddingTop="10dp"
+                                    android:paddingBottom="10dp"
+                                    android:gravity="center">
+
+                                    <ImageView
+                                        android:layout_width="18dp"
+                                        android:layout_height="18dp"
+                                        android:src="@drawable/ic_award"
+                                        app:tint="@color/bronze"
+                                        android:layout_marginEnd="5dp"
+                                        android:contentDescription="Bronze"/>
+
+                                    <TextView
+                                        android:id="@+id/tvDetailBronze"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="0"
+                                        android:textColor="@color/text"
+                                        android:textSize="14sp"
+                                        android:textStyle="bold"/>
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+</FrameLayout>

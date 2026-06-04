@@ -25,31 +25,49 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Avatar with online indicator -->
             <FrameLayout
-                android:layout_width="52dp"
-                android:layout_height="52dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
                 android:layout_marginEnd="12dp">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivFriendAvatar"
+                <!-- Frame -->
+                <ImageView
+                    android:id="@+id/ivFriendRegionAwardFrame"
+                    android:layout_width="62dp"
+                    android:layout_height="62dp"
+                    android:src="@drawable/pfr_bronze"
+                    android:visibility="visible"
+                    android:elevation="1dp"/>
+
+                <!-- Avatar with online indicator -->
+                <FrameLayout
                     android:layout_width="52dp"
                     android:layout_height="52dp"
-                    app:shapeAppearanceOverlay="@style/CircleAppearance"
-                    tools:srcCompat="@tools:sample/avatars"
-                    app:strokeColor="@color/border"
-                    app:strokeWidth="2dp" />
+                    android:layout_gravity="center"
+                    android:elevation="2dp">
 
-                <!-- Online status dot -->
-                <View
-                    android:id="@+id/viewOnlineDot"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_marginBottom="1dp"
-                    android:background="@drawable/bg_status_online"
-                    android:visibility="visible" />
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivFriendAvatar"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        app:shapeAppearanceOverlay="@style/CircleAppearance"
+                        tools:srcCompat="@tools:sample/avatars"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="2dp" />
 
+                    <!-- Online status dot -->
+                    <View
+                        android:id="@+id/viewOnlineDot"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_marginBottom="1dp"
+                        android:background="@drawable/bg_status_online"
+                        android:visibility="visible" />
+
+                </FrameLayout>
             </FrameLayout>
 
             <!-- Username + league + stars -->
