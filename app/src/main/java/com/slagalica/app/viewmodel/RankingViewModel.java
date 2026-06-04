@@ -15,7 +15,7 @@ import java.util.List;
 
 public class RankingViewModel extends ViewModel {
 
-    public enum CycleType { WEEKLY, MONTHLY }
+    public enum CycleType { WEEKLY, MONTHLY, REGIONAL }
 
     private final RankingRepository repo = new RankingRepository();
 
