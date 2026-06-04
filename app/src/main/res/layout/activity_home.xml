@@ -864,6 +864,17 @@
         app:layout_constraintTop_toBottomOf="@id/topFrame"
         app:layout_constraintBottom_toTopOf="@id/bottomFrame"/>
 
+    <!-- Profile section -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/profileFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Bottom navigation divider -->
     <View
         android:layout_width="match_parent"

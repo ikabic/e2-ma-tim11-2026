@@ -26,7 +26,6 @@ import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
-import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.ui.regions.RegionFragment;
 import com.slagalica.app.util.ConfirmDialog;
@@ -40,7 +39,6 @@ import android.os.Looper;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends BaseActivity {
@@ -72,11 +70,6 @@ public class HomeActivity extends BaseActivity {
                             finish();
                         })
         );
-
-        if (savedInstanceState == null)
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.regionFragmentContainer, new RegionFragment())
-                    .commit();
 
         regionRankingAdapter = new RegionRankingAdapter();
         regionViewModel = new ViewModelProvider(this).get(RegionViewModel.class);
@@ -257,7 +250,7 @@ public class HomeActivity extends BaseActivity {
                 android.widget.Toast.makeText(this,
                     "Register to access your profile", android.widget.Toast.LENGTH_SHORT).show();
             } else {
-                startActivity(new Intent(this, ProfileActivity.class));
+                selectTab(4);
             }
         });
 
@@ -278,6 +271,17 @@ public class HomeActivity extends BaseActivity {
         binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         binding.regionFragmentContainer.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        binding.profileFragmentContainer.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
+
+        if (index == 3 && getSupportFragmentManager().findFragmentById(R.id.regionFragmentContainer) == null)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.regionFragmentContainer, new RegionFragment())
+                    .commit();
+
+        if (index == 4 && getSupportFragmentManager().findFragmentById(R.id.profileFragmentContainer) == null)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.profileFragmentContainer, new com.slagalica.app.ui.profile.ProfileFragment())
+                    .commit();
 
         int accent = ContextCompat.getColor(this, R.color.accent);
         int mute   = ContextCompat.getColor(this, R.color.text_mute);

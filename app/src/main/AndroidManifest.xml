@@ -23,10 +23,6 @@
             android:exported="false"
             android:theme="@style/Theme.Slagalica" />
         <activity
-            android:name=".ui.profile.ProfileActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".ui.game.koznazna.KoZnaZnaActivity"
             android:exported="false"
             android:screenOrientation="portrait"
