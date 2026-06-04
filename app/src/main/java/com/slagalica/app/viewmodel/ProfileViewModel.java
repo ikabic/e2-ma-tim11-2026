@@ -45,4 +45,11 @@ public class ProfileViewModel extends ViewModel {
             }
         });
     }
+
+    public void updateAvatar(String avatarUrl) {
+        profileRepository.updateAvatar(avatarUrl, new RepositoryCallback<>() {
+            @Override public void onSuccess(Void result) { loadProfile(); }
+            @Override public void onFailure(Exception e) { errorMessage.setValue("Failed to save avatar: " + e.getMessage()); }
+        });
+    }
 }

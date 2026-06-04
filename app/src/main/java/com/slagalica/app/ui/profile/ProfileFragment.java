@@ -1,6 +1,7 @@
 package com.slagalica.app.ui.profile;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.slagalica.app.R;
@@ -22,6 +26,8 @@ import com.slagalica.app.databinding.FragmentProfileBinding;
 import com.slagalica.app.util.ProfileUtils;
 import com.slagalica.app.util.QRCodeGenerator;
 import com.slagalica.app.viewmodel.ProfileViewModel;
+
+import java.util.Map;
 
 public class ProfileFragment extends Fragment {
 
@@ -102,9 +108,32 @@ public class ProfileFragment extends Fragment {
                 new ActivityResultContracts.GetContent(),
                 uri -> {
                     if (uri == null) return;
-                    Glide.with(this).load(uri).circleCrop().into(binding.ivAvatar);
+                    uploadImageToCloudinary(uri);
                 }
         );
+    }
+
+    private void uploadImageToCloudinary(Uri imageUri) {
+        MediaManager.get().upload(imageUri)
+                .unsigned("slagalica-app")
+                .callback(new UploadCallback() {
+                    @Override
+                    public void onStart(String requestId) {}
+                    @Override
+                    public void onProgress(String requestId, long bytes, long totalBytes) {}
+                    @Override
+                    public void onSuccess(String requestId, Map resultData) {
+                        String imageUrl = (String) resultData.get("secure_url");
+                        viewModel.updateAvatar(imageUrl);
+                    }
+                    @Override
+                    public void onError(String requestId, ErrorInfo error) {
+                        Toast.makeText(requireContext(), "Upload failed: " + error.getDescription(), Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onReschedule(String requestId, ErrorInfo error) {}
+                })
+                .dispatch();
     }
 
     private void setLeague(String league) {
