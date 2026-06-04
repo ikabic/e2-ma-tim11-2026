@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,7 +16,9 @@
         android:paddingEnd="16dp"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/header">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuestLogin"
@@ -178,13 +180,19 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border"/>
+        android:background="@color/border"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toTopOf="@id/nestedScroll"
+        android:id="@+id/topFrame"/>
 
     <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/nestedScroll"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -789,18 +797,32 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Region section -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/regionFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame"/>
+
     <!-- Bottom navigation divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border"/>
+        android:background="@color/border"
+        android:id="@+id/bottomFrame"
+        app:layout_constraintTop_toBottomOf="@id/nestedScroll"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"/>
 
     <!-- Bottom navigation bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:orientation="horizontal"
-        android:background="@color/bg_elev">
+        android:background="@color/bg_elev"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/bottomNav">
 
         <!-- Home tab -->
         <LinearLayout
@@ -958,4 +980,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

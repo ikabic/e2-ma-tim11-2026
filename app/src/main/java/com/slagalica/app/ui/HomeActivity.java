@@ -26,6 +26,7 @@ import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.ui.ranking.RankingAdapter;
+import com.slagalica.app.ui.regions.RegionFragment;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.RankingViewModel;
 import android.os.Handler;
@@ -46,10 +47,14 @@ public class HomeActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        if (savedInstanceState == null)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.regionFragmentContainer, new RegionFragment())
+                    .commit();
 
         rankingAdapter = new RankingAdapter();
         binding.rvRanking.setLayoutManager(new LinearLayoutManager(this));
@@ -192,7 +197,7 @@ public class HomeActivity extends BaseActivity {
         binding.navBtnHome.setOnClickListener(v -> selectTab(0));
         binding.navBtnGames.setOnClickListener(v -> selectTab(1));
         binding.navBtnRanks.setOnClickListener(v -> selectTab(2));
-        binding.navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        binding.navBtnRegions.setOnClickListener(v -> selectTab(3));
         binding.navBtnProfile.setOnClickListener(v -> {
             if (isGuest) {
                 android.widget.Toast.makeText(this,
@@ -209,6 +214,7 @@ public class HomeActivity extends BaseActivity {
         binding.sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        binding.regionFragmentContainer.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
 
         // Update icon tints and label colours
         int accent = ContextCompat.getColor(this, R.color.accent);
