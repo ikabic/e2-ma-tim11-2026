@@ -33,7 +33,7 @@ public class UserRepository {
                 assignUserToRegion(region);
 
                 User user = new User(uid, username, email, region);
-                Profile profile = new Profile(uid, "", 5, 0);
+                Profile profile = new Profile(uid, "", 5, 0, 0);
 
                 db.collection(USERS_COLLECTION).document(uid).set(user)
                         .addOnSuccessListener(unused -> {

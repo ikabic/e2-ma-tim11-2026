@@ -18,6 +18,7 @@ import com.slagalica.app.databinding.ActivityProfileBinding;
 import com.slagalica.app.ui.auth.ChangePasswordActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.util.ConfirmDialog;
+import com.slagalica.app.util.ProfileUtils;
 import com.slagalica.app.util.QRCodeGenerator;
 import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.ProfileViewModel;
@@ -98,7 +99,9 @@ public class ProfileActivity extends BaseActivity {
                         .load(profile.getAvatarUrl())
                         .circleCrop()
                         .into(binding.ivAvatar);
-            }
+            } else binding.ivAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
+
+            ProfileUtils.applyRegionFrame(binding.ivRegionAwardFrame, profile.getPrevCycleRegionRank(), binding.ivAvatar);
         });
 
         viewModel.getErrorMessage().observe(this, error -> {
