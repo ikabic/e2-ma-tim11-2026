@@ -29,6 +29,8 @@ import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileActivity;
 import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.ui.regions.RegionFragment;
+import com.slagalica.app.util.ConfirmDialog;
+import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.RankingViewModel;
 import com.slagalica.app.viewmodel.RegionViewModel;
@@ -60,6 +62,16 @@ public class HomeActivity extends BaseActivity {
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        binding.btnLogout.setOnClickListener(v ->
+                ConfirmDialog.show(this, "Log out?", "You'll need to sign in again.",
+                        "Log out", "Cancel", () -> {
+                            authViewModel.logout();
+                            startActivity(new Intent(this, LoginActivity.class));
+                            finish();
+                        })
+        );
 
         if (savedInstanceState == null)
             getSupportFragmentManager().beginTransaction()
@@ -137,6 +149,7 @@ public class HomeActivity extends BaseActivity {
                 binding.chipTokensHeader.setVisibility(View.GONE);
                 binding.chipStarsHeader.setVisibility(View.GONE);
                 binding.rowTokenInfo.setVisibility(View.GONE);
+                binding.btnLogout.setVisibility(View.GONE);
                 binding.btnGuestLogin.setVisibility(View.VISIBLE);
                 binding.btnGuestLogin.setOnClickListener(v -> {
                     FirebaseAuth.getInstance().signOut();
@@ -145,6 +158,8 @@ public class HomeActivity extends BaseActivity {
                 });
             } else {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                binding.btnLogout.setVisibility(View.VISIBLE);
 
                 db.collection("users").document(currentUser.getUid()).get()
                     .addOnSuccessListener(doc -> {
