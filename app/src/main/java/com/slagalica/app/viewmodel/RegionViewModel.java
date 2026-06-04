@@ -92,7 +92,7 @@ public class RegionViewModel extends ViewModel {
     }
 
     public void fetchLeaderboard() {
-        regionRepo.fetchRegionLeaderboard(new RepositoryCallback<>() {
+        regionRepo.fetchRegionLeaderboard("", new RepositoryCallback<>() {
             @Override
             public void onSuccess(List<Region> result) { leaderboard.setValue(result); }
             @Override

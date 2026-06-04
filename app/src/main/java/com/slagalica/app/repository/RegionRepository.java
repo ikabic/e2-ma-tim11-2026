@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.slagalica.app.R;
@@ -131,8 +132,8 @@ public class RegionRepository {
         });
     }
 
-    public void fetchRegionLeaderboard(RepositoryCallback<List<Region>> cb) {
-        String cycleId = RankingRepository.currentCycleId("monthly");
+    public void fetchRegionLeaderboard(String cycleId, RepositoryCallback<List<Region>> cb) {
+        cycleId = cycleId == "" ? RankingRepository.currentCycleId("monthly") : cycleId;
 
         db.collection(CYCLES_COLLECTION).document(cycleId)
                 .collection(ENTRIES_COLLECTION)
@@ -300,6 +301,31 @@ public class RegionRepository {
                 db.collection(PROFILES_COLLECTION).document(uid).update("prevCycleRegionRank", pRank);
             }
             cb.onSuccess(null);
+        }).addOnFailureListener(cb::onFailure);
+    }
+
+    public void secureAwardDistribution(String pastMonthCycleId, RepositoryCallback<Void> cb) {
+        final DocumentReference cycleRef = db.collection(CYCLES_COLLECTION).document(pastMonthCycleId);
+
+        db.runTransaction(transaction -> {
+            com.google.firebase.firestore.DocumentSnapshot cycleSnap = transaction.get(cycleRef);
+            if (!cycleSnap.exists()) return null;
+
+            Boolean distributed = cycleSnap.getBoolean("regionRewardsDistributed");
+            if (Boolean.TRUE.equals(distributed)) return null;
+
+            transaction.update(cycleRef, "regionRewardsDistributed", true);
+            return true;
+        }).addOnSuccessListener(result -> {
+            if (result != null) {
+                fetchRegionLeaderboard(pastMonthCycleId, new RepositoryCallback<>() {
+                    @Override
+                    public void onSuccess(List<Region> sortedRegions) { distributeRegionPodium(sortedRegions, cb); }
+                    @Override
+                    public void onFailure(Exception e) { cb.onFailure(e); }
+                });
+            } else
+                cb.onSuccess(null);
         }).addOnFailureListener(cb::onFailure);
     }
 
