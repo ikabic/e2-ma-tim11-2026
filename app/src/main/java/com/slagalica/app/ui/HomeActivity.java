@@ -197,7 +197,6 @@ public class HomeActivity extends BaseActivity {
         binding.frameBell.setOnClickListener(openNotifs);
         binding.btnNotifications.setOnClickListener(openNotifs);
 
-        // Game card click listeners
         binding.cardKorakPoKorak.setOnClickListener(v -> {
             Intent i = new Intent(this, KorakPoKorakActivity.class);
             i.putExtra("username", playerUsername);
@@ -265,7 +264,6 @@ public class HomeActivity extends BaseActivity {
         binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         binding.regionFragmentContainer.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
 
-        // Update icon tints and label colours
         int accent = ContextCompat.getColor(this, R.color.accent);
         int mute   = ContextCompat.getColor(this, R.color.text_mute);
 

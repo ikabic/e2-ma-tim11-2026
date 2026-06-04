@@ -135,12 +135,7 @@ public class RegionRankingAdapter extends RecyclerView.Adapter<RecyclerView.View
             binding.tvRegionItemName.setText(info.getDisplayName());
             binding.tvRegionItemStars.setText(String.valueOf(info.getCycleStars()));
 
-            if (isPinnedMyRegion)
-                binding.getRoot().setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.accent)));
-            else {
-                binding.getRoot().setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.border)));
-                binding.ivRegionItemIcon.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, repo.defaultIconColour(info.getRegionKey()))));
-            }
+            if (isPinnedMyRegion) binding.getRoot().setBackgroundResource(R.drawable.bg_ranking_me);
         }
     }
 }
