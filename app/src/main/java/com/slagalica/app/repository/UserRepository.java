@@ -4,7 +4,11 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 import com.slagalica.app.model.Profile;
 import com.slagalica.app.model.User;
 import com.slagalica.app.util.UserStatusManager;
@@ -26,6 +30,7 @@ public class UserRepository {
             .addOnSuccessListener(authResult -> {
                 FirebaseUser firebaseUser = authResult.getUser();
                 String uid = firebaseUser.getUid();
+                assignUserToRegion(region);
 
                 User user = new User(uid, username, email, region);
                 Profile profile = new Profile(uid, "", 5, 0);
@@ -53,7 +58,15 @@ public class UserRepository {
                     auth.signOut();
                     callback.onFailure(new Exception("Email not verified. Check your inbox."));
                 } else {
-                    UserStatusManager.goOnline(auth);
+                    FirebaseFirestore.getInstance().collection("users")
+                            .document(firebaseUser.getUid())
+                            .get().addOnSuccessListener(document -> {
+                                User user = document.toObject(User.class);
+                                if (user != null)
+                                    UserStatusManager.goOnline(FirebaseAuth.getInstance(), user.getRegion());
+                            })
+                            .addOnFailureListener(e -> UserStatusManager.goOnline(FirebaseAuth.getInstance(), ""));
+
                     callback.onSuccess(firebaseUser);
                 }
             })
@@ -97,6 +110,15 @@ public class UserRepository {
         auth.signInAnonymously()
             .addOnSuccessListener(result -> callback.onSuccess(result.getUser()))
             .addOnFailureListener(callback::onFailure);
+    }
+
+    public void assignUserToRegion(String regionKey) {
+        WriteBatch batch = db.batch();
+
+        DocumentReference statsRef = db.collection("regions").document(regionKey);
+        batch.update(statsRef, "totalPlayers", FieldValue.increment(1));
+
+        batch.commit().addOnSuccessListener(aVoid -> {});
     }
 
     public void logout() { UserStatusManager.goOffline(auth); }
