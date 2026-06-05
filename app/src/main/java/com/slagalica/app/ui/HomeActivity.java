@@ -26,9 +26,11 @@ import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
-import com.slagalica.app.ui.profile.ProfileActivity;
+import com.slagalica.app.ui.profile.ProfileFragment;
 import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.ui.regions.RegionFragment;
+import com.slagalica.app.util.ConfirmDialog;
+import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.RankingViewModel;
 import com.slagalica.app.viewmodel.RegionViewModel;
@@ -38,7 +40,6 @@ import android.os.Looper;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends BaseActivity {
@@ -61,16 +62,21 @@ public class HomeActivity extends BaseActivity {
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (savedInstanceState == null)
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.regionFragmentContainer, new RegionFragment())
-                    .commit();
+        AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        binding.btnLogout.setOnClickListener(v ->
+                ConfirmDialog.show(this, "Log out?", "You'll need to sign in again.",
+                        "Log out", "Cancel", () -> {
+                            authViewModel.logout();
+                            startActivity(new Intent(this, LoginActivity.class));
+                            finish();
+                        })
+        );
 
         regionRankingAdapter = new RegionRankingAdapter();
         regionViewModel = new ViewModelProvider(this).get(RegionViewModel.class);
         regionViewModel.bootstrapRegions(this);
 
-        rankingAdapter = new RankingAdapter();
+        rankingAdapter = new RankingAdapter(friend -> showFriendProfile(friend.getUid()));
         binding.rvRanking.setLayoutManager(new LinearLayoutManager(this));
         binding.rvRanking.setAdapter(rankingAdapter);
 
@@ -137,6 +143,7 @@ public class HomeActivity extends BaseActivity {
                 binding.chipTokensHeader.setVisibility(View.GONE);
                 binding.chipStarsHeader.setVisibility(View.GONE);
                 binding.rowTokenInfo.setVisibility(View.GONE);
+                binding.btnLogout.setVisibility(View.GONE);
                 binding.btnGuestLogin.setVisibility(View.VISIBLE);
                 binding.btnGuestLogin.setOnClickListener(v -> {
                     FirebaseAuth.getInstance().signOut();
@@ -145,6 +152,8 @@ public class HomeActivity extends BaseActivity {
                 });
             } else {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                binding.btnLogout.setVisibility(View.VISIBLE);
 
                 db.collection("users").document(currentUser.getUid()).get()
                     .addOnSuccessListener(doc -> {
@@ -231,6 +240,11 @@ public class HomeActivity extends BaseActivity {
             startActivity(i);
         });
 
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+                selectTab(0);
+        });
+
         // Bottom navigation
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
         binding.navBtnHome.setOnClickListener(v -> selectTab(0));
@@ -242,7 +256,7 @@ public class HomeActivity extends BaseActivity {
                 android.widget.Toast.makeText(this,
                     "Register to access your profile", android.widget.Toast.LENGTH_SHORT).show();
             } else {
-                startActivity(new Intent(this, ProfileActivity.class));
+                selectTab(4);
             }
         });
 
@@ -263,6 +277,17 @@ public class HomeActivity extends BaseActivity {
         binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         binding.regionFragmentContainer.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        binding.profileFragmentContainer.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
+
+        if (index == 3 && getSupportFragmentManager().findFragmentById(R.id.regionFragmentContainer) == null)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.regionFragmentContainer, new RegionFragment())
+                    .commit();
+
+        if (index == 4)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.profileFragmentContainer, new ProfileFragment())
+                    .commit();
 
         int accent = ContextCompat.getColor(this, R.color.accent);
         int mute   = ContextCompat.getColor(this, R.color.text_mute);
@@ -307,5 +332,28 @@ public class HomeActivity extends BaseActivity {
             btn.setTextColor(getResources().getColor(R.color.text_mute, null));
             btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
         }
+    }
+
+    public void showFriendProfile(String uid) {
+        Bundle args = new Bundle();
+        args.putString("USER_UID", uid);
+
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setArguments(args);
+
+        selectTab(-1);
+        binding.profileFragmentContainer.setVisibility(View.VISIBLE);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.profileFragmentContainer, fragment)
+                .addToBackStack("profile_view")
+                .commit();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String targetUid = intent.getStringExtra("TARGET_USER_UID");
+        if (targetUid != null) showFriendProfile(targetUid);
     }
 }

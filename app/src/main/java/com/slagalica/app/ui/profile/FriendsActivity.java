@@ -9,17 +9,21 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.adapter.FriendsAdapter;
 import com.slagalica.app.adapter.SearchResultsAdapter;
 import com.slagalica.app.databinding.ActivityFriendsBinding;
 import com.slagalica.app.model.Friend;
+import com.slagalica.app.ui.HomeActivity;
 import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.viewmodel.FriendsViewModel;
 
@@ -75,12 +79,34 @@ public class FriendsActivity extends BaseActivity {
     }
 
     private void setupAdapters() {
-        friendsAdapter = new FriendsAdapter(friend -> viewModel.sendInvite(friend));
+        friendsAdapter = new FriendsAdapter(new FriendsAdapter.OnFriendClick() {
+            @Override
+            public void onChallenge(Friend friend) {
+                viewModel.sendInvite(friend);
+            }
+            @Override
+            public void onProfileClick(Friend friend) {
+                Intent intent = new Intent(FriendsActivity.this, HomeActivity.class);
+                intent.putExtra("TARGET_USER_UID", friend.getUid());
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
 
         binding.rvFriends.setLayoutManager(new LinearLayoutManager(this));
         binding.rvFriends.setAdapter(friendsAdapter);
 
-        searchAdapter = new SearchResultsAdapter(item -> viewModel.addFriend(item.getUid()));
+        searchAdapter = new SearchResultsAdapter(new SearchResultsAdapter.OnFriendClick() {
+            @Override
+            public void onAdd(Friend item) { viewModel.addFriend(item.getUid()); }
+            @Override
+            public void onProfileClick(Friend friend) {
+                Intent intent = new Intent(FriendsActivity.this, HomeActivity.class);
+                intent.putExtra("TARGET_USER_UID", friend.getUid());
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        });
         binding.rvSearchResults.setLayoutManager(new LinearLayoutManager(this));
         binding.rvSearchResults.setAdapter(searchAdapter);
     }
@@ -184,7 +210,7 @@ public class FriendsActivity extends BaseActivity {
 
     private void setupQrScan() {
         binding.btnScanQr.setOnClickListener(v -> qrScanLauncher.launch(
-                new com.journeyapps.barcodescanner.ScanOptions()
+                new ScanOptions()
                         .setPrompt("Scan a friend's QR code")
                         .setBeepEnabled(true)
                         .setBarcodeImageEnabled(false)
@@ -192,9 +218,9 @@ public class FriendsActivity extends BaseActivity {
         ));
     }
 
-    private final androidx.activity.result.ActivityResultLauncher<com.journeyapps.barcodescanner.ScanOptions>
+    private final ActivityResultLauncher<ScanOptions>
             qrScanLauncher = registerForActivityResult(
-            new com.journeyapps.barcodescanner.ScanContract(),
+            new ScanContract(),
             result -> {
                 if (result.getContents() != null) {
                     viewModel.addFriend(result.getContents());

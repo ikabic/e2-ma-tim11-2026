@@ -211,24 +211,57 @@
                 android:paddingBottom="32dp"
                 android:visibility="visible">
 
-                <!-- Greeting -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Welcome back,"
-                    android:textColor="@color/text_mute"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="2dp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="28dp">
 
-                <TextView
-                    android:id="@+id/tvWelcome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="player"
-                    android:textColor="@color/text"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="28dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Greeting -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Welcome back,"
+                            android:textColor="@color/text_mute"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="2dp"/>
+
+                        <TextView
+                            android:id="@+id/tvWelcome"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="player"
+                            android:textColor="@color/text"
+                            android:textSize="26sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" />
+
+                    <!-- Logout Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLogout"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:padding="0dp"
+                        app:icon="@drawable/ic_logout"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/danger"
+                        app:backgroundTint="@android:color/transparent"
+                        app:elevation="0dp"
+                        app:rippleColor="@color/border" />
+                </LinearLayout>
 
                 <!-- Hero CTA: orange gradient card -->
                 <LinearLayout
@@ -830,6 +863,17 @@
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/topFrame"
         app:layout_constraintBottom_toTopOf="@id/bottomFrame"/>
+
+    <!-- Profile section -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/profileFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Bottom navigation divider -->
     <View

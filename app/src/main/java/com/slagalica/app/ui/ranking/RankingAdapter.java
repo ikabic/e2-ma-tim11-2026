@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.slagalica.app.R;
+import com.slagalica.app.adapter.FriendsAdapter;
+import com.slagalica.app.model.Friend;
 import com.slagalica.app.model.RankingEntry;
 import com.slagalica.app.model.Profile;
 
@@ -18,10 +20,18 @@ import java.util.List;
 
 public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.RankViewHolder> {
 
+    public interface OnProfileClick {
+        void onProfileClick(Friend friend);
+    }
+
+    private final RankingAdapter.OnProfileClick listener;
+
     private List<RankingEntry> items = new ArrayList<>();
     private String currentUserId = "";
 
-    public RankingAdapter() {
+    public RankingAdapter(RankingAdapter.OnProfileClick listener) {
+        this.listener = listener;
+
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             currentUserId = auth.getCurrentUser().getUid();
@@ -87,6 +97,14 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.RankView
             itemView.setAlpha(isMe ? 1.0f : 0.92f);
             int bgRes = isMe ? R.drawable.bg_hero : 0;
             itemView.setBackgroundResource(isMe ? R.drawable.bg_ranking_me : 0);
+
+            itemView.setOnClickListener(v -> {
+                Friend friend = new Friend();
+                friend.setUid(entry.getUserId());
+                friend.setUsername(entry.getUsername());
+
+                listener.onProfileClick(friend);
+            });
         }
 
         private String leagueEmoji(String league) {
