@@ -23,11 +23,14 @@ import java.util.List;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.VH> {
 
-    public interface OnChallengeClick { void onChallenge(Friend friend); }
+    public interface OnFriendClick {
+        void onChallenge(Friend friend);
+        void onProfileClick(Friend friend);
+    }
 
     private static final String PAYLOAD_STATUS = "status";
 
-    private final OnChallengeClick listener;
+    private final OnFriendClick listener;
 
     private final DiffUtil.ItemCallback<Friend> DIFF_CALLBACK = new DiffUtil.ItemCallback<Friend>() {
         @Override
@@ -61,7 +64,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.VH> {
 
     private final AsyncListDiffer<Friend> differ = new AsyncListDiffer<>(this, DIFF_CALLBACK);
 
-    public FriendsAdapter(OnChallengeClick listener) {
+    public FriendsAdapter(OnFriendClick listener) {
         this.listener = listener;
     }
 
@@ -89,6 +92,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int pos) {
         Friend item = differ.getCurrentList().get(pos);
         Context ctx = h.itemView.getContext();
+
+        h.binding.getRoot().setOnClickListener(v -> listener.onProfileClick(item));
 
         h.binding.tvFriendUsername.setText(item.getUsername());
         h.binding.tvFriendStars.setText(item.getStars() + " stars");

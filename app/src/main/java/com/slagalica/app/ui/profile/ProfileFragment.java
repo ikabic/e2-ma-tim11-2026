@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.slagalica.app.R;
 import com.slagalica.app.databinding.FragmentProfileBinding;
+import com.slagalica.app.repository.RegionRepository;
 import com.slagalica.app.util.ProfileUtils;
 import com.slagalica.app.util.QRCodeGenerator;
 import com.slagalica.app.viewmodel.ProfileViewModel;
@@ -52,31 +53,50 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null || user.isAnonymous()) {
+        String targetUid = getArguments() != null ? getArguments().getString("USER_UID") : null;
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String uidToLoad = (targetUid != null) ? targetUid : (currentUser != null ? currentUser.getUid() : null);
+
+        if (uidToLoad == null || (currentUser != null && currentUser.isAnonymous() && targetUid == null)) {
             Toast.makeText(requireContext(), "Register to access your profile", Toast.LENGTH_SHORT).show();
             return;
         }
 
         setupViewModel();
-        viewModel.loadProfile();
+        viewModel.loadProfile(uidToLoad);
 
-        Bitmap qrBitmap = QRCodeGenerator.generateQRCode(user.getUid());
+        Bitmap qrBitmap = QRCodeGenerator.generateQRCode(uidToLoad);
         binding.ivQrCode.setImageBitmap(qrBitmap);
 
-        binding.btnEditAvatar.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
+        Boolean isMe = (targetUid != null && currentUser != null && targetUid.equals(currentUser.getUid()));
+
+        if (targetUid != null && !isMe) {
+            binding.btnEditAvatar.setVisibility(View.GONE);
+            binding.personalSection.setVisibility(View.GONE);
+        }
+        else {
+            binding.btnEditAvatar.setVisibility(View.VISIBLE);
+            binding.personalSection.setVisibility(View.VISIBLE);
+            binding.btnEditAvatar.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
+        }
     }
 
     private void setupViewModel() {
-        viewModel = new ViewModelProvider(requireActivity()).get(ProfileViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
 
         viewModel.getUser().observe(getViewLifecycleOwner(), user -> {
+            if (user == null) return;
             binding.tvUsername.setText(user.getUsername());
             binding.tvEmail.setText(user.getEmail());
-            binding.tvRegion.setText(user.getRegion());
+
+            RegionRepository regionRepo = new RegionRepository();
+            String region = regionRepo.keyToDisplayName(user.getRegion());
+            binding.tvRegion.setText(region);
         });
 
         viewModel.getProfile().observe(getViewLifecycleOwner(), profile -> {
+            if (profile == null) return;
             int stars = profile.getStars();
             int points = Integer.parseInt(profile.getLeague("points"));
             int progress = (stars * 100) / points;
@@ -165,6 +185,11 @@ public class ProfileFragment extends Fragment {
                 binding.ivLeagueBadge.setImageResource(R.drawable.league_unranked);
                 break;
         }
+    }
+
+    public void refreshProfile() {
+        if (viewModel != null)
+            viewModel.loadProfile(null);
     }
 
     @Override

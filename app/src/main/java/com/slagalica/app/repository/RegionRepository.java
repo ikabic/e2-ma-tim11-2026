@@ -375,7 +375,7 @@ public class RegionRepository {
         }
     }
 
-    private String keyToDisplayName(String key) {
+    public String keyToDisplayName(String key) {
         switch (key) {
             case "beogradski_region": return "Beogradski region";
             case "vojvodina": return "Vojvodina";

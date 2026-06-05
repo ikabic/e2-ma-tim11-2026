@@ -29,13 +29,16 @@ public class ProfileViewModel extends ViewModel {
     public LiveData<String> getErrorMessage() { return errorMessage; }
     public LiveData<Boolean> getLoading() { return loading; }
 
-    public void loadProfile() {
+    public void loadProfile(String uid) {
+        user.setValue(null);
+        profile.setValue(null);
         loading.setValue(true);
-        profileRepository.getProfile(new RepositoryCallback<Pair<User, Profile>>() {
+        profileRepository.getProfile(uid, new RepositoryCallback<>() {
             @Override
             public void onSuccess(Pair<User, Profile> result) {
                 user.setValue(result.first);
                 profile.setValue(result.second);
+                loading.setValue(false);
             }
 
             @Override
@@ -48,7 +51,7 @@ public class ProfileViewModel extends ViewModel {
 
     public void updateAvatar(String avatarUrl) {
         profileRepository.updateAvatar(avatarUrl, new RepositoryCallback<>() {
-            @Override public void onSuccess(Void result) { loadProfile(); }
+            @Override public void onSuccess(Void result) { loadProfile(null); }
             @Override public void onFailure(Exception e) { errorMessage.setValue("Failed to save avatar: " + e.getMessage()); }
         });
     }

@@ -19,18 +19,18 @@ public class ProfileRepository {
         db = FirebaseFirestore.getInstance();
     }
 
-    public void getProfile(RepositoryCallback<Pair<User, Profile>> callback) {
+    public void getProfile(String uid, RepositoryCallback<Pair<User, Profile>> callback) {
         FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser == null) {
             callback.onFailure(new Exception("User is not logged in."));
             return;
         }
 
-        String uid = firebaseUser.getUid();
+        String finalUid = uid == null ? firebaseUser.getUid() : uid;
 
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(userDoc -> {
-                    db.collection(PROFILES_COLLECTION).document(uid).get()
+                    db.collection(PROFILES_COLLECTION).document(finalUid).get()
                             .addOnSuccessListener(profileDoc ->
                             {
                                 User user = userDoc.toObject(User.class);

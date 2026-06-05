@@ -19,15 +19,16 @@ import java.util.List;
 
 public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdapter.VH> {
 
-    public interface OnAddFriendClick {
+    public interface OnFriendClick {
         void onAdd(Friend item);
+        void onProfileClick(Friend friend);
     }
 
     private final List<Friend> items = new ArrayList<>();
     private final List<String> friendUids = new ArrayList<>();
-    private final OnAddFriendClick listener;
+    private final OnFriendClick listener;
 
-    public SearchResultsAdapter(OnAddFriendClick listener) {
+    public SearchResultsAdapter(OnFriendClick listener) {
         this.listener = listener;
     }
 
@@ -52,6 +53,8 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<SearchResultsAdap
     public void onBindViewHolder(@NonNull VH h, int pos) {
         Friend item = items.get(pos);
         Context ctx = h.itemView.getContext();
+
+        h.binding.getRoot().setOnClickListener(v -> listener.onProfileClick(item));
 
         h.binding.tvResultUsername.setText(item.getUsername());
 

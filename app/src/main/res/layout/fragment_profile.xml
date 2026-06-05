@@ -1932,94 +1932,102 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"/>
-
-            <!-- QR Code -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/personalSection"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/bg_elev"
-                android:paddingStart="22dp"
-                android:paddingEnd="22dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="28dp"
-                android:gravity="center_horizontal">
+                android:orientation="vertical">
 
-                <TextView
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border"/>
+
+                <!-- QR Code -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="CONNECT WITH FRIENDS"
-                    android:textColor="@color/text_mute"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1"
-                    android:layout_marginBottom="6dp"/>
+                    android:orientation="vertical"
+                    android:background="@color/bg_elev"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="28dp"
+                    android:gravity="center_horizontal">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Share your QR code with others to become friends"
-                    android:textColor="@color/text_dim"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:layout_marginBottom="20dp"/>
-
-                <!-- QR code -->
-                <FrameLayout
-                    android:layout_width="180dp"
-                    android:layout_height="180dp"
-                    android:padding="12dp">
-
-                    <ImageView
-                        android:id="@+id/ivQrCode"
+                    <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter"
-                        />
-                </FrameLayout>
-            </LinearLayout>
+                        android:layout_height="wrap_content"
+                        android:text="CONNECT WITH FRIENDS"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"
+                        android:layout_marginBottom="6dp"/>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/border"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Share your QR code with others to become friends"
+                        android:textColor="@color/text_dim"
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="20dp"/>
 
-            <!-- Account section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="22dp"
-                android:paddingEnd="22dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="20dp">
+                    <!-- QR code -->
+                    <FrameLayout
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:padding="12dp">
 
-                <TextView
+                        <ImageView
+                            android:id="@+id/ivQrCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter"
+                            />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border"/>
+
+                <!-- Account section -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="ACCOUNT"
-                    android:textColor="@color/text_mute"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1"
-                    android:layout_marginBottom="12dp"/>
+                    android:orientation="vertical"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:visibility="visible">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnChangePassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="Change password"
-                    android:textColor="@color/text"
-                    android:textSize="14sp"
-                    app:backgroundTint="@android:color/transparent"
-                    app:strokeColor="@color/border_strong"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="14dp"
-                    app:elevation="0dp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ACCOUNT"
+                        android:textColor="@color/text_mute"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnChangePassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Change password"
+                        android:textColor="@color/text"
+                        android:textSize="14sp"
+                        app:backgroundTint="@android:color/transparent"
+                        app:strokeColor="@color/border_strong"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
