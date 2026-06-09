@@ -141,7 +141,6 @@ public class SkockoViewModel extends ViewModel {
         int fbRound = safeGetRound() - 1;
 
         removeListener(questionIdListener);
-        removeListener(guessHistoryListener);
         removeListener(bonusListener);
         removeListener(roundDoneListener);
 
@@ -174,25 +173,25 @@ public class SkockoViewModel extends ViewModel {
                     @Override public void onFailure(Exception e) {}
                 });
 
+        roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
+            removeListener(roundDoneListener); roundDoneListener = null;
+            removeListener(bonusListener);     bonusListener = null;
+            onSpectatingRoundDone();
+        });
+
         bonusListener = skockoRepo.listenForBonusActive(fbRound, () -> {
-            removeListener(bonusListener);  bonusListener = null;
+            removeListener(bonusListener);        bonusListener = null;
             removeListener(guessHistoryListener); guessHistoryListener = null;
             timedOut = false;
             isMyTurn.postValue(true);
             gameState.postValue(GameState.BONUS_TURN);
         });
 
-        roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
-            removeListener(roundDoneListener); roundDoneListener = null;
-            removeListener(guessHistoryListener); guessHistoryListener = null;
-            removeListener(bonusListener); bonusListener = null;
-            onSpectatingRoundDone();
-        });
-
         listenForOpponentForfeit();
     }
 
     private void onSpectatingRoundDone() {
+        removeListener(guessHistoryListener); guessHistoryListener = null;
         int round = safeGetRound();
         if (round < 2) {
             currentRound.postValue(2);
@@ -327,20 +326,33 @@ public class SkockoViewModel extends ViewModel {
 
         if (isMatchGame) {
             matchRepo.writeGameScore(matchId, 3, p1, p2, new RepositoryCallback<Void>() {
-                @Override public void onSuccess(Void v) {}
-                @Override public void onFailure(Exception e) {}
+                @Override public void onSuccess(Void v) {
+                    if (writeStats) {
+                        skockoRepo.writeStats(
+                                p1SolvedR1, p1AttemptR1, p1SolvedR2, p1AttemptR2,
+                                p2SolvedR1, p2AttemptR1, p2SolvedR2, p2AttemptR2,
+                                p1, p2,
+                                new RepositoryCallback<Void>() {
+                                    @Override public void onSuccess(Void v) {
+                                        skockoRepo.cleanupMatchData();
+                                    }
+                                    @Override public void onFailure(Exception e) {
+                                        skockoRepo.cleanupMatchData();
+                                    }
+                                });
+                    }
+                    finalScores.postValue(new int[]{p1, p2});
+                    gameState.postValue(GameState.GAME_OVER);
+                }
+                @Override public void onFailure(Exception e) {
+                    finalScores.postValue(new int[]{p1, p2});
+                    gameState.postValue(GameState.GAME_OVER);
+                }
             });
-            if (writeStats) {
-                skockoRepo.writeStats(p1SolvedR1, p1AttemptR1, p1SolvedR2, p1AttemptR2,
-                        p2SolvedR1, p2AttemptR1, p2SolvedR2, p2AttemptR2, p1, p2,
-                        new RepositoryCallback<Void>() {
-                            @Override public void onSuccess(Void v)      { skockoRepo.cleanupMatchData(); }
-                            @Override public void onFailure(Exception e) { skockoRepo.cleanupMatchData(); }
-                        });
-            }
+        } else {
+            finalScores.postValue(new int[]{p1, p2});
+            gameState.postValue(GameState.GAME_OVER);
         }
-        finalScores.postValue(new int[]{p1, p2});
-        gameState.postValue(GameState.GAME_OVER);
     }
 
     private void addMyPoints(int pts) {

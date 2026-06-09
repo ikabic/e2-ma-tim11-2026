@@ -251,7 +251,12 @@ public class SkockoRepository {
     }
 
     public void cleanupMatchData() {
-        if (gameRef != null) gameRef.setValue(null);
+        if (gameRef == null) return;
+        gameRef.child("round0").removeValue();
+        gameRef.child("round1").removeValue();
+        gameRef.child("questionId").removeValue();
+        gameRef.child("p1Score").removeValue();
+        gameRef.child("p2Score").removeValue();
     }
 
     public void seedTestData() {

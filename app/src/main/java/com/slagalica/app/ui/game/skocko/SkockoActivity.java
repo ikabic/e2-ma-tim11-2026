@@ -6,6 +6,8 @@ import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -182,7 +184,7 @@ public class SkockoActivity extends AppCompatActivity {
 
                 case SPECTATING:
                     setInputEnabled(false);
-                    showSpectatorOverlay(opponentUsername + " is playing...\nWatch the board — you play next!");
+                    showSpectatorOverlay("");
                     tvActivePlayer.setText(opponentUsername + "'s turn");
                     break;
 
@@ -213,7 +215,7 @@ public class SkockoActivity extends AppCompatActivity {
                     hideSpectatorOverlay();
                     setInputEnabled(false);
                     resetBoardUI();
-                    viewModel.startNextRound();
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> viewModel.startNextRound(), 300);
                     break;
 
                 case GAME_OVER:
@@ -244,7 +246,10 @@ public class SkockoActivity extends AppCompatActivity {
 
     private void showSpectatorOverlay(String message) {
         if (spectatorOverlay == null) return;
-        if (tvSpectatorMsg != null) tvSpectatorMsg.setText(message);
+        if (tvSpectatorMsg != null) {
+            tvSpectatorMsg.setText(message);
+            tvSpectatorMsg.setVisibility(message.isEmpty() ? View.GONE : View.VISIBLE);
+        }
         spectatorOverlay.setVisibility(View.VISIBLE);
     }
 
@@ -284,7 +289,6 @@ public class SkockoActivity extends AppCompatActivity {
 
         SkockoViewModel.GameState state = viewModel.getGameState().getValue();
         if (state == SkockoViewModel.GameState.PLAYER_TURN) {
-            cancelTimer(); // stop timer as soon as submit pressed
             viewModel.submitGuess(new ArrayList<>(currentGuess));
         } else if (state == SkockoViewModel.GameState.BONUS_TURN) {
             cancelTimer();
