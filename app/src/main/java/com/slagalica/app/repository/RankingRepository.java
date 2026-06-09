@@ -2,6 +2,8 @@ package com.slagalica.app.repository;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -129,6 +131,34 @@ public class RankingRepository {
                 .addOnFailureListener(cb::onFailure);
     }
 
+    public void secureAwardDistribution(String pastCycleId, RepositoryCallback<Void> cb) {
+        final DocumentReference cycleRef = db.collection(CYCLES_COL).document(pastCycleId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot cycleSnap = transaction.get(cycleRef);
+
+            if (!cycleSnap.exists()) return null;
+
+            Boolean distributed = cycleSnap.getBoolean("rewardsDistributed");
+            Timestamp endDate = cycleSnap.getTimestamp("endDate");
+
+            if (Boolean.TRUE.equals(distributed) || (endDate != null && endDate.compareTo(Timestamp.now()) > 0))
+                return null;
+
+            transaction.update(cycleRef, "rewardsDistributed", true);
+            return true;
+        }).addOnSuccessListener(result -> {
+            if (result != null) {
+                String type = pastCycleId.contains("weekly") ? "weekly" : "monthly";
+                distributeRewards(pastCycleId, type, new RepositoryCallback<>() {
+                    @Override public void onSuccess(List<RewardResult> r) { cb.onSuccess(null); }
+                    @Override public void onFailure(Exception e) { cb.onFailure(e); }
+                });
+            } else
+                cb.onSuccess(null);
+        }).addOnFailureListener(cb::onFailure);
+    }
+
     public static String currentCycleId(String type) {
         Calendar cal = Calendar.getInstance();
         if (type.equals("weekly")) {
@@ -235,6 +265,21 @@ public class RankingRepository {
                     }
                 })
                 .addOnFailureListener(cb::onFailure);
+    }
+
+    public static String getPastCycleId(String type) {
+        Calendar cal = Calendar.getInstance();
+        if (type.equals("weekly")) {
+            cal.add(Calendar.WEEK_OF_YEAR, -1);
+            int year = cal.get(Calendar.YEAR);
+            int week = cal.get(Calendar.WEEK_OF_YEAR);
+            return String.format("weekly_%04d_W%02d", year, week);
+        } else {
+            cal.add(Calendar.MONTH, -1);
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) + 1;
+            return String.format("monthly_%04d_%02d", year, month);
+        }
     }
 
     public static class RewardResult {

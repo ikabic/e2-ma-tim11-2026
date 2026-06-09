@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,7 +16,9 @@
         android:paddingEnd="16dp"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/header">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuestLogin"
@@ -178,13 +180,19 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border"/>
+        android:background="@color/border"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toTopOf="@id/nestedScroll"
+        android:id="@+id/topFrame"/>
 
     <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:id="@+id/nestedScroll"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -203,24 +211,57 @@
                 android:paddingBottom="32dp"
                 android:visibility="visible">
 
-                <!-- Greeting -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Welcome back,"
-                    android:textColor="@color/text_mute"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="2dp"/>
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="28dp">
 
-                <TextView
-                    android:id="@+id/tvWelcome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="player"
-                    android:textColor="@color/text"
-                    android:textSize="26sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="28dp"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Greeting -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Welcome back,"
+                            android:textColor="@color/text_mute"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="2dp"/>
+
+                        <TextView
+                            android:id="@+id/tvWelcome"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="player"
+                            android:textColor="@color/text"
+                            android:textSize="26sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" />
+
+                    <!-- Logout Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLogout"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:padding="0dp"
+                        app:icon="@drawable/ic_logout"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="@color/danger"
+                        app:backgroundTint="@android:color/transparent"
+                        app:elevation="0dp"
+                        app:rippleColor="@color/border" />
+                </LinearLayout>
 
                 <!-- Hero CTA: orange gradient card -->
                 <LinearLayout
@@ -700,18 +741,23 @@
                     android:paddingStart="18dp"
                     android:paddingEnd="18dp"
                     android:paddingTop="10dp"
-                    android:paddingBottom="12dp">
+                    android:paddingBottom="12dp"
+                    android:layout_marginBottom="6dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnTabWeekly"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="38dp"
                         android:text="Weekly"
                         android:textSize="13sp"
                         android:textColor="@color/accent_ink"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         app:backgroundTint="@color/accent"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
                         app:cornerRadius="17dp"
                         app:elevation="0dp"
                         android:layout_marginEnd="8dp"/>
@@ -719,12 +765,32 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnTabMonthly"
                         android:layout_width="wrap_content"
-                        android:layout_height="34dp"
+                        android:layout_height="38dp"
                         android:text="Monthly"
                         android:textSize="13sp"
                         android:textColor="@color/text_mute"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:backgroundTint="@android:color/transparent"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="17dp"
+                        app:elevation="0dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTabRegional"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:text="Regional"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_mute"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         app:backgroundTint="@android:color/transparent"
                         app:strokeColor="@color/border"
                         app:strokeWidth="1dp"
@@ -789,18 +855,43 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <!-- Region section -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/regionFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame"/>
+
+    <!-- Profile section -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/profileFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintBottom_toTopOf="@id/bottomFrame"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Bottom navigation divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border"/>
+        android:background="@color/border"
+        android:id="@+id/bottomFrame"
+        app:layout_constraintTop_toBottomOf="@id/nestedScroll"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"/>
 
     <!-- Bottom navigation bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:orientation="horizontal"
-        android:background="@color/bg_elev">
+        android:background="@color/bg_elev"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/bottomNav">
 
         <!-- Home tab -->
         <LinearLayout
@@ -958,4 +1049,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

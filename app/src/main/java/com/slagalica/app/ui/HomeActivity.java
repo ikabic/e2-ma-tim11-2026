@@ -13,7 +13,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
+import com.slagalica.app.adapter.RegionRankingAdapter;
 import com.slagalica.app.databinding.ActivityHomeBinding;
+import com.slagalica.app.model.Region;
 import com.slagalica.app.ui.game.asocijacije.AsocijacijeActivity;
 import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.korakpokorak.KorakPoKorakActivity;
@@ -24,14 +26,21 @@ import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
-import com.slagalica.app.ui.profile.ProfileActivity;
+import com.slagalica.app.ui.profile.ProfileFragment;
 import com.slagalica.app.ui.ranking.RankingAdapter;
+import com.slagalica.app.ui.regions.RegionFragment;
+import com.slagalica.app.util.ConfirmDialog;
+import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.RankingViewModel;
+import com.slagalica.app.viewmodel.RegionViewModel;
+
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import java.util.List;
 
 public class HomeActivity extends BaseActivity {
 
@@ -40,24 +49,43 @@ public class HomeActivity extends BaseActivity {
     private NotificationViewModel notifViewModel;
     private RankingViewModel rankingViewModel;
     private RankingAdapter rankingAdapter;
+    private RegionRankingAdapter regionRankingAdapter;
+    private RegionViewModel regionViewModel;
     private Handler countdownHandler  = new Handler(Looper.getMainLooper());
     private long nextRefreshAtMs = 0;
+    private String userRegionKey = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        rankingAdapter = new RankingAdapter();
+        AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+        binding.btnLogout.setOnClickListener(v ->
+                ConfirmDialog.show(this, "Log out?", "You'll need to sign in again.",
+                        "Log out", "Cancel", () -> {
+                            authViewModel.logout();
+                            startActivity(new Intent(this, LoginActivity.class));
+                            finish();
+                        })
+        );
+
+        regionRankingAdapter = new RegionRankingAdapter();
+        regionViewModel = new ViewModelProvider(this).get(RegionViewModel.class);
+        regionViewModel.bootstrapRegions(this);
+
+        rankingAdapter = new RankingAdapter(friend -> showFriendProfile(friend.getUid()));
         binding.rvRanking.setLayoutManager(new LinearLayoutManager(this));
         binding.rvRanking.setAdapter(rankingAdapter);
 
         rankingViewModel = new ViewModelProvider(this).get(RankingViewModel.class);
 
         rankingViewModel.getEntries().observe(this, list -> {
+            if (rankingViewModel.getActiveType().getValue() == RankingViewModel.CycleType.REGIONAL)
+                return;
+
             boolean empty = list == null || list.isEmpty();
             binding.rvRanking.setVisibility(empty ? View.GONE : View.VISIBLE);
             binding.layoutRankEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
@@ -77,15 +105,32 @@ public class HomeActivity extends BaseActivity {
         });
 
         rankingViewModel.getActiveType().observe(this, type -> {
-            boolean weekly = type == RankingViewModel.CycleType.WEEKLY;
-            setTabActive(binding.btnTabWeekly, weekly);
-            setTabActive(binding.btnTabMonthly, !weekly);
+            setTabActive(binding.btnTabWeekly, type == RankingViewModel.CycleType.WEEKLY);
+            setTabActive(binding.btnTabMonthly, type == RankingViewModel.CycleType.MONTHLY);
+            setTabActive(binding.btnTabRegional, type == RankingViewModel.CycleType.REGIONAL);
+
+            if (type == RankingViewModel.CycleType.REGIONAL) {
+                if (regionRankingAdapter == null)
+                    regionRankingAdapter = new RegionRankingAdapter();
+                binding.rvRanking.setAdapter(regionRankingAdapter);
+                regionViewModel.fetchLeaderboard();
+            } else {
+                binding.rvRanking.setAdapter(rankingAdapter);
+                rankingViewModel.refresh();
+            }
+        });
+
+        regionViewModel.getLeaderboard().observe(this, list -> {
+            if (rankingViewModel.getActiveType().getValue() == RankingViewModel.CycleType.REGIONAL)
+                displayRegionalList(list);
         });
 
         binding.btnTabWeekly.setOnClickListener(v ->
                 rankingViewModel.selectType(RankingViewModel.CycleType.WEEKLY));
         binding.btnTabMonthly.setOnClickListener(v ->
                 rankingViewModel.selectType(RankingViewModel.CycleType.MONTHLY));
+        binding.btnTabRegional.setOnClickListener(v ->
+                rankingViewModel.selectType(RankingViewModel.CycleType.REGIONAL));
 
         nextRefreshAtMs = System.currentTimeMillis() + 2 * 60 * 1000L;
         countdownHandler.post(countdownTick);
@@ -98,6 +143,7 @@ public class HomeActivity extends BaseActivity {
                 binding.chipTokensHeader.setVisibility(View.GONE);
                 binding.chipStarsHeader.setVisibility(View.GONE);
                 binding.rowTokenInfo.setVisibility(View.GONE);
+                binding.btnLogout.setVisibility(View.GONE);
                 binding.btnGuestLogin.setVisibility(View.VISIBLE);
                 binding.btnGuestLogin.setOnClickListener(v -> {
                     FirebaseAuth.getInstance().signOut();
@@ -107,11 +153,19 @@ public class HomeActivity extends BaseActivity {
             } else {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+                binding.btnLogout.setVisibility(View.VISIBLE);
+
                 db.collection("users").document(currentUser.getUid()).get()
                     .addOnSuccessListener(doc -> {
                         String username = doc.getString("username");
                         playerUsername = username != null ? username : currentUser.getEmail();
                         binding.tvWelcome.setText(playerUsername);
+
+                        String region = doc.getString("region");
+                        userRegionKey = region != null ? region : "";
+
+                        if (rankingViewModel.getActiveType().getValue() == RankingViewModel.CycleType.REGIONAL)
+                            displayRegionalList(regionViewModel.getLeaderboard().getValue());
                     })
                     .addOnFailureListener(e -> {
                         playerUsername = currentUser.getEmail();
@@ -152,7 +206,6 @@ public class HomeActivity extends BaseActivity {
         binding.frameBell.setOnClickListener(openNotifs);
         binding.btnNotifications.setOnClickListener(openNotifs);
 
-        // Game card click listeners
         binding.cardKorakPoKorak.setOnClickListener(v -> {
             Intent i = new Intent(this, KorakPoKorakActivity.class);
             i.putExtra("username", playerUsername);
@@ -187,30 +240,55 @@ public class HomeActivity extends BaseActivity {
             startActivity(i);
         });
 
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+                selectTab(0);
+        });
+
         // Bottom navigation
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
         binding.navBtnHome.setOnClickListener(v -> selectTab(0));
         binding.navBtnGames.setOnClickListener(v -> selectTab(1));
         binding.navBtnRanks.setOnClickListener(v -> selectTab(2));
-        binding.navBtnRegions.setOnClickListener(v -> { /* placeholder — coming soon */ });
+        binding.navBtnRegions.setOnClickListener(v -> selectTab(3));
         binding.navBtnProfile.setOnClickListener(v -> {
             if (isGuest) {
                 android.widget.Toast.makeText(this,
                     "Register to access your profile", android.widget.Toast.LENGTH_SHORT).show();
             } else {
-                startActivity(new Intent(this, ProfileActivity.class));
+                selectTab(4);
             }
         });
 
         selectTab(0); // start on Home
     }
 
+    private void displayRegionalList(List<Region> list) {
+        boolean empty = list == null || list.isEmpty();
+        binding.rvRanking.setVisibility(empty ? View.GONE : View.VISIBLE);
+        binding.layoutRankEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+
+        if (!empty)
+            regionRankingAdapter.submitList(list, userRegionKey);
+    }
+
     private void selectTab(int index) {
         binding.sectionHome.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         binding.sectionGames.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         binding.sectionRanks.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        binding.regionFragmentContainer.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        binding.profileFragmentContainer.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
 
-        // Update icon tints and label colours
+        if (index == 3 && getSupportFragmentManager().findFragmentById(R.id.regionFragmentContainer) == null)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.regionFragmentContainer, new RegionFragment())
+                    .commit();
+
+        if (index == 4)
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.profileFragmentContainer, new ProfileFragment())
+                    .commit();
+
         int accent = ContextCompat.getColor(this, R.color.accent);
         int mute   = ContextCompat.getColor(this, R.color.text_mute);
 
@@ -254,5 +332,28 @@ public class HomeActivity extends BaseActivity {
             btn.setTextColor(getResources().getColor(R.color.text_mute, null));
             btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
         }
+    }
+
+    public void showFriendProfile(String uid) {
+        Bundle args = new Bundle();
+        args.putString("USER_UID", uid);
+
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setArguments(args);
+
+        selectTab(-1);
+        binding.profileFragmentContainer.setVisibility(View.VISIBLE);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.profileFragmentContainer, fragment)
+                .addToBackStack("profile_view")
+                .commit();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String targetUid = intent.getStringExtra("TARGET_USER_UID");
+        if (targetUid != null) showFriendProfile(targetUid);
     }
 }

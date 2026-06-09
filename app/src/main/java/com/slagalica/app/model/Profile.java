@@ -11,14 +11,16 @@ public class Profile {
     private String avatarUrl;
     private int tokens;
     private int stars;
+    private int prevCycleRegionRank;
 
     public Profile() {}
 
-    public Profile(String userId, String avatarUrl, int tokens, int stars) {
+    public Profile(String userId, String avatarUrl, int tokens, int stars, int prevCycleRegionRank) {
         this.userId = userId;
         this.avatarUrl = avatarUrl;
         this.tokens = tokens;
         this.stars = stars;
+        this.prevCycleRegionRank = prevCycleRegionRank;
     }
 
     public String getUserId() {
@@ -51,6 +53,14 @@ public class Profile {
 
     public void setStars(int stars) {
         this.stars = stars;
+    }
+
+    public int getPrevCycleRegionRank() {
+        return prevCycleRegionRank;
+    }
+
+    public void setPrevCycleRegionRank(int prevCycleRegionRank) {
+        this.prevCycleRegionRank = prevCycleRegionRank;
     }
 
     @Exclude

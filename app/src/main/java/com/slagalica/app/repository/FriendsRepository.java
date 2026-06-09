@@ -81,7 +81,9 @@ public class FriendsRepository {
         int stars = starsLong != null ? starsLong.intValue() : 0;
         Long rankLong = profileDoc.getLong("monthlyRank");
         int rank = rankLong != null ? rankLong.intValue() : 0;
-        return new Friend(uid, username, avatarUrl, stars, true, false, rank);
+        Long cycleLong = profileDoc.getLong("prevCycleRegionRank");
+        int cycle = cycleLong != null ? cycleLong.intValue() : 0;
+        return new Friend(uid, username, avatarUrl, stars, true, false, rank, cycle);
     }
 
     public interface FriendCallback {
@@ -112,7 +114,10 @@ public class FriendsRepository {
         Long rankLong = profileDoc.getLong("monthlyRank");
         int rank = rankLong != null ? rankLong.intValue() : 0;
 
-        return new Friend(uid, username, avatarUrl, stars, online, inGame, rank);
+        Long cycleLong = profileDoc.getLong("prevCycleRegionRank");
+        int cycle = cycleLong != null ? cycleLong.intValue() : 0;
+
+        return new Friend(uid, username, avatarUrl, stars, online, inGame, rank, cycle);
     }
 
     public void searchByUsername(String query, List<String> existingFriendUids, RepositoryCallback<List<Friend>> callback) {

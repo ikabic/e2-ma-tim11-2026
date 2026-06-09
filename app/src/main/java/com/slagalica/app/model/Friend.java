@@ -10,9 +10,11 @@ public class Friend {
     private boolean inGame;
     private int monthlyRank; // 0 = unranked / unknown
 
+    private int prevCycleRegionRank;
+
     public Friend() {}
 
-    public Friend(String uid, String username, String avatarUrl, int stars, boolean online, boolean inGame, int monthlyRank) {
+    public Friend(String uid, String username, String avatarUrl, int stars, boolean online, boolean inGame, int monthlyRank, int prevCycleRegionRank) {
         this.uid = uid;
         this.username = username;
         this.avatarUrl = avatarUrl;
@@ -20,6 +22,7 @@ public class Friend {
         this.online = online;
         this.inGame = inGame;
         this.monthlyRank = monthlyRank;
+        this.prevCycleRegionRank = prevCycleRegionRank;
     }
 
     public String getUid() {
@@ -78,6 +81,10 @@ public class Friend {
         this.monthlyRank = monthlyRank;
     }
 
+    public int getPrevCycleRegionRank() {
+        return prevCycleRegionRank;
+    }
+
     public String getLeagueName() {
         String[] names = {"Unranked", "Bronze", "Silver", "Gold", "Platinum", "Diamond"};
         int league = 0;
@@ -90,7 +97,7 @@ public class Friend {
     }
 
     public Friend withStatus(String status, Boolean inGame) {
-        Friend copy = new Friend(this.uid, this.username, this.avatarUrl, this.stars, this.online, this.inGame, this.monthlyRank);
+        Friend copy = new Friend(this.uid, this.username, this.avatarUrl, this.stars, this.online, this.inGame, this.monthlyRank, this.prevCycleRegionRank);
         copy.online = "online".equals(status) || "in_game".equals(status);
         copy.inGame = inGame != null && inGame;
         return copy;
