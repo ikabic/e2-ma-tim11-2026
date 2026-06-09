@@ -634,4 +634,37 @@ public class MatchRepository {
             })
             .addOnFailureListener(callback::onFailure);
     }
+
+    public void writeAsocSkockoStarted(String matchId, String gameIdx) {
+        rtdb.child(MATCHES_PATH).child(matchId)
+                .child("gameStarted").child(gameIdx).setValue(true);
+    }
+
+    public ValueEventListener listenForAsocSkockoStarted(String matchId, String gameIdx, Runnable onStarted) {
+        DatabaseReference ref = rtdb.child(MATCHES_PATH).child(matchId)
+                .child("gameStarted").child(gameIdx);
+        android.util.Log.d("ASOC_LAUNCH", "P2 listening at: " + ref.toString());
+        ValueEventListener listener = new ValueEventListener() {
+            private boolean fired = false;
+            @Override public void onDataChange(DataSnapshot snap) {
+                android.util.Log.d("ASOC_LAUNCH", "P2 got value: " + snap.getValue());
+                if (fired) return;
+                if (Boolean.TRUE.equals(snap.getValue(Boolean.class))) {
+                    fired = true;
+                    ref.removeEventListener(this);
+                    onStarted.run();
+                }
+            }
+            @Override public void onCancelled(DatabaseError e) {
+                android.util.Log.e("ASOC_LAUNCH", "cancelled: " + e.getMessage());
+            }
+        };
+        ref.addValueEventListener(listener);
+        return listener;
+    }
+
+    public void removeAsocSkockoStartedListener(String matchId, String gameIdx, ValueEventListener listener) {
+        if (listener == null) return;
+        rtdb.child(MATCHES_PATH).child(matchId).child("gameStarted").child(gameIdx).removeEventListener(listener);
+    }
 }

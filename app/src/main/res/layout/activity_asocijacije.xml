@@ -695,6 +695,20 @@
 
                     </LinearLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPassTurn"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Pass (Opponent's turn)"
+                        android:textColor="@color/text_mute"
+                        android:textSize="13sp"
+                        app:backgroundTint="@color/bg_card"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="1dp"
+                        app:cornerRadius="12dp"
+                        app:elevation="0dp"/>
+
                     <LinearLayout
                         android:id="@+id/layoutColumnSelector"
                         android:layout_width="match_parent"

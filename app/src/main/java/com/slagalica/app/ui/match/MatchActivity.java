@@ -30,20 +30,23 @@ import com.slagalica.app.util.UserStatusManager;
 
 public class MatchActivity extends AppCompatActivity {
 
-    private static final int GAME_KZZ = 0;
-    private static final int GAME_CONN = 1;
-    private static final int GAME_KPK = 4;
+    private static final int GAME_KZZ   = 0;
+    private static final int GAME_CONN  = 1;
+    private static final int GAME_ASOC  = 2;
+    private static final int GAME_SKOCK = 3;
+    private static final int GAME_KPK   = 4;
+    // game 5 = MojBroj
 
     private static final String[] GAME_NAMES = {
-        "Who knows, knows", "Connections", "Asocijacije", "Skočko", "Step by step", "My number"
+            "Who knows, knows", "Connections", "Asocijacije", "Skočko", "Step by step", "My number"
     };
     private static final Class<?>[] GAME_CLASSES = {
-        KoZnaZnaActivity.class,
-        SpojniceActivity.class,
-        AsocijacijeActivity.class,
-        SkockoActivity.class,
-        KorakPoKorakActivity.class,
-        MojBrojActivity.class
+            KoZnaZnaActivity.class,
+            SpojniceActivity.class,
+            AsocijacijeActivity.class,
+            SkockoActivity.class,
+            KorakPoKorakActivity.class,
+            MojBrojActivity.class
     };
 
     private String matchId;
@@ -129,19 +132,19 @@ public class MatchActivity extends AppCompatActivity {
             return;
         }
         FirebaseFirestore.getInstance()
-            .collection("profiles").document(user.getUid()).get()
-            .addOnSuccessListener(doc -> {
-                if (!doc.exists()) return;
-                Profile profile = doc.toObject(Profile.class);
-                Long tokens = doc.getLong("tokens");
-                Long stars  = doc.getLong("stars");
-                int t = tokens != null ? tokens.intValue() : 0;
-                long s = stars  != null ? stars  : 0;
-                ((TextView) findViewById(R.id.tvMatchTokenCount)).setText(String.valueOf(t));
-                ((TextView) findViewById(R.id.tvMatchStarCount)).setText(String.valueOf(s));
-                String league = profile != null ? profile.getLeague(null) : "";
-                ((TextView) findViewById(R.id.tvMatchLeague)).setText(league);
-            });
+                .collection("profiles").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    Profile profile = doc.toObject(Profile.class);
+                    Long tokens = doc.getLong("tokens");
+                    Long stars  = doc.getLong("stars");
+                    int t = tokens != null ? tokens.intValue() : 0;
+                    long s = stars  != null ? stars  : 0;
+                    ((TextView) findViewById(R.id.tvMatchTokenCount)).setText(String.valueOf(t));
+                    ((TextView) findViewById(R.id.tvMatchStarCount)).setText(String.valueOf(s));
+                    String league = profile != null ? profile.getLeague(null) : "";
+                    ((TextView) findViewById(R.id.tvMatchLeague)).setText(league);
+                });
     }
 
     private void setupForfeitHandling() {
@@ -166,54 +169,71 @@ public class MatchActivity extends AppCompatActivity {
 
     private void setupGameLauncher() {
         gameLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                gameInProgress = false;
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    gameInProgress = false;
 
-                if (result.getData() != null && result.getData().hasExtra("kpkSoloStealBonus")) {
-                    int bonus = result.getData().getIntExtra("kpkSoloStealBonus", 0);
-                    writeKpkFinalAndAdvance(pendingP1ForGame4 + bonus, pendingP2ForGame4);
-                    return;
-                }
-
-                int idx = currentGame;
-                int returnedP1 = 0, returnedP2 = 0;
-                String stealQId = null;
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    returnedP1 = result.getData().getIntExtra("p1Score", 0);
-                    returnedP2 = result.getData().getIntExtra("p2Score", 0);
-                    stealQId  = result.getData().getStringExtra("kpkStealQuestionId");
-                }
-
-                int myScore = isPlayer1 ? returnedP1 : returnedP2;
-
-                showWaitingForOpponent("Waiting for " + opponentUsername + "...");
-
-                final String finalStealQId = stealQId;
-                final int finalMyScore = myScore;
-                RepositoryCallback<Void> afterScore = new RepositoryCallback<Void>() {
-                    @Override public void onSuccess(Void v)      { afterMyScoreWritten(idx, finalMyScore); }
-                    @Override public void onFailure(Exception e) { afterMyScoreWritten(idx, finalMyScore); }
-                };
-
-                if (idx == GAME_KPK && finalStealQId != null) {
-                    RepositoryCallback<Void> writeScore = new RepositoryCallback<Void>() {
-                        @Override public void onSuccess(Void v) {
-                            matchRepository.writePlayerScore(matchId, idx, isPlayer1, finalMyScore, afterScore);
-                        }
-                        @Override public void onFailure(Exception e) {
-                            matchRepository.writePlayerScore(matchId, idx, isPlayer1, finalMyScore, afterScore);
-                        }
-                    };
-                    if (isPlayer1) {
-                        matchRepository.writeKpkP1StealQuestion(matchId, finalStealQId, writeScore);
-                    } else {
-                        matchRepository.writeKpkP2StealQuestion(matchId, finalStealQId, writeScore);
+                    if (result.getData() != null && result.getData().hasExtra("kpkSoloStealBonus")) {
+                        int bonus = result.getData().getIntExtra("kpkSoloStealBonus", 0);
+                        writeKpkFinalAndAdvance(pendingP1ForGame4 + bonus, pendingP2ForGame4);
+                        return;
                     }
-                } else {
-                    matchRepository.writePlayerScore(matchId, idx, isPlayer1, finalMyScore, afterScore);
+
+                    int idx = currentGame;
+                    int returnedP1 = 0, returnedP2 = 0;
+                    String stealQId = null;
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        returnedP1 = result.getData().getIntExtra("p1Score", 0);
+                        returnedP2 = result.getData().getIntExtra("p2Score", 0);
+                        stealQId  = result.getData().getStringExtra("kpkStealQuestionId");
+                    }
+
+                    final int finalReturnedP1 = returnedP1;
+                    final int finalReturnedP2 = returnedP2;
+                    final String finalStealQId = stealQId;
+
+                    showWaitingForOpponent("Waiting for " + opponentUsername + "...");
+
+                    if (idx == GAME_ASOC || idx == GAME_SKOCK) {
+                        totalP1 = finalReturnedP1;
+                        totalP2 = finalReturnedP2;
+                        updateScoreDisplay();
+                        if (opponentForfeited) {
+                            showMatchOver();
+                        } else {
+                            advanceToGame(idx + 1);
+                        }
+
+                    } else if (idx == GAME_KPK && finalStealQId != null) {
+                        // ── KPK with steal question ───────────────────────────────
+                        int myScore = isPlayer1 ? finalReturnedP1 : finalReturnedP2;
+                        RepositoryCallback<Void> afterScore = new RepositoryCallback<Void>() {
+                            @Override public void onSuccess(Void v)      { afterMyScoreWritten(idx, isPlayer1 ? finalReturnedP1 : finalReturnedP2); }
+                            @Override public void onFailure(Exception e) { afterMyScoreWritten(idx, isPlayer1 ? finalReturnedP1 : finalReturnedP2); }
+                        };
+                        RepositoryCallback<Void> writeScore = new RepositoryCallback<Void>() {
+                            @Override public void onSuccess(Void v) {
+                                matchRepository.writePlayerScore(matchId, idx, isPlayer1, myScore, afterScore);
+                            }
+                            @Override public void onFailure(Exception e) {
+                                matchRepository.writePlayerScore(matchId, idx, isPlayer1, myScore, afterScore);
+                            }
+                        };
+                        if (isPlayer1) {
+                            matchRepository.writeKpkP1StealQuestion(matchId, finalStealQId, writeScore);
+                        } else {
+                            matchRepository.writeKpkP2StealQuestion(matchId, finalStealQId, writeScore);
+                        }
+
+                    } else {
+                        int myScore = isPlayer1 ? finalReturnedP1 : finalReturnedP2;
+                        RepositoryCallback<Void> afterScore = new RepositoryCallback<Void>() {
+                            @Override public void onSuccess(Void v)      { afterMyScoreWritten(idx, myScore); }
+                            @Override public void onFailure(Exception e) { afterMyScoreWritten(idx, myScore); }
+                        };
+                        matchRepository.writePlayerScore(matchId, idx, isPlayer1, myScore, afterScore);
+                    }
                 }
-            }
         );
     }
 
@@ -226,7 +246,7 @@ public class MatchActivity extends AppCompatActivity {
     private void afterMyScoreWritten(int idx, int myScore) {
         if (opponentForfeited) {
             if (isPlayer1) totalP1 += myScore;
-            else totalP2 += myScore;
+            else           totalP2 += myScore;
             updateScoreDisplay();
             showMatchOver();
         } else {
@@ -253,6 +273,20 @@ public class MatchActivity extends AppCompatActivity {
                     currentTurnListener = null;
                     launchGame(idx);
                 });
+            }
+            return;
+        }
+
+        if (idx == GAME_ASOC || idx == GAME_SKOCK) {
+            if (isPlayer1) {
+                showPlayButton(idx);
+            } else {
+                showWaitingForOpponent("Waiting for " + opponentUsername + " to start " + GAME_NAMES[idx] + "...");
+                currentTurnListener = matchRepository.listenForAsocSkockoStarted(
+                        matchId, String.valueOf(idx), () -> {
+                            currentTurnListener = null;
+                            launchGame(idx);
+                        });
             }
             return;
         }
@@ -291,6 +325,9 @@ public class MatchActivity extends AppCompatActivity {
     private void launchGame(int idx) {
         btnPlayGame.setEnabled(false);
         gameInProgress = true;
+        if ((idx == GAME_ASOC || idx == GAME_SKOCK) && isPlayer1) {
+            matchRepository.writeAsocSkockoStarted(matchId, String.valueOf(idx));
+        }
         Intent intent = new Intent(this, GAME_CLASSES[idx]);
         intent.putExtra("isMatchGame", true);
         intent.putExtra("isPlayer1", isPlayer1);
@@ -339,19 +376,14 @@ public class MatchActivity extends AppCompatActivity {
             currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2, bothDone) -> {
                 if (bothDone) {
                     currentScoreListener = null;
-
                     totalP1 += p1;
                     totalP2 += p2;
-
                     updateScoreDisplay();
                     advanceToGame(idx + 1);
                 } else {
-                    int tempTotalP1 = totalP1 + p1;
-                    int tempTotalP2 = totalP2 + p2;
-
-                    int myDisplayTotal  = isPlayer1 ? tempTotalP1 : tempTotalP2;
-                    int oppDisplayTotal = isPlayer1 ? tempTotalP2 : tempTotalP1;
-
+                    // Show partial totals while waiting
+                    int myDisplayTotal  = isPlayer1 ? (totalP1 + p1) : (totalP2 + p2);
+                    int oppDisplayTotal = isPlayer1 ? (totalP2 + p2) : (totalP1 + p1);
                     tvMyScore.setText(String.valueOf(myDisplayTotal));
                     tvOpponentScore.setText(String.valueOf(oppDisplayTotal));
                 }
@@ -399,9 +431,7 @@ public class MatchActivity extends AppCompatActivity {
 
     private void updateProgressDots() {
         for (int i = 0; i < 6; i++) {
-            if (i < currentGame) {
-                dots[i].setBackgroundResource(R.drawable.bg_clue_active);
-            } else if (i == currentGame && currentGame < 6) {
+            if (i <= currentGame && currentGame < 6) {
                 dots[i].setBackgroundResource(R.drawable.bg_clue_active);
             } else {
                 dots[i].setBackgroundResource(R.drawable.bg_input);
@@ -434,6 +464,7 @@ public class MatchActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -445,7 +476,11 @@ public class MatchActivity extends AppCompatActivity {
             }
         }
         if (currentTurnListener != null) {
-            matchRepository.removeP1DoneListener(matchId, currentGame, currentTurnListener);
+            if ((currentGame == GAME_ASOC || currentGame == GAME_SKOCK) && !isPlayer1) {
+                matchRepository.removeAsocSkockoStartedListener(matchId, String.valueOf(currentGame), currentTurnListener);
+            } else {
+                matchRepository.removeP1DoneListener(matchId, currentGame, currentTurnListener);
+            }
         }
         if (forfeitListener != null) {
             matchRepository.removeForfeitListener(matchId, forfeitListener);

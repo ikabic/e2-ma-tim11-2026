@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.button.MaterialButton;
 import com.slagalica.app.R;
-import com.slagalica.app.repository.AsocijacijeRepository;
 import com.slagalica.app.repository.SkockoRepository;
 import com.slagalica.app.ui.HomeActivity;
 import com.slagalica.app.viewmodel.SkockoViewModel;
@@ -27,20 +26,26 @@ public class SkockoActivity extends AppCompatActivity {
 
     private static final long ROUND_DURATION_MS  = 30_000L;
     private static final long BONUS_DURATION_MS  = 10_000L;
+
     private TextView tvRound, tvTimer, tvScore, tvScoreOpponent, tvActivePlayer, tvAttempt, tvFeedback;
 
-    private View[]     guessRows;
+    private View[] guessRows;
     private TextView[] symViews;
-    private View[]     dotViews;
+    private View[] dotViews;
     private TextView[] guessSlots;
     private MaterialButton btnSubmitGuess, btnDelete;
-    private View     sectionGameOver;
-    private View     nestedScrollView;
+    private View sectionGameOver;
+    private View nestedScrollView;
+    private View spectatorOverlay;
+    private TextView tvSpectatorMsg;
     private TextView tvFinalScoreP1, tvFinalScoreP2, tvWinner;
     private final List<Integer> currentGuess = new ArrayList<>();
 
     private SkockoViewModel viewModel;
     private CountDownTimer  activeTimer;
+
+    private boolean isMatchGame = false;
+    private String opponentUsername = "Opponent";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,24 +54,42 @@ public class SkockoActivity extends AppCompatActivity {
 
         initViews();
         setupViewModel();
-        viewModel.loadQuestion();
         new SkockoRepository().seedTestData();
+
+        isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
+        boolean isPlayer1 = getIntent().getBooleanExtra("isPlayer1", true);
+        String matchId = getIntent().getStringExtra("matchId");
+        opponentUsername = getIntent().getStringExtra("opponentUsername");
+        if (opponentUsername == null) opponentUsername = "Opponent";
+
+        int prevTotalP1 = getIntent().getIntExtra("prevTotalP1", 0);
+        int prevTotalP2 = getIntent().getIntExtra("prevTotalP2", 0);
+
+        if (isMatchGame && matchId != null) {
+            viewModel.setInitialScores(prevTotalP1, prevTotalP2);
+            viewModel.initMatchMode(matchId, isPlayer1, opponentUsername);
+        } else {
+            viewModel.loadQuestion();
+        }
     }
 
     private void initViews() {
-        tvRound         = findViewById(R.id.tvRound);
-        tvTimer         = findViewById(R.id.tvTimer);
-        tvScore         = findViewById(R.id.tvScore);
+        tvRound = findViewById(R.id.tvRound);
+        tvTimer = findViewById(R.id.tvTimer);
+        tvScore  = findViewById(R.id.tvScore);
         tvScoreOpponent = findViewById(R.id.tvScoreOpponent);
-        tvActivePlayer  = findViewById(R.id.tvActivePlayer);
-        tvAttempt       = findViewById(R.id.tvAttempt);
-        tvFeedback      = findViewById(R.id.tvFeedback);
+        tvActivePlayer = findViewById(R.id.tvActivePlayer);
+        tvAttempt = findViewById(R.id.tvAttempt);
+        tvFeedback = findViewById(R.id.tvFeedback);
 
         nestedScrollView = findViewById(R.id.nestedScrollView);
         sectionGameOver  = findViewById(R.id.sectionGameOver);
         tvFinalScoreP1   = findViewById(R.id.tvFinalScoreP1);
         tvFinalScoreP2   = findViewById(R.id.tvFinalScoreP2);
         tvWinner         = findViewById(R.id.tvWinner);
+
+        spectatorOverlay = findViewById(R.id.spectatorOverlay);
+        tvSpectatorMsg   = findViewById(R.id.tvSpectatorMsg);
 
         guessRows = new View[]{
                 findViewById(R.id.rowGuess1), findViewById(R.id.rowGuess2),
@@ -110,7 +133,7 @@ public class SkockoActivity extends AppCompatActivity {
             findViewById(symBtnIds[i]).setOnClickListener(v -> addSymbol(symIdx));
         }
 
-        btnDelete       = findViewById(R.id.btnDelete);
+        btnDelete = findViewById(R.id.btnDelete);
         btnSubmitGuess  = findViewById(R.id.btnSubmitGuess);
 
         btnDelete.setOnClickListener(v -> removeLastSymbol());
@@ -126,17 +149,17 @@ public class SkockoActivity extends AppCompatActivity {
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(SkockoViewModel.class);
 
-        viewModel.getCurrentRound().observe(this, r ->
-                tvRound.setText("ROUND " + r + " / 2"));
+        viewModel.getCurrentRound().observe(this, r -> tvRound.setText("ROUND " + r + " / 2"));
 
         viewModel.getPlayer1Score().observe(this, s -> tvScore.setText(String.valueOf(s)));
         viewModel.getPlayer2Score().observe(this, s -> tvScoreOpponent.setText(String.valueOf(s)));
 
-        viewModel.getActivePlayer().observe(this, ap ->
-                tvActivePlayer.setText("Player " + ap + "'s turn"));
+        viewModel.getIsMyTurn().observe(this, myTurn -> {
+            if (myTurn == null) return;
+            tvActivePlayer.setText(myTurn ? "Your turn" : opponentUsername + "'s turn");
+        });
 
-        viewModel.getCurrentAttempt().observe(this, attempt ->
-                tvAttempt.setText("Attempt " + attempt + " / 6"));
+        viewModel.getCurrentAttempt().observe(this, attempt -> tvAttempt.setText("Attempt " + attempt + " / 6"));
 
         viewModel.getFeedbackMsg().observe(this, msg -> {
             if (msg != null) tvFeedback.setText(msg);
@@ -147,35 +170,87 @@ public class SkockoActivity extends AppCompatActivity {
         viewModel.getGameState().observe(this, state -> {
             switch (state) {
                 case LOADING:
+                    hideSpectatorOverlay();
                     setInputEnabled(false);
                     break;
+
                 case PLAYER_TURN:
+                    hideSpectatorOverlay();
                     setInputEnabled(true);
                     startRoundTimer();
                     break;
+
+                case SPECTATING:
+                    setInputEnabled(false);
+                    showSpectatorOverlay(opponentUsername + " is playing...\nWatch the board — you play next!");
+                    tvActivePlayer.setText(opponentUsername + "'s turn");
+                    break;
+
                 case BONUS_TURN:
                     cancelTimer();
+                    hideSpectatorOverlay();
                     setInputEnabled(true);
                     Toast.makeText(this, "Bonus! 10 seconds to steal!", Toast.LENGTH_SHORT).show();
                     startBonusTimer();
                     break;
+
+                case WAITING_FOR_BONUS:
+                    cancelTimer();
+                    hideSpectatorOverlay();
+                    setInputEnabled(false);
+                    tvActivePlayer.setText(opponentUsername + " gets a bonus try...");
+                    break;
+
+                case WAITING:
+                    cancelTimer();
+                    hideSpectatorOverlay();
+                    setInputEnabled(false);
+                    tvActivePlayer.setText("Waiting for " + opponentUsername + "...");
+                    break;
+
                 case ROUND_OVER:
                     cancelTimer();
+                    hideSpectatorOverlay();
                     setInputEnabled(false);
                     resetBoardUI();
                     viewModel.startNextRound();
                     break;
+
                 case GAME_OVER:
                     cancelTimer();
+                    hideSpectatorOverlay();
                     setInputEnabled(false);
-                    showGameOver();
                     break;
             }
+        });
+
+        viewModel.getFinalScores().observe(this, scores -> {
+            if (scores == null) return;
+            if (getIntent().getBooleanExtra("isMatchGame", false)) {
+                Intent result = new Intent();
+                result.putExtra("p1Score", scores[0]);
+                result.putExtra("p2Score", scores[1]);
+                setResult(RESULT_OK, result);
+                finish();
+                return;
+            }
+            showGameOver();
         });
 
         viewModel.getErrorMessage().observe(this, err -> {
             if (err != null) Toast.makeText(this, err, Toast.LENGTH_LONG).show();
         });
+    }
+
+    private void showSpectatorOverlay(String message) {
+        if (spectatorOverlay == null) return;
+        if (tvSpectatorMsg != null) tvSpectatorMsg.setText(message);
+        spectatorOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private void hideSpectatorOverlay() {
+        if (spectatorOverlay == null) return;
+        spectatorOverlay.setVisibility(View.GONE);
     }
 
     private void addSymbol(int symIdx) {
@@ -209,6 +284,7 @@ public class SkockoActivity extends AppCompatActivity {
 
         SkockoViewModel.GameState state = viewModel.getGameState().getValue();
         if (state == SkockoViewModel.GameState.PLAYER_TURN) {
+            cancelTimer(); // stop timer as soon as submit pressed
             viewModel.submitGuess(new ArrayList<>(currentGuess));
         } else if (state == SkockoViewModel.GameState.BONUS_TURN) {
             cancelTimer();
@@ -240,8 +316,7 @@ public class SkockoActivity extends AppCompatActivity {
         int color;
         switch (result) {
             case CORRECT: color = getResources().getColor(R.color.success, null); break;
-            case PRESENT: color = 0xFFF5C842;
-                break;
+            case PRESENT: color = 0xFFF5C842; break;
             default:      color = getResources().getColor(R.color.border, null); break;
         }
         dot.setBackgroundColor(color);
@@ -255,7 +330,7 @@ public class SkockoActivity extends AppCompatActivity {
             }
             @Override public void onFinish() {
                 tvTimer.setText("0s");
-                viewModel.submitGuess(new ArrayList<>());
+                viewModel.onTimerExpired();
             }
         }.start();
     }
@@ -266,7 +341,7 @@ public class SkockoActivity extends AppCompatActivity {
             @Override public void onTick(long ms) { tvTimer.setText(ms / 1000 + "s"); }
             @Override public void onFinish() {
                 tvTimer.setText("0s");
-                viewModel.submitBonusGuess(null);
+                viewModel.onTimerExpired();
             }
         }.start();
     }
@@ -311,9 +386,7 @@ public class SkockoActivity extends AppCompatActivity {
         tvFinalScoreP1.setText(String.valueOf(p1));
         tvFinalScoreP2.setText(String.valueOf(p2));
 
-        String result = p1 > p2 ? "Player 1 wins!"
-                : p2 > p1 ? "Player 2 wins!"
-                : "It's a draw!";
+        String result = p1 > p2 ? "Player 1 wins!" : p2 > p1 ? "Player 2 wins!" : "It's a draw!";
         tvWinner.setText(result);
     }
 
@@ -321,5 +394,8 @@ public class SkockoActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         cancelTimer();
+        if (isMatchGame) {
+            viewModel.writeForfeit();
+        }
     }
 }
