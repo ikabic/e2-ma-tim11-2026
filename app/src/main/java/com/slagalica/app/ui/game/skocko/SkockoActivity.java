@@ -26,10 +26,11 @@ import java.util.List;
 
 public class SkockoActivity extends AppCompatActivity {
 
-    private static final long ROUND_DURATION_MS  = 30_000L;
-    private static final long BONUS_DURATION_MS  = 10_000L;
+    private static final long ROUND_DURATION_MS = 30_000L;
+    private static final long BONUS_DURATION_MS = 10_000L;
 
     private TextView tvRound, tvTimer, tvScore, tvScoreOpponent, tvActivePlayer, tvAttempt, tvFeedback;
+    private TextView tvPointsPopup;
 
     private View[] guessRows;
     private TextView[] symViews;
@@ -44,7 +45,7 @@ public class SkockoActivity extends AppCompatActivity {
     private final List<Integer> currentGuess = new ArrayList<>();
 
     private SkockoViewModel viewModel;
-    private CountDownTimer  activeTimer;
+    private CountDownTimer activeTimer;
 
     private boolean isMatchGame = false;
     private String opponentUsername = "Opponent";
@@ -78,20 +79,21 @@ public class SkockoActivity extends AppCompatActivity {
     private void initViews() {
         tvRound = findViewById(R.id.tvRound);
         tvTimer = findViewById(R.id.tvTimer);
-        tvScore  = findViewById(R.id.tvScore);
+        tvScore = findViewById(R.id.tvScore);
         tvScoreOpponent = findViewById(R.id.tvScoreOpponent);
         tvActivePlayer = findViewById(R.id.tvActivePlayer);
         tvAttempt = findViewById(R.id.tvAttempt);
         tvFeedback = findViewById(R.id.tvFeedback);
+        tvPointsPopup = findViewById(R.id.tvPointsPopup);
 
         nestedScrollView = findViewById(R.id.nestedScrollView);
-        sectionGameOver  = findViewById(R.id.sectionGameOver);
-        tvFinalScoreP1   = findViewById(R.id.tvFinalScoreP1);
-        tvFinalScoreP2   = findViewById(R.id.tvFinalScoreP2);
-        tvWinner         = findViewById(R.id.tvWinner);
+        sectionGameOver = findViewById(R.id.sectionGameOver);
+        tvFinalScoreP1 = findViewById(R.id.tvFinalScoreP1);
+        tvFinalScoreP2 = findViewById(R.id.tvFinalScoreP2);
+        tvWinner = findViewById(R.id.tvWinner);
 
         spectatorOverlay = findViewById(R.id.spectatorOverlay);
-        tvSpectatorMsg   = findViewById(R.id.tvSpectatorMsg);
+        tvSpectatorMsg = findViewById(R.id.tvSpectatorMsg);
 
         guessRows = new View[]{
                 findViewById(R.id.rowGuess1), findViewById(R.id.rowGuess2),
@@ -136,7 +138,7 @@ public class SkockoActivity extends AppCompatActivity {
         }
 
         btnDelete = findViewById(R.id.btnDelete);
-        btnSubmitGuess  = findViewById(R.id.btnSubmitGuess);
+        btnSubmitGuess = findViewById(R.id.btnSubmitGuess);
 
         btnDelete.setOnClickListener(v -> removeLastSymbol());
         btnSubmitGuess.setOnClickListener(v -> submitGuess());
@@ -164,7 +166,19 @@ public class SkockoActivity extends AppCompatActivity {
         viewModel.getCurrentAttempt().observe(this, attempt -> tvAttempt.setText("Attempt " + attempt + " / 6"));
 
         viewModel.getFeedbackMsg().observe(this, msg -> {
-            if (msg != null) tvFeedback.setText(msg);
+            if (msg != null) {
+                tvFeedback.setText(msg);
+                if (msg.contains("+") && msg.contains("pts")) {
+                    try {
+                        int start = msg.lastIndexOf('+');
+                        int end = msg.indexOf(" pts");
+                        if (start >= 0 && end > start) {
+                            int pts = Integer.parseInt(msg.substring(start + 1, end).trim());
+                            showPointsPopup(pts);
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
         });
 
         viewModel.getGuessHistory().observe(this, this::renderGuessHistory);
@@ -256,6 +270,24 @@ public class SkockoActivity extends AppCompatActivity {
     private void hideSpectatorOverlay() {
         if (spectatorOverlay == null) return;
         spectatorOverlay.setVisibility(View.GONE);
+    }
+
+    private void showPointsPopup(int points) {
+        if (tvPointsPopup == null) return;
+        tvPointsPopup.setText("+" + points);
+        tvPointsPopup.setAlpha(1f);
+        tvPointsPopup.setTranslationY(0f);
+        tvPointsPopup.setVisibility(View.VISIBLE);
+        tvPointsPopup.animate()
+                .translationY(-80f)
+                .alpha(0f)
+                .setDuration(1200)
+                .withEndAction(() -> {
+                    tvPointsPopup.setVisibility(View.GONE);
+                    tvPointsPopup.setTranslationY(0f);
+                    tvPointsPopup.setAlpha(1f);
+                })
+                .start();
     }
 
     private void addSymbol(int symIdx) {
