@@ -3,6 +3,7 @@ package com.slagalica.app.ui.notifications;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -37,7 +38,8 @@ public class NotificationsAdapter extends
     @NonNull
     @Override
     public NotifViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_notification, parent, false);
         return new NotifViewHolder(v);
     }
 
@@ -51,17 +53,17 @@ public class NotificationsAdapter extends
 
     class NotifViewHolder extends RecyclerView.ViewHolder {
 
-        private final View  viewUnreadDot;
-        private final TextView  tvChannelIcon;
-        private final TextView  tvTitle;
-        private final TextView  tvBody;
-        private final TextView  tvTime;
+        private final View viewUnreadDot;
+        private final ImageView ivChannelIcon;
+        private final TextView tvTitle;
+        private final TextView tvBody;
+        private final TextView tvTime;
         private final MaterialButton btnMarkRead;
 
         NotifViewHolder(@NonNull View itemView) {
             super(itemView);
             viewUnreadDot = itemView.findViewById(R.id.viewUnreadDot);
-            tvChannelIcon = itemView.findViewById(R.id.tvChannelIcon);
+            ivChannelIcon = itemView.findViewById(R.id.tvChannelIcon);
             tvTitle = itemView.findViewById(R.id.tvTitle);
             tvBody = itemView.findViewById(R.id.tvBody);
             tvTime = itemView.findViewById(R.id.tvTime);
@@ -69,14 +71,12 @@ public class NotificationsAdapter extends
         }
 
         void bind(NotificationItem item) {
-            tvChannelIcon.setText(channelEmoji(item.getChannel()));
+            ivChannelIcon.setImageResource(channelIcon(item.getChannel()));
 
             tvTitle.setText(item.getTitle());
-            tvTitle.setTextColor(itemView.getContext().getResources().getColor(
-                    item.isRead() ? R.color.text_mute : R.color.text, null));
+            tvTitle.setTextColor(itemView.getContext().getResources().getColor(item.isRead() ? R.color.text_mute : R.color.text, null));
 
             tvBody.setText(item.getBody());
-
             tvTime.setText(relativeTime(item.getTimestampMs()));
 
             viewUnreadDot.setVisibility(item.isRead() ? View.INVISIBLE : View.VISIBLE);
@@ -91,14 +91,17 @@ public class NotificationsAdapter extends
             }
         }
 
-        private String channelEmoji(String channel) {
-            if (channel == null) return "🔔";
+        private int channelIcon(String channel) {
+            if (channel == null) return R.drawable.ic_notifications;
             switch (channel) {
-                case NotificationItem.CHANNEL_CHAT:    return "💬";
-                case NotificationItem.CHANNEL_RANKING: return "📊";
-                case NotificationItem.CHANNEL_REWARD:  return "🎁";
-                case NotificationItem.CHANNEL_MATCH:   return "🎮";
-                default:                               return "🔔";
+                case NotificationItem.CHANNEL_RANKING:
+                case NotificationItem.CHANNEL_REWARD:
+                case NotificationItem.CHANNEL_MATCH:
+                    return R.drawable.ic_nav_ranks;
+                case NotificationItem.CHANNEL_CHAT:
+                case NotificationItem.CHANNEL_OTHER:
+                default:
+                    return R.drawable.ic_notifications;
             }
         }
 
@@ -109,10 +112,10 @@ public class NotificationsAdapter extends
             long diffHr  = diffMin / 60;
             long diffDay = diffHr  / 24;
 
-            if (diffSec < 60)  return "just now";
-            if (diffMin < 60)  return diffMin + "m ago";
-            if (diffHr  < 24)  return diffHr  + "h ago";
-            return diffDay + "d ago";
+            if (diffSec < 60) return "just now";
+            if (diffMin < 60) return diffMin + " min";
+            if (diffHr  < 24) return diffHr  + " h";
+            return diffDay + " d";
         }
     }
 }

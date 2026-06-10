@@ -460,7 +460,7 @@ public class MatchActivity extends AppCompatActivity {
 
         String myUid = matchRepository.getUid();
         if (myUid != null) {
-            matchRepository.finishMatch(matchId, myUid, myTotal, oppTotal);
+            matchRepository.finishMatch(this, matchId, myUid, myTotal, oppTotal, opponentUsername);
         }
     }
 

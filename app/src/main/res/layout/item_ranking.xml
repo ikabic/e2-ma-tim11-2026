@@ -38,12 +38,15 @@
                 android:textStyle="bold"
                 android:background="@drawable/bg_chip"/>
 
-            <TextView
+            <ImageView
                 android:id="@+id/tvMedal"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:gravity="center"
-                android:textSize="22sp"/>
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_nav_ranks"
+                android:visibility="gone"/>
+
         </FrameLayout>
 
         <LinearLayout
@@ -62,13 +65,30 @@
                 android:singleLine="true"
                 android:ellipsize="end"/>
 
-            <TextView
-                android:id="@+id/tvLeague"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_mute"
-                android:textSize="12sp"
-                android:layout_marginTop="2dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="2dp">
+
+                <ImageView
+                    android:id="@+id/ivLeagueIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:scaleType="fitCenter"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/league_unranked"/>
+
+                <TextView
+                    android:id="@+id/tvLeague"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_mute"
+                    android:textSize="12sp"/>
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <TextView
