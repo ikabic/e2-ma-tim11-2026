@@ -221,7 +221,7 @@ public class MatchRepository {
             rtdb.child(QUEUE_PATH).child(uid).get().addOnSuccessListener(mySnap -> {
                 if (!mySnap.exists()) return;
                 Object midVal = mySnap.child("matchId").getValue();
-                if (midVal != null && !midVal.toString().isEmpty()) return; // already matched
+                if (midVal != null && !midVal.toString().isEmpty()) return;
                 Object usernameObj = mySnap.child("username").getValue();
                 String myUsername = usernameObj != null ? usernameObj.toString() : "Player";
 
@@ -298,7 +298,7 @@ public class MatchRepository {
 
                 if (p1Done != null && p2Done != null) {
                     if (p1Done && p2Done) ref.removeEventListener(this);
-                } else { // fallback
+                } else {
                     if (p1 >= 0 && p2 >= 0) ref.removeEventListener(this);
                 }
             }
@@ -340,33 +340,6 @@ public class MatchRepository {
 
     public void finishMatch(String matchId, String myUid, int myScore, int opponentScore) {
         finishMatch(null, matchId, myUid, myScore, opponentScore, "protivnik");
-    }
-
-    private void updateStars(String uid, int myScore, int opponentScore) {
-        db.collection("profiles").document(uid).get()
-            .addOnSuccessListener(doc -> {
-                if (!doc.exists()) return;
-                Long current = doc.getLong("stars");
-                long stars = current != null ? current : 0;
-
-                long bonusStars = myScore / 40;
-                long delta;
-                if (myScore > opponentScore)      delta = 10 + bonusStars;
-                else if (myScore < opponentScore) delta = -10 + bonusStars;
-                else                              delta = bonusStars;
-                long newStars = Math.max(0, stars + delta);
-
-                long oldMilestones = stars / 50;
-                long newMilestones = newStars / 50;
-                long tokenBonus = newMilestones - oldMilestones;
-
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("stars", newStars);
-                if (tokenBonus > 0) {
-                    updates.put("tokens", FieldValue.increment(tokenBonus));
-                }
-                db.collection("profiles").document(uid).update(updates);
-            });
     }
 
     public void writeKpkP1StealQuestion(String matchId, String questionId,
@@ -619,18 +592,39 @@ public class MatchRepository {
                 long oneDayMs = 24L * 60 * 60 * 1000;
                 Long lastRefresh = doc.getLong("lastTokenRefresh");
                 Long tokens = doc.getLong("tokens");
-                int current = tokens != null ? tokens.intValue() : 0;
-                boolean refresh = lastRefresh == null || now - lastRefresh > oneDayMs;
-                int afterRefresh = refresh ? current + 5 : current;
-                if (afterRefresh <= 0) { callback.onSuccess(false); return; }
+                int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
+
                 Map<String, Object> upd = new HashMap<>();
+                int afterRefresh = current;
+                if (lastRefresh == null) {
+                    upd.put("lastTokenRefresh", now);
+                } else if (now - lastRefresh >= oneDayMs) {
+                    afterRefresh = current + 5;
+                    upd.put("lastTokenRefresh", now);
+                }
+                if (afterRefresh <= 0) { callback.onSuccess(false); return; }
                 upd.put("tokens", afterRefresh - 1);
-                if (refresh) upd.put("lastTokenRefresh", now);
                 db.collection("profiles").document(uid).update(upd)
                     .addOnSuccessListener(v -> callback.onSuccess(true))
                     .addOnFailureListener(callback::onFailure);
             })
             .addOnFailureListener(callback::onFailure);
+    }
+
+    public void hasToken(String uid, RepositoryCallback<Boolean> callback) {
+        db.collection("profiles").document(uid).get()
+            .addOnSuccessListener(doc -> {
+                if (!doc.exists()) { callback.onSuccess(false); return; }
+                long now = System.currentTimeMillis();
+                long oneDayMs = 24L * 60 * 60 * 1000;
+                Long lastRefresh = doc.getLong("lastTokenRefresh");
+                Long tokens = doc.getLong("tokens");
+                int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
+                boolean refreshDue = lastRefresh != null && now - lastRefresh >= oneDayMs;
+                int available = current + (refreshDue ? 5 : 0);
+                callback.onSuccess(available > 0);
+            })
+            .addOnFailureListener(e -> callback.onSuccess(false));
     }
 
     public void writeAsocSkockoStarted(String matchId, String gameIdx) {
@@ -668,8 +662,15 @@ public class MatchRepository {
 
     public void finishMatch(android.content.Context context, String matchId, String myUid, int myScore, int opponentScore, String opponentName) {
         UserStatusManager.setInGame(auth, false);
-        rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
-        updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
+        DatabaseReference matchRef = rtdb.child(MATCHES_PATH).child(matchId);
+        matchRef.child("status").setValue("finished");
+        matchRef.child("invite").get()
+            .addOnSuccessListener(snap -> {
+                if (!Boolean.TRUE.equals(snap.getValue(Boolean.class))) {
+                    updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
+                }
+            })
+            .addOnFailureListener(e -> updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName));
     }
 
     private void updateStarsAndNotify(android.content.Context context, String uid, int myScore, int opponentScore, String opponentName) {
