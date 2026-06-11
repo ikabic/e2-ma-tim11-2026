@@ -223,7 +223,7 @@ public class MatchRepository {
             rtdb.child(QUEUE_PATH).child(uid).get().addOnSuccessListener(mySnap -> {
                 if (!mySnap.exists()) return;
                 Object midVal = mySnap.child("matchId").getValue();
-                if (midVal != null && !midVal.toString().isEmpty()) return; // already matched
+                if (midVal != null && !midVal.toString().isEmpty()) return;
                 Object usernameObj = mySnap.child("username").getValue();
                 String myUsername = usernameObj != null ? usernameObj.toString() : "Player";
 
@@ -300,7 +300,7 @@ public class MatchRepository {
 
                 if (p1Done != null && p2Done != null) {
                     if (p1Done && p2Done) ref.removeEventListener(this);
-                } else { // fallback
+                } else {
                     if (p1 >= 0 && p2 >= 0) ref.removeEventListener(this);
                 }
             }
@@ -590,18 +590,39 @@ public class MatchRepository {
                 long oneDayMs = 24L * 60 * 60 * 1000;
                 Long lastRefresh = doc.getLong("lastTokenRefresh");
                 Long tokens = doc.getLong("tokens");
-                int current = tokens != null ? tokens.intValue() : 0;
-                boolean refresh = lastRefresh == null || now - lastRefresh > oneDayMs;
-                int afterRefresh = refresh ? current + 5 : current;
-                if (afterRefresh <= 0) { callback.onSuccess(false); return; }
+                int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
+
                 Map<String, Object> upd = new HashMap<>();
+                int afterRefresh = current;
+                if (lastRefresh == null) {
+                    upd.put("lastTokenRefresh", now);
+                } else if (now - lastRefresh >= oneDayMs) {
+                    afterRefresh = current + 5;
+                    upd.put("lastTokenRefresh", now);
+                }
+                if (afterRefresh <= 0) { callback.onSuccess(false); return; }
                 upd.put("tokens", afterRefresh - 1);
-                if (refresh) upd.put("lastTokenRefresh", now);
                 db.collection("profiles").document(uid).update(upd)
                     .addOnSuccessListener(v -> callback.onSuccess(true))
                     .addOnFailureListener(callback::onFailure);
             })
             .addOnFailureListener(callback::onFailure);
+    }
+
+    public void hasToken(String uid, RepositoryCallback<Boolean> callback) {
+        db.collection("profiles").document(uid).get()
+            .addOnSuccessListener(doc -> {
+                if (!doc.exists()) { callback.onSuccess(false); return; }
+                long now = System.currentTimeMillis();
+                long oneDayMs = 24L * 60 * 60 * 1000;
+                Long lastRefresh = doc.getLong("lastTokenRefresh");
+                Long tokens = doc.getLong("tokens");
+                int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
+                boolean refreshDue = lastRefresh != null && now - lastRefresh >= oneDayMs;
+                int available = current + (refreshDue ? 5 : 0);
+                callback.onSuccess(available > 0);
+            })
+            .addOnFailureListener(e -> callback.onSuccess(false));
     }
 
     public void writeAsocSkockoStarted(String matchId, String gameIdx) {
@@ -639,13 +660,20 @@ public class MatchRepository {
 
     public void finishMatch(android.content.Context context, String matchId, String myUid, int myScore, int opponentScore, String opponentName) {
         UserStatusManager.setInGame(auth, false);
-        rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
-        updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
-
-        statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
-            @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
-            @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
-        });
+        DatabaseReference matchRef = rtdb.child(MATCHES_PATH).child(matchId);
+        matchRef.child("status").setValue("finished");
+        Runnable applyResults = () -> {
+            updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
+            statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
+                @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
+                @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
+            });
+        };
+        matchRef.child("invite").get()
+            .addOnSuccessListener(snap -> {
+                if (!Boolean.TRUE.equals(snap.getValue(Boolean.class))) applyResults.run();
+            })
+            .addOnFailureListener(e -> applyResults.run());
     }
 
     private void updateStarsAndNotify(android.content.Context context, String uid, int myScore, int opponentScore, String opponentName) {

@@ -24,7 +24,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.slagalica.app.util.ConfirmDialog;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.database.ValueEventListener;
 import com.slagalica.app.R;
+import com.slagalica.app.repository.MatchRepository;
+import com.slagalica.app.repository.RepositoryCallback;
 import com.slagalica.app.viewmodel.MojBrojViewModel;
 
 import java.util.ArrayList;
@@ -66,6 +69,25 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     private Sensor accelerometer;
     private CountDownTimer roundTimer;
     private CountDownTimer autoStopTimer;
+    private CountDownTimer fallbackTimer;
+
+    private boolean isMatchGame;
+    private boolean isPlayer1;
+    private String matchId;
+    private MatchRepository matchRepository;
+    private int matchRound;
+    private int p1Total, p2Total;
+    private int matchTarget;
+    private int[] matchNumbers;
+    private boolean targetStopped, numbersStopped, myResultSubmitted, roundResolved;
+    private boolean soloContinue;
+    private Integer myRoundResult;
+    private ValueEventListener matchTargetListener, matchNumbersListener, matchResultsListener, matchForfeitListener;
+
+    private final RepositoryCallback<Void> noop = new RepositoryCallback<Void>() {
+        @Override public void onSuccess(Void v) {}
+        @Override public void onFailure(Exception e) {}
+    };
 
     private final Handler animHandler = new Handler(Looper.getMainLooper());
     private Runnable targetAnimRunnable;
@@ -368,8 +390,8 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void setupViewModel() {
-        boolean isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
-        boolean isPlayer1   = getIntent().getBooleanExtra("isPlayer1", true);
+        isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
+        isPlayer1   = getIntent().getBooleanExtra("isPlayer1", true);
 
         viewModel = new ViewModelProvider(this).get(MojBrojViewModel.class);
         viewModel.setMatchMode(isMatchGame);
@@ -403,6 +425,11 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         viewModel.getMessage().observe(this, msg -> {
             if (msg != null) GameToast.show(this, msg);
         });
+
+        if (isMatchGame) {
+            setupMatchMode();
+            return;
+        }
 
         viewModel.getGameState().observe(this, state -> {
             switch (state) {
@@ -506,6 +533,194 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         });
     }
 
+    private void setupMatchMode() {
+        matchRepository = new MatchRepository();
+        matchId = getIntent().getStringExtra("matchId");
+        soloContinue = getIntent().getBooleanExtra("soloContinue", false);
+        matchRound = soloContinue ? (isPlayer1 ? 1 : 2) : 1;
+        p1Total = 0;
+        p2Total = 0;
+        tvScore.setText("0");
+        tvScoreOpponent.setText("0");
+        btnSubmit.setOnClickListener(v -> submitMatchResult());
+
+        if (!soloContinue) {
+            String myUid = matchRepository.getUid();
+            if (myUid != null) {
+                matchForfeitListener = matchRepository.listenForForfeit(matchId, myUid,
+                    () -> runOnUiThread(this::onOpponentForfeitDuringGame));
+            }
+        }
+        startMatchRound();
+    }
+
+    private int currentStarter() {
+        return matchRound;
+    }
+
+    private boolean iAmStarter() {
+        return soloContinue || (matchRound == 1 && isPlayer1) || (matchRound == 2 && !isPlayer1);
+    }
+
+    private void startMatchRound() {
+        if (isFinishing() || isDestroyed()) return;
+        tvRound.setText("Round " + matchRound + " / 2");
+        tvTimerHeader.setText("--");
+        matchTarget = 0;
+        matchNumbers = null;
+        targetStopped = false;
+        numbersStopped = false;
+        myResultSubmitted = false;
+        roundResolved = false;
+        myRoundResult = null;
+        clearTokens();
+        setInputEnabled(false);
+
+        if (iAmStarter()) {
+            sectionStopTarget.setOnClickListener(v -> onStarterStopTarget());
+            sectionStopNumbers.setOnClickListener(v -> onStarterStopNumbers());
+            showPhase(0);
+            startTargetAnimation();
+            startAutoStopTimer(this::onStarterStopTarget);
+        } else {
+            sectionStopTarget.setOnClickListener(null);
+            sectionStopNumbers.setOnClickListener(null);
+            showPhase(0);
+            startTargetAnimation();
+            GameToast.show(this, "Waiting for " + opponentUsername + " to set the number…", GameToast.Type.INFO);
+            matchTargetListener = matchRepository.listenForMojBrojTarget(matchId, matchRound, target -> {
+                matchTarget = target;
+                viewModel.setSharedTarget(target);
+                stopTargetAnimation();
+                showPhase(1);
+                startNumbersAnimation();
+                matchNumbersListener = matchRepository.listenForMojBrojNumbers(matchId, matchRound, nums -> {
+                    matchNumbers = nums;
+                    viewModel.setSharedNumbers(nums);
+                    stopNumbersAnimation();
+                    beginMatchPlaying();
+                });
+            });
+        }
+    }
+
+    private void onStarterStopTarget() {
+        if (targetStopped) return;
+        targetStopped = true;
+        if (autoStopTimer != null) autoStopTimer.cancel();
+        stopTargetAnimation();
+        matchTarget = viewModel.generateTarget();
+        viewModel.setSharedTarget(matchTarget);
+        matchRepository.writeMojBrojTarget(matchId, matchRound, matchTarget, noop);
+        showPhase(1);
+        startNumbersAnimation();
+        startAutoStopTimer(this::onStarterStopNumbers);
+    }
+
+    private void onStarterStopNumbers() {
+        if (numbersStopped) return;
+        numbersStopped = true;
+        if (autoStopTimer != null) autoStopTimer.cancel();
+        stopNumbersAnimation();
+        matchNumbers = viewModel.generateNumbers();
+        viewModel.setSharedNumbers(matchNumbers);
+        matchRepository.writeMojBrojNumbers(matchId, matchRound, matchNumbers, noop);
+        beginMatchPlaying();
+    }
+
+    private void beginMatchPlaying() {
+        showPhase(2);
+        highlightPlayer(1);
+        clearTokens();
+        setInputEnabled(true);
+        startRoundTimer();
+    }
+
+    private void submitMatchResult() {
+        if (myResultSubmitted) return;
+        myResultSubmitted = true;
+        if (roundTimer != null) roundTimer.cancel();
+        setInputEnabled(false);
+        myRoundResult = viewModel.tryEvaluate(buildExpression());
+        if (myRoundResult != null && matchTarget != 0 && myRoundResult == matchTarget) {
+            GameToast.show(this, "Exact! +10 pts", GameToast.Type.SUCCESS);
+        }
+        if (soloContinue) {
+            resolveSoloRound();
+            return;
+        }
+        matchRepository.writeMojBrojResult(matchId, matchRound, isPlayer1, myRoundResult, noop);
+        tvTimerHeader.setText("--");
+        GameToast.show(this, "Waiting for " + opponentUsername + "…", GameToast.Type.INFO);
+        matchResultsListener = matchRepository.listenForMojBrojResults(matchId, matchRound, this::resolveMatchRound);
+        startResultFallback();
+    }
+
+    private void startResultFallback() {
+        if (fallbackTimer != null) fallbackTimer.cancel();
+        fallbackTimer = new CountDownTimer(65000, 65000) {
+            @Override public void onTick(long ms) {}
+            @Override public void onFinish() {
+                if (isPlayer1) resolveMatchRound(myRoundResult, null);
+                else           resolveMatchRound(null, myRoundResult);
+            }
+        }.start();
+    }
+
+    private void resolveMatchRound(Integer p1Result, Integer p2Result) {
+        if (roundResolved) return;
+        roundResolved = true;
+        if (fallbackTimer != null) fallbackTimer.cancel();
+        if (matchResultsListener != null) {
+            matchRepository.removeMojBrojResultsListener(matchId, matchRound, matchResultsListener);
+            matchResultsListener = null;
+        }
+        int[] pts = MojBrojViewModel.scoreRound(p1Result, p2Result, matchTarget, currentStarter());
+        p1Total += pts[0];
+        p2Total += pts[1];
+        updateMatchScoreDisplay();
+
+        if (matchRound < 2) {
+            matchRound++;
+            resetNumberTiles();
+            animHandler.postDelayed(this::startMatchRound, 1200);
+        } else {
+            finishMatchGame();
+        }
+    }
+
+    private void resolveSoloRound() {
+        if (roundResolved) return;
+        roundResolved = true;
+        int pts = (myRoundResult != null && matchTarget != 0 && myRoundResult == matchTarget) ? 10 : 0;
+        if (isPlayer1) p1Total += pts;
+        else           p2Total += pts;
+        updateMatchScoreDisplay();
+        finishMatchGame();
+    }
+
+    private void updateMatchScoreDisplay() {
+        int mine = isPlayer1 ? p1Total : p2Total;
+        int opp  = isPlayer1 ? p2Total : p1Total;
+        tvScore.setText(String.valueOf(mine));
+        tvScoreOpponent.setText(String.valueOf(opp));
+    }
+
+    private void finishMatchGame() {
+        Intent matchResult = new Intent();
+        matchResult.putExtra("p1Score", p1Total);
+        matchResult.putExtra("p2Score", p2Total);
+        setResult(RESULT_OK, matchResult);
+        finish();
+    }
+
+    private void onOpponentForfeitDuringGame() {
+        if (isFinishing() || isDestroyed()) return;
+        if (roundTimer != null) roundTimer.cancel();
+        if (fallbackTimer != null) fallbackTimer.cancel();
+        finishMatchGame();
+    }
+
     private void startTargetAnimation() {
         if (targetAnimRunnable != null) animHandler.removeCallbacks(targetAnimRunnable);
         targetAnimRunnable = new Runnable() {
@@ -564,7 +779,8 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
             @Override
             public void onFinish() {
                 tvTimerHeader.setText("--");
-                submitCurrentExpression();
+                if (isMatchGame) submitMatchResult();
+                else submitCurrentExpression();
             }
         }.start();
     }
@@ -593,6 +809,12 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         float x = event.values[0], y = event.values[1], z = event.values[2];
         float accel = (float) Math.sqrt(x * x + y * y + z * z) - SensorManager.GRAVITY_EARTH;
         if (accel > SHAKE_THRESHOLD) {
+            if (isMatchGame) {
+                if (!iAmStarter()) return;
+                if (sectionStopTarget.getVisibility() == View.VISIBLE && !targetStopped) onStarterStopTarget();
+                else if (sectionStopNumbers.getVisibility() == View.VISIBLE && !numbersStopped) onStarterStopNumbers();
+                return;
+            }
             MojBrojViewModel.GameState state = viewModel.getGameState().getValue();
             if (state == MojBrojViewModel.GameState.SPINNING_TARGET) {
                 if (autoStopTimer != null) autoStopTimer.cancel();
@@ -626,7 +848,16 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
 
     private void showExitConfirm() {
         ConfirmDialog.show(this, "Quit game?", "Your progress will be lost.",
-            "Quit", "Keep playing", this::finish);
+            "Quit", "Keep playing", this::quitGame);
+    }
+
+    private void quitGame() {
+        if (isMatchGame) {
+            Intent result = new Intent();
+            result.putExtra("quitMatch", true);
+            setResult(RESULT_OK, result);
+        }
+        finish();
     }
 
     @Override
@@ -639,7 +870,14 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         super.onDestroy();
         if (roundTimer != null) roundTimer.cancel();
         if (autoStopTimer != null) autoStopTimer.cancel();
+        if (fallbackTimer != null) fallbackTimer.cancel();
         stopTargetAnimation();
         stopNumbersAnimation();
+        if (matchRepository != null && matchId != null) {
+            if (matchTargetListener != null) matchRepository.removeMojBrojTargetListener(matchId, matchRound, matchTargetListener);
+            if (matchNumbersListener != null) matchRepository.removeMojBrojNumbersListener(matchId, matchRound, matchNumbersListener);
+            if (matchResultsListener != null) matchRepository.removeMojBrojResultsListener(matchId, matchRound, matchResultsListener);
+            if (matchForfeitListener != null) matchRepository.removeForfeitListener(matchId, matchForfeitListener);
+        }
     }
 }

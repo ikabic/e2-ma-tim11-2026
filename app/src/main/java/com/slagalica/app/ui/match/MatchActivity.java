@@ -35,7 +35,7 @@ public class MatchActivity extends AppCompatActivity {
     private static final int GAME_ASOC  = 2;
     private static final int GAME_SKOCK = 3;
     private static final int GAME_KPK   = 4;
-    // game 5 = MojBroj
+    private static final int GAME_MB    = 5;
 
     private static final String[] GAME_NAMES = {
             "Who knows, knows", "Connections", "Asocijacije", "Skočko", "Step by step", "My number"
@@ -59,6 +59,8 @@ public class MatchActivity extends AppCompatActivity {
     private boolean matchComplete = false;
     private boolean opponentForfeited = false;
     private boolean gameInProgress = false;
+    private boolean waitingForOppScoreThisGame = false;
+    private int lastSubmittedMyScore = 0;
     private String pendingStealQuestionId = null;
 
     private int pendingP1ForGame4 = 0;
@@ -162,7 +164,12 @@ public class MatchActivity extends AppCompatActivity {
                 currentScoreListener = null;
             }
             if (!gameInProgress) {
-                showMatchOver();
+                if (waitingForOppScoreThisGame) {
+                    waitingForOppScoreThisGame = false;
+                    addMyScoreAndAdvance(currentGame, lastSubmittedMyScore);
+                } else {
+                    advanceToGame(currentGame);
+                }
             }
         }));
     }
@@ -172,6 +179,17 @@ public class MatchActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     gameInProgress = false;
+
+                    boolean userQuit = result.getData() != null
+                            && result.getData().getBooleanExtra("quitMatch", false);
+                    if (userQuit && !matchComplete && !opponentForfeited) {
+                        matchComplete = true;
+                        String myUid = matchRepository.getUid();
+                        if (myUid != null) matchRepository.writeForfeit(matchId, myUid);
+                        startActivity(new Intent(this, HomeActivity.class));
+                        finish();
+                        return;
+                    }
 
                     if (result.getData() != null && result.getData().hasExtra("kpkSoloStealBonus")) {
                         int bonus = result.getData().getIntExtra("kpkSoloStealBonus", 0);
@@ -192,20 +210,15 @@ public class MatchActivity extends AppCompatActivity {
                     final int finalReturnedP2 = returnedP2;
                     final String finalStealQId = stealQId;
 
-                    showWaitingForOpponent("Waiting for " + opponentUsername + "...");
+                    if (!opponentForfeited) showWaitingForOpponent("Waiting for " + opponentUsername + "...");
 
                     if (idx == GAME_ASOC || idx == GAME_SKOCK) {
                         totalP1 = finalReturnedP1;
                         totalP2 = finalReturnedP2;
                         updateScoreDisplay();
-                        if (opponentForfeited) {
-                            showMatchOver();
-                        } else {
-                            advanceToGame(idx + 1);
-                        }
+                        advanceToGame(idx + 1);
 
                     } else if (idx == GAME_KPK && finalStealQId != null) {
-                        // ── KPK with steal question ───────────────────────────────
                         int myScore = isPlayer1 ? finalReturnedP1 : finalReturnedP2;
                         RepositoryCallback<Void> afterScore = new RepositoryCallback<Void>() {
                             @Override public void onSuccess(Void v)      { afterMyScoreWritten(idx, isPlayer1 ? finalReturnedP1 : finalReturnedP2); }
@@ -245,13 +258,19 @@ public class MatchActivity extends AppCompatActivity {
 
     private void afterMyScoreWritten(int idx, int myScore) {
         if (opponentForfeited) {
-            if (isPlayer1) totalP1 += myScore;
-            else           totalP2 += myScore;
-            updateScoreDisplay();
-            showMatchOver();
+            addMyScoreAndAdvance(idx, myScore);
         } else {
+            lastSubmittedMyScore = myScore;
+            waitingForOppScoreThisGame = true;
             listenForBothScores(idx);
         }
+    }
+
+    private void addMyScoreAndAdvance(int idx, int myScore) {
+        if (isPlayer1) totalP1 += myScore;
+        else           totalP2 += myScore;
+        updateScoreDisplay();
+        advanceToGame(idx + 1);
     }
 
     private void advanceToGame(int idx) {
@@ -265,6 +284,13 @@ public class MatchActivity extends AppCompatActivity {
 
         tvCurrentGame.setText("GAME " + (idx + 1) + " / 6");
 
+        waitingForOppScoreThisGame = false;
+
+        if (opponentForfeited) {
+            showPlayButton(idx);
+            return;
+        }
+
         if (idx == GAME_KZZ || idx == GAME_CONN) {
             if (isPlayer1) showPlayButton(idx);
             else {
@@ -277,7 +303,7 @@ public class MatchActivity extends AppCompatActivity {
             return;
         }
 
-        if (idx == GAME_ASOC || idx == GAME_SKOCK) {
+        if (idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) {
             if (isPlayer1) {
                 showPlayButton(idx);
             } else {
@@ -325,7 +351,7 @@ public class MatchActivity extends AppCompatActivity {
     private void launchGame(int idx) {
         btnPlayGame.setEnabled(false);
         gameInProgress = true;
-        if ((idx == GAME_ASOC || idx == GAME_SKOCK) && isPlayer1) {
+        if ((idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) && isPlayer1) {
             matchRepository.writeAsocSkockoStarted(matchId, String.valueOf(idx));
         }
         Intent intent = new Intent(this, GAME_CLASSES[idx]);
@@ -336,6 +362,7 @@ public class MatchActivity extends AppCompatActivity {
         intent.putExtra("opponentUsername", opponentUsername);
         intent.putExtra("prevTotalP1", totalP1);
         intent.putExtra("prevTotalP2", totalP2);
+        if (opponentForfeited) intent.putExtra("soloContinue", true);
         if (idx == GAME_KPK && pendingStealQuestionId != null) {
             intent.putExtra("kpkStealQuestionId", pendingStealQuestionId);
             pendingStealQuestionId = null;
@@ -359,7 +386,8 @@ public class MatchActivity extends AppCompatActivity {
     private void listenForBothScores(int idx) {
         if (idx == GAME_KPK) {
             if (isPlayer1) {
-                currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2, ignored) -> {
+                currentScoreListener = matchRepository.listenForGameScore(matchId, idx, (p1, p2, bothDone) -> {
+                    if (!bothDone) return;
                     currentScoreListener = null;
                     handleGame4P1Side(p1, p2);
                 });
@@ -381,7 +409,6 @@ public class MatchActivity extends AppCompatActivity {
                     updateScoreDisplay();
                     advanceToGame(idx + 1);
                 } else {
-                    // Show partial totals while waiting
                     int myDisplayTotal  = isPlayer1 ? (totalP1 + p1) : (totalP2 + p2);
                     int oppDisplayTotal = isPlayer1 ? (totalP2 + p2) : (totalP1 + p1);
                     tvMyScore.setText(String.valueOf(myDisplayTotal));
@@ -453,14 +480,16 @@ public class MatchActivity extends AppCompatActivity {
         tvFinalScore.setText(myTotal + " – " + oppTotal);
 
         String result;
-        if (myTotal > oppTotal)       result = "You win!";
+        if (opponentForfeited)        result = "You win!";
+        else if (myTotal > oppTotal)  result = "You win!";
         else if (oppTotal > myTotal)  result = opponentUsername + " wins!";
         else                          result = "Draw!";
         tvWinner.setText(result);
 
         String myUid = matchRepository.getUid();
         if (myUid != null) {
-            matchRepository.finishMatch(this, matchId, myUid, myTotal, oppTotal, opponentUsername);
+            int oppForStars = opponentForfeited ? -1 : oppTotal;
+            matchRepository.finishMatch(this, matchId, myUid, myTotal, oppForStars, opponentUsername);
         }
     }
 
@@ -476,7 +505,7 @@ public class MatchActivity extends AppCompatActivity {
             }
         }
         if (currentTurnListener != null) {
-            if ((currentGame == GAME_ASOC || currentGame == GAME_SKOCK) && !isPlayer1) {
+            if ((currentGame == GAME_ASOC || currentGame == GAME_SKOCK || currentGame == GAME_MB) && !isPlayer1) {
                 matchRepository.removeAsocSkockoStartedListener(matchId, String.valueOf(currentGame), currentTurnListener);
             } else {
                 matchRepository.removeP1DoneListener(matchId, currentGame, currentTurnListener);

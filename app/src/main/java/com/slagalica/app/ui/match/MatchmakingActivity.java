@@ -56,7 +56,7 @@ public class MatchmakingActivity extends AppCompatActivity {
             finish();
         });
 
-        matchRepository.joinQueue(
+        Runnable startQueue = () -> matchRepository.joinQueue(
             username,
             (matchId, isPlayer1, opponentUsername) -> {
                 if (matchFound) return;
@@ -107,6 +107,25 @@ public class MatchmakingActivity extends AppCompatActivity {
                 }
             }
         );
+
+        FirebaseUser me = FirebaseAuth.getInstance().getCurrentUser();
+        boolean guest = me == null || me.isAnonymous();
+        if (guest) {
+            startQueue.run();
+        } else {
+            matchRepository.hasToken(uid, new RepositoryCallback<Boolean>() {
+                @Override public void onSuccess(Boolean has) {
+                    if (Boolean.TRUE.equals(has)) {
+                        startQueue.run();
+                    } else {
+                        Toast.makeText(MatchmakingActivity.this,
+                            "No tokens left. Come back tomorrow!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+                @Override public void onFailure(Exception e) { startQueue.run(); }
+            });
+        }
     }
 
     @Override

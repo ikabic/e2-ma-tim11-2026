@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         MediaManager.init(this, config);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            InviteManager.get().startListening();
+            InviteManager.get().startListening(getApplicationContext());
 
             FirebaseFirestore.getInstance().collection("users")
                     .document(FirebaseAuth.getInstance().getCurrentUser().getUid())

@@ -39,6 +39,8 @@ public class UserRepository {
                         .addOnSuccessListener(unused -> {
                             db.collection("profiles").document(uid).set(profile)
                                     .addOnSuccessListener(profileUnused -> {
+                                        db.collection("profiles").document(uid)
+                                                .update("lastTokenRefresh", System.currentTimeMillis());
                                         firebaseUser.sendEmailVerification()
                                                 .addOnSuccessListener(v -> callback.onSuccess(null))
                                                 .addOnFailureListener(callback::onFailure);
