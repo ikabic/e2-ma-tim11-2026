@@ -2,6 +2,7 @@ package com.slagalica.app.repository;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,6 +30,7 @@ public class MatchRepository {
     private final FirebaseFirestore  db;
     private final FirebaseAuth       auth;
 
+    private final StatisticsRepository statsRepository = new StatisticsRepository();
     public interface MatchFoundCallback {
         void onMatchFound(String matchId, boolean isPlayer1, String opponentUsername);
     }
@@ -342,6 +344,11 @@ public class MatchRepository {
         UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
         updateStars(myUid, myScore, opponentScore);
+
+        statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
+            @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
+            @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
+        });
     }
 
     private void updateStars(String uid, int myScore, int opponentScore) {
