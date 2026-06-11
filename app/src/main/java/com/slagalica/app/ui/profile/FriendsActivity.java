@@ -114,9 +114,22 @@ public class FriendsActivity extends BaseActivity {
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(FriendsViewModel.class);
 
+        viewModel.getLoading().observe(this, isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    binding.pbLoading.setVisibility(View.VISIBLE);
+                    binding.rvFriends.setVisibility(View.GONE);
+                } else {
+                    binding.pbLoading.setVisibility(View.GONE);
+                    binding.rvFriends.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         viewModel.getFriends().observe(this, friends -> {
             binding.tvFriendCount.setText(String.valueOf(friends.size()));
-            binding.sectionEmpty.setVisibility(friends.isEmpty() ? View.VISIBLE : View.GONE);
+            if(!viewModel.getLoading().getValue())
+                binding.sectionEmpty.setVisibility(friends.isEmpty() ? View.VISIBLE : View.GONE);
             friendsAdapter.submitList(friends);
         });
 

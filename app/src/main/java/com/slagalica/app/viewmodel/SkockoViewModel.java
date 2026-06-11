@@ -159,16 +159,38 @@ public class SkockoViewModel extends ViewModel {
                 new RepositoryCallback<List<SkockoRepository.GuessRow>>() {
                     @Override public void onSuccess(List<SkockoRepository.GuessRow> rows) {
                         List<GuessEntry> entries = new ArrayList<>();
-                        for (SkockoRepository.GuessRow row : rows) {
+                        boolean opponentSolved = false;
+                        int solveAttempt = 0;
+
+                        for (int i = 0; i < rows.size(); i++) {
+                            SkockoRepository.GuessRow row = rows.get(i);
                             GuessResult[] res = new GuessResult[CODE_LENGTH];
-                            for (int i = 0; i < CODE_LENGTH && i < row.results.size(); i++) {
-                                try { res[i] = GuessResult.valueOf(row.results.get(i)); }
-                                catch (Exception ex) { res[i] = GuessResult.ABSENT; }
+                            for (int j = 0; j < CODE_LENGTH && j < row.results.size(); j++) {
+                                try { res[j] = GuessResult.valueOf(row.results.get(j)); }
+                                catch (Exception ex) { res[j] = GuessResult.ABSENT; }
                             }
                             entries.add(new GuessEntry(row.symbols, res));
+
+                            if (allCorrect(res)) {
+                                opponentSolved = true;
+                                solveAttempt = i + 1;
+                            }
                         }
                         guessHistory.postValue(entries);
                         currentAttempt.postValue(entries.size() + 1);
+
+                        int round = safeGetRound();
+                        if (isPlayer1) {
+                            if (round == 2) {
+                                p2SolvedR2 = opponentSolved;
+                                p2AttemptR2 = opponentSolved ? solveAttempt : rows.size();
+                            }
+                        } else {
+                            if (round == 1) {
+                                p1SolvedR1 = opponentSolved;
+                                p1AttemptR1 = opponentSolved ? solveAttempt : rows.size();
+                            }
+                        }
                     }
                     @Override public void onFailure(Exception e) {}
                 });
@@ -330,11 +352,11 @@ public class SkockoViewModel extends ViewModel {
         if (isMatchGame) {
             matchRepo.writeGameScore(matchId, 3, p1Delta, p2Delta, new RepositoryCallback<Void>() {
                 @Override public void onSuccess(Void v) {
-                    if (writeStats) {
-                        skockoRepo.writeStats(
-                                p1SolvedR1, p1AttemptR1, p1SolvedR2, p1AttemptR2,
-                                p2SolvedR1, p2AttemptR1, p2SolvedR2, p2AttemptR2,
-                                p1Delta, p2Delta,
+                    if (writeStats && isPlayer1) {
+                        int r1Attempt = p1SolvedR1 ? p1AttemptR1 : 0;
+                        int r2Attempt = p2SolvedR2 ? p2AttemptR2 : 0;
+
+                        skockoRepo.writeStats(r1Attempt, r2Attempt,
                                 new RepositoryCallback<Void>() {
                                     @Override public void onSuccess(Void v) {
                                         skockoRepo.cleanupMatchData();
