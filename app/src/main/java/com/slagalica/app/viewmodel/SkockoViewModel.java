@@ -324,14 +324,17 @@ public class SkockoViewModel extends ViewModel {
         int p1 = safeGet(player1Score);
         int p2 = safeGet(player2Score);
 
+        int p1Delta = p1 - prevP1Score;
+        int p2Delta = p2 - prevP2Score;
+
         if (isMatchGame) {
-            matchRepo.writeGameScore(matchId, 3, p1, p2, new RepositoryCallback<Void>() {
+            matchRepo.writeGameScore(matchId, 3, p1Delta, p2Delta, new RepositoryCallback<Void>() {
                 @Override public void onSuccess(Void v) {
                     if (writeStats) {
                         skockoRepo.writeStats(
                                 p1SolvedR1, p1AttemptR1, p1SolvedR2, p1AttemptR2,
                                 p2SolvedR1, p2AttemptR1, p2SolvedR2, p2AttemptR2,
-                                p1, p2,
+                                p1Delta, p2Delta,
                                 new RepositoryCallback<Void>() {
                                     @Override public void onSuccess(Void v) {
                                         skockoRepo.cleanupMatchData();

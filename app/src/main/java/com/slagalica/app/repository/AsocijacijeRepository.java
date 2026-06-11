@@ -25,6 +25,7 @@ public class AsocijacijeRepository {
     private DatabaseReference matchRef;
     private DatabaseReference gameRef;
     private DatabaseReference statsRef;
+    private DatabaseReference scoresRef;
 
     private final Map<ValueEventListener, DatabaseReference> activeListeners = new HashMap<>();
 
@@ -34,7 +35,8 @@ public class AsocijacijeRepository {
     }
 
     public void initMatch(String matchId) {
-        matchRef = rtdb.child(MATCHES_PATH).child(matchId);
+        matchRef  = rtdb.child(MATCHES_PATH).child(matchId);
+        scoresRef = matchRef.child("scores").child("2");
         setRound(1);
     }
 
@@ -202,14 +204,14 @@ public class AsocijacijeRepository {
     }
 
     public void writeScore(boolean isPlayer1, int score) {
-        if (gameRef != null) {
-            gameRef.child(isPlayer1 ? "p1Score" : "p2Score").setValue(score);
+        if (scoresRef != null) {
+            scoresRef.child(isPlayer1 ? "p1Score" : "p2Score").setValue(score);
         }
     }
 
     public ValueEventListener listenForOpponentScore(boolean isPlayer1, RepositoryCallback<Integer> callback) {
         String key = isPlayer1 ? "p2Score" : "p1Score";
-        DatabaseReference ref = gameRef.child(key);
+        DatabaseReference ref = scoresRef.child(key);
         ValueEventListener listener = new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot snap) {
                 Integer v = snap.getValue(Integer.class);
@@ -252,7 +254,7 @@ public class AsocijacijeRepository {
         stats.put("p2ColsSolved", p2ColsSolved);
         stats.put("p2FinalSolved", p2FinalSolved);
         stats.put("p2Score", p2Score);
-        statsRef.setValue(stats).addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(null); })
+        scoresRef.child("stats").setValue(stats).addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(null); })
                 .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
     }
 
