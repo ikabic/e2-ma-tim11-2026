@@ -340,17 +340,6 @@ public class MatchRepository {
             .removeEventListener(listener);
     }
 
-    public void finishMatch(String matchId, String myUid, int myScore, int opponentScore) {
-        UserStatusManager.setInGame(auth, false);
-        rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
-        updateStars(myUid, myScore, opponentScore);
-
-        statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
-            @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
-            @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
-        });
-    }
-
     private void updateStars(String uid, int myScore, int opponentScore) {
         db.collection("profiles").document(uid).get()
             .addOnSuccessListener(doc -> {
@@ -673,5 +662,79 @@ public class MatchRepository {
     public void removeAsocSkockoStartedListener(String matchId, String gameIdx, ValueEventListener listener) {
         if (listener == null) return;
         rtdb.child(MATCHES_PATH).child(matchId).child("gameStarted").child(gameIdx).removeEventListener(listener);
+    }
+
+    public void finishMatch(android.content.Context context, String matchId, String myUid, int myScore, int opponentScore, String opponentName) {
+        UserStatusManager.setInGame(auth, false);
+        rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
+        updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
+
+        statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
+            @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
+            @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
+        });
+    }
+
+    private void updateStarsAndNotify(android.content.Context context, String uid, int myScore, int opponentScore, String opponentName) {
+        db.collection("profiles").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    Long currentStarsLong = doc.getLong("stars");
+                    long stars = currentStarsLong != null ? currentStarsLong : 0;
+
+                    long bonusStars = myScore / 40;
+                    long delta;
+                    if      (myScore > opponentScore) delta =  10 + bonusStars;
+                    else if (myScore < opponentScore) delta = -10 + bonusStars;
+                    else                              delta = bonusStars;
+                    long newStars = Math.max(0, stars + delta);
+
+                    long oldMilestones = stars    / 50;
+                    long newMilestones = newStars / 50;
+                    long tokenBonus    = newMilestones - oldMilestones;
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("stars", newStars);
+                    if (tokenBonus > 0) updates.put("tokens", FieldValue.increment(tokenBonus));
+
+                    String oldLeague = leagueForStars(stars);
+                    String newLeague = leagueForStars(newStars);
+                    boolean leagueChanged = !oldLeague.equals(newLeague) && newStars > stars;
+
+                    db.collection("profiles").document(uid).update(updates)
+                            .addOnSuccessListener(v -> {
+
+                                int starsDelta = (int) Math.max(0, delta);
+                                if (starsDelta > 0) {
+                                    RankingRepository rankRepo = new RankingRepository();
+                                    rankRepo.addStarsToCycle("weekly", starsDelta, new RepositoryCallback<Void>() {
+                                        @Override public void onSuccess(Void r) {}
+                                        @Override public void onFailure(Exception e) {}
+                                    });
+                                    rankRepo.addStarsToCycle("monthly", starsDelta, new RepositoryCallback<Void>() {
+                                        @Override public void onSuccess(Void r) {}
+                                        @Override public void onFailure(Exception e) {}
+                                    });
+                                }
+
+                                if (leagueChanged) {
+                                    NotificationRepository notifRepo = context != null ? new NotificationRepository(context) : new NotificationRepository();
+                                    notifRepo.createLeagueChangeNotif(uid, newLeague);
+                                }
+
+                                NotificationRepository notifRepo = context != null ? new NotificationRepository(context) : new NotificationRepository();
+                                notifRepo.createMatchResultNotif(uid, opponentName, myScore, opponentScore);
+                            });
+                });
+    }
+
+    private String leagueForStars(long stars) {
+        if (stars < 50)   return "Unranked";
+        if (stars < 200)  return "Bronze";
+        if (stars < 500)  return "Silver";
+        if (stars < 1000) return "Gold";
+        if (stars < 2000) return "Platinum";
+        return "Diamond";
     }
 }

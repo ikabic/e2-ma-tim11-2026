@@ -433,7 +433,10 @@ public class AsocijacijeViewModel extends ViewModel {
         int p1 = safeGet(player1Score);
         int p2 = safeGet(player2Score);
 
-        matchRepo.writeGameScore(matchId, 2, p1, p2, new RepositoryCallback<Void>() {
+        int p1Delta = p1 - prevP1Score;
+        int p2Delta = p2 - prevP2Score;
+
+        matchRepo.writeGameScore(matchId, 2, p1Delta, p2Delta, new RepositoryCallback<Void>() {
             @Override public void onSuccess(Void v) {}
             @Override public void onFailure(Exception e) {}
         });

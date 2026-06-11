@@ -346,8 +346,11 @@ public class SkockoViewModel extends ViewModel {
         int p1 = safeGet(player1Score);
         int p2 = safeGet(player2Score);
 
+        int p1Delta = p1 - prevP1Score;
+        int p2Delta = p2 - prevP2Score;
+
         if (isMatchGame) {
-            matchRepo.writeGameScore(matchId, 3, p1, p2, new RepositoryCallback<Void>() {
+            matchRepo.writeGameScore(matchId, 3, p1Delta, p2Delta, new RepositoryCallback<Void>() {
                 @Override public void onSuccess(Void v) {
                     if (writeStats && isPlayer1) {
                         int r1Attempt = p1SolvedR1 ? p1AttemptR1 : 0;

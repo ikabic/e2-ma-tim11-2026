@@ -17,10 +17,9 @@ public class NotificationsActivity extends BaseActivity
         implements NotificationsAdapter.OnMarkReadListener {
 
     private NotificationViewModel viewModel;
-    private NotificationsAdapter   adapter;
-
+    private NotificationsAdapter adapter;
     private MaterialButton btnFilterAll, btnFilterUnread, btnMarkAllRead, btnBack;
-    private RecyclerView   rvNotifications;
+    private RecyclerView rvNotifications;
     private View layoutEmpty;
 
     @Override
@@ -50,14 +49,12 @@ public class NotificationsActivity extends BaseActivity
 
         viewModel.getActiveFilter().observe(this, filter -> {
             boolean allActive = filter == Filter.ALL;
-            setChipActive(btnFilterAll,    allActive);
+            setChipActive(btnFilterAll, allActive);
             setChipActive(btnFilterUnread, !allActive);
         });
 
         viewModel.getUnreadCount().observe(this, count -> {
-            String label = count != null && count > 0
-                    ? "Unread (" + count + ")"
-                    : "Unread";
+            String label = count != null && count > 0 ? "Unread (" + count + ")" : "Unread";
             btnFilterUnread.setText(label);
         });
 
@@ -77,14 +74,11 @@ public class NotificationsActivity extends BaseActivity
 
     private void setChipActive(MaterialButton btn, boolean active) {
         if (active) {
-            btn.setBackgroundTintList(
-                    getResources().getColorStateList(R.color.accent, null));
+            btn.setBackgroundTintList(getResources().getColorStateList(R.color.accent, null));
             btn.setTextColor(getResources().getColor(R.color.accent_ink, null));
             btn.setStrokeColor(getResources().getColorStateList(R.color.accent, null));
         } else {
-            btn.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            android.graphics.Color.TRANSPARENT));
+            btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
             btn.setTextColor(getResources().getColor(R.color.text_mute, null));
             btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
         }

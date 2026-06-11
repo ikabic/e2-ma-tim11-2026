@@ -3,6 +3,7 @@ package com.slagalica.app.ui.ranking;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,12 +25,12 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.RankView
         void onProfileClick(Friend friend);
     }
 
-    private final RankingAdapter.OnProfileClick listener;
+    private final OnProfileClick listener;
 
     private List<RankingEntry> items = new ArrayList<>();
     private String currentUserId = "";
 
-    public RankingAdapter(RankingAdapter.OnProfileClick listener) {
+    public RankingAdapter(OnProfileClick listener) {
         this.listener = listener;
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -46,7 +47,8 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.RankView
     @NonNull
     @Override
     public RankViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ranking, parent, false);
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_ranking, parent, false);
         return new RankViewHolder(v);
     }
 
@@ -59,64 +61,72 @@ public class RankingAdapter extends RecyclerView.Adapter<RankingAdapter.RankView
     public int getItemCount() { return items.size(); }
 
     class RankViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvRank;
-        private final TextView tvMedal;
-        private final TextView tvUsername;
-        private final TextView tvLeague;
-        private final TextView tvStars;
+        private final TextView   tvRank;
+        private final ImageView  ivMedal;
+        private final TextView   tvUsername;
+        private final ImageView  ivLeagueIcon;
+        private final TextView   tvLeagueName;
+        private final TextView   tvStars;
 
         RankViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvRank = itemView.findViewById(R.id.tvRank);
-            tvMedal = itemView.findViewById(R.id.tvMedal);
-            tvUsername = itemView.findViewById(R.id.tvUsername);
-            tvLeague = itemView.findViewById(R.id.tvLeague);
-            tvStars = itemView.findViewById(R.id.tvStars);
+            tvRank  = itemView.findViewById(R.id.tvRank);
+            ivMedal  = itemView.findViewById(R.id.tvMedal);
+            tvUsername  = itemView.findViewById(R.id.tvUsername);
+            ivLeagueIcon = itemView.findViewById(R.id.ivLeagueIcon);
+            tvLeagueName = itemView.findViewById(R.id.tvLeague);
+            tvStars  = itemView.findViewById(R.id.tvStars);
         }
 
         void bind(RankingEntry entry) {
             int rank = entry.getRank();
 
-            if (rank == 1) { tvMedal.setText("🥇"); tvRank.setVisibility(View.GONE); }
-            else if (rank == 2) { tvMedal.setText("🥈"); tvRank.setVisibility(View.GONE); }
-            else if (rank == 3) { tvMedal.setText("🥉"); tvRank.setVisibility(View.GONE); }
-            else {
-                tvMedal.setText("");
+            if (rank <= 3) {
+                ivMedal.setVisibility(View.VISIBLE);
+                tvRank.setVisibility(View.GONE);
+                ivMedal.setImageResource(medalDrawable(rank));
+            } else {
+                ivMedal.setVisibility(View.GONE);
                 tvRank.setVisibility(View.VISIBLE);
                 tvRank.setText(String.valueOf(rank));
             }
 
             tvUsername.setText(entry.getUsername());
-            tvStars.setText("⭐ " + entry.getCycleStars());
+
+            tvStars.setText(entry.getCycleStars() + " stars");
 
             Profile dummy = new Profile();
             dummy.setStars(entry.getTotalStars());
-            tvLeague.setText(leagueEmoji(dummy.getLeague("current")) + " " + dummy.getLeague("current"));
+            String league = dummy.getLeague("current");
+            ivLeagueIcon.setImageResource(leagueDrawable(league));
+            tvLeagueName.setText(league);
 
             boolean isMe = entry.getUserId().equals(currentUserId);
             itemView.setAlpha(isMe ? 1.0f : 0.92f);
-            int bgRes = isMe ? R.drawable.bg_hero : 0;
             itemView.setBackgroundResource(isMe ? R.drawable.bg_ranking_me : 0);
 
             itemView.setOnClickListener(v -> {
                 Friend friend = new Friend();
                 friend.setUid(entry.getUserId());
                 friend.setUsername(entry.getUsername());
-
                 listener.onProfileClick(friend);
             });
         }
 
-        private String leagueEmoji(String league) {
-            if (league == null) return "❓";
+        private int leagueDrawable(String league) {
+            if (league == null) return R.drawable.league_unranked;
             switch (league) {
-                case "Bronze":   return "🥉";
-                case "Silver":   return "🥈";
-                case "Gold":     return "🥇";
-                case "Platinum": return "💎";
-                case "Diamond":  return "💠";
-                default:         return "🔰";
+                case "Bronze": return R.drawable.league_bronze;
+                case "Silver": return R.drawable.league_silver;
+                case "Gold": return R.drawable.league_gold;
+                case "Platinum": return R.drawable.league_platinum;
+                case "Diamond": return R.drawable.league_diamond;
+                default:  return R.drawable.league_unranked;
             }
+        }
+
+        private int medalDrawable(int rank) {
+            return R.drawable.ic_nav_ranks;
         }
     }
 }
