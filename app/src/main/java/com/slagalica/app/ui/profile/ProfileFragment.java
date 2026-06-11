@@ -230,20 +230,24 @@ public class ProfileFragment extends Fragment {
                                 gs.getMinPoints(), gs.getMaxPoints(), points, played);
 
                         long solvedAsoc = gs.getMetric("solved");
-                        long totalAsoc = solvedAsoc + gs.getMetric("unsolved");
+                        long unsolvedAsoc = gs.getMetric("unsolved");
+                        long totalAsoc = solvedAsoc + unsolvedAsoc;
 
                         LinearLayout.LayoutParams completeParams = (LinearLayout.LayoutParams) binding.vAsocComplete.getLayoutParams();
                         LinearLayout.LayoutParams incompleteParams = (LinearLayout.LayoutParams) binding.vAsocIncomplete.getLayoutParams();
 
                         if (totalAsoc > 0) {
-                            long asocPct = (solvedAsoc * 100) / totalAsoc;
-                            binding.tvAsocSolved.setText(String.valueOf(asocPct));
+                            binding.tvAsocSolved.setText(String.valueOf(solvedAsoc));
+                            binding.tvAsocTotal.setText(" / " + totalAsoc);
 
-                            completeParams.weight = asocPct;
-                            incompleteParams.weight = totalAsoc - asocPct;
+                            long asocPct = (solvedAsoc * 100) / totalAsoc;
+
+                            completeParams.weight = (solvedAsoc * 100) / totalAsoc;
+                            incompleteParams.weight = (unsolvedAsoc * 100) / totalAsoc;
                         } else {
                             completeParams.weight = incompleteParams.weight = 50;
                             binding.tvAsocSolved.setText("0");
+                            binding.tvAsocTotal.setText(" / 0");
                         }
 
                         binding.vAsocComplete.setLayoutParams(completeParams);

@@ -260,7 +260,7 @@ public class MatchRepository {
         scores.put("p2Done", true);
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
-            .setValue(scores)
+            .updateChildren(scores)
             .addOnSuccessListener(v -> callback.onSuccess(null))
             .addOnFailureListener(callback::onFailure);
     }
@@ -338,33 +338,6 @@ public class MatchRepository {
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
             .removeEventListener(listener);
-    }
-
-    private void updateStars(String uid, int myScore, int opponentScore) {
-        db.collection("profiles").document(uid).get()
-            .addOnSuccessListener(doc -> {
-                if (!doc.exists()) return;
-                Long current = doc.getLong("stars");
-                long stars = current != null ? current : 0;
-
-                long bonusStars = myScore / 40;
-                long delta;
-                if (myScore > opponentScore)      delta = 10 + bonusStars;
-                else if (myScore < opponentScore) delta = -10 + bonusStars;
-                else                              delta = bonusStars;
-                long newStars = Math.max(0, stars + delta);
-
-                long oldMilestones = stars / 50;
-                long newMilestones = newStars / 50;
-                long tokenBonus = newMilestones - oldMilestones;
-
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("stars", newStars);
-                if (tokenBonus > 0) {
-                    updates.put("tokens", FieldValue.increment(tokenBonus));
-                }
-                db.collection("profiles").document(uid).update(updates);
-            });
     }
 
     public void writeKpkP1StealQuestion(String matchId, String questionId,

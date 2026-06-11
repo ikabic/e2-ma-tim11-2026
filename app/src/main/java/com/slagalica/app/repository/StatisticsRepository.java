@@ -110,7 +110,7 @@ public class StatisticsRepository {
                 p2GameUpdates.put("totalPlayed", FieldValue.increment(1));
                 p2GameUpdates.put("totalPoints", FieldValue.increment(p2GameScore));
 
-                DataSnapshot statsSnap = gameSnap.child(STATS);
+                DataSnapshot statsSnap = gameSnap.child("stats");
                 if (statsSnap.exists()) {
                     for (DataSnapshot statChild : statsSnap.getChildren()) {
                         String statKey = statChild.getKey();

@@ -228,13 +228,15 @@ public class SkockoRepository {
     public void writeStats(int r1Attempt, int r2Attempt, RepositoryCallback<Void> callback) {
         Map<String, Object> stats = new HashMap<>();
 
-        Log.d("STATS",  r1Attempt + ", " + r2Attempt);
-
         if (r1Attempt != 0) stats.put("p1GuessedInAttempt" + r1Attempt, 1);
         if (r2Attempt != 0) stats.put("p2GuessedInAttempt" + r2Attempt, 1);
-
-        statsRef.setValue(stats).addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(null); })
-                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+        statsRef.setValue(stats)
+                .addOnSuccessListener(unused -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
     }
 
     private void addTracked(DatabaseReference ref, ValueEventListener l) {
