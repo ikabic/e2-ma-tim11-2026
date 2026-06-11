@@ -54,8 +54,10 @@ public class AsocijacijeViewModel extends ViewModel {
     private int prevP2Score = 0;
     private int myColsSolved = 0;
     private boolean myFinalSolved = false;
+    private int myFinalsSolved = 0;
     private int oppColsSolved = 0;
     private boolean oppFinalSolved  = false;
+    private int oppFinalsSolved = 0;
     private boolean hasOpenedFieldInThisTurn = false;
     private boolean roundEndScheduled = false;
     public LiveData<AsocijacijeQuestion> getQuestion()     { return question; }
@@ -201,9 +203,16 @@ public class AsocijacijeViewModel extends ViewModel {
             @Override public void onFailure(Exception e) {}
         });
 
-        solvedListener = asocRepo.listenForSolvedState((cols, fs) -> {
+        solvedListener = asocRepo.listenForSolvedState((cols, fs, finalSolvedPlayer) -> {
             columnSolved.postValue(cols);
             finalSolved.postValue(fs);
+
+            if (finalSolvedPlayer != null && !finalSolvedPlayer.isEmpty()) {
+                String myRole = isPlayer1 ? "p1" : "p2";
+                if (finalSolvedPlayer.equals(myRole)) myFinalsSolved++;
+                else oppFinalsSolved++;
+            }
+
             if (fs) scheduleRoundEnd();
         });
 
@@ -389,7 +398,7 @@ public class AsocijacijeViewModel extends ViewModel {
                 myFinalSolved = true;
                 addMyPoints(pts);
                 feedbackMsg.setValue("Final answer correct! +" + pts + " pts");
-                asocRepo.writeFinalSolved(true);
+                asocRepo.writeFinalSolved(true, isPlayer1);
                 scheduleRoundEnd();
             } else {
                 feedbackMsg.setValue("Wrong final answer — opponent's turn");
@@ -429,8 +438,7 @@ public class AsocijacijeViewModel extends ViewModel {
             @Override public void onFailure(Exception e) {}
         });
 
-        asocRepo.writeStats(isPlayer1 ? myColsSolved  : oppColsSolved, isPlayer1 ? myFinalSolved : oppFinalSolved, p1,
-                isPlayer1 ? oppColsSolved  : myColsSolved, isPlayer1 ? oppFinalSolved : myFinalSolved, p2,
+        asocRepo.writeStats(isPlayer1 ? myFinalsSolved : oppFinalsSolved, isPlayer1 ? oppFinalsSolved : myFinalsSolved,
                 new RepositoryCallback<Void>() {
                     @Override public void onSuccess(Void v) { asocRepo.cleanupMatchData(); }
                     @Override public void onFailure(Exception e) { asocRepo.cleanupMatchData(); }
