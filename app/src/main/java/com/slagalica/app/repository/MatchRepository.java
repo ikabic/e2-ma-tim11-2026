@@ -2,6 +2,7 @@ package com.slagalica.app.repository;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,6 +30,7 @@ public class MatchRepository {
     private final FirebaseFirestore  db;
     private final FirebaseAuth       auth;
 
+    private final StatisticsRepository statsRepository = new StatisticsRepository();
     public interface MatchFoundCallback {
         void onMatchFound(String matchId, boolean isPlayer1, String opponentUsername);
     }
@@ -258,7 +260,7 @@ public class MatchRepository {
         scores.put("p2Done", true);
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
-            .setValue(scores)
+            .updateChildren(scores)
             .addOnSuccessListener(v -> callback.onSuccess(null))
             .addOnFailureListener(callback::onFailure);
     }
@@ -336,10 +338,6 @@ public class MatchRepository {
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
             .removeEventListener(listener);
-    }
-
-    public void finishMatch(String matchId, String myUid, int myScore, int opponentScore) {
-        finishMatch(null, matchId, myUid, myScore, opponentScore, "protivnik");
     }
 
     public void writeKpkP1StealQuestion(String matchId, String questionId,
@@ -664,13 +662,18 @@ public class MatchRepository {
         UserStatusManager.setInGame(auth, false);
         DatabaseReference matchRef = rtdb.child(MATCHES_PATH).child(matchId);
         matchRef.child("status").setValue("finished");
+        Runnable applyResults = () -> {
+            updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
+            statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
+                @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
+                @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
+            });
+        };
         matchRef.child("invite").get()
             .addOnSuccessListener(snap -> {
-                if (!Boolean.TRUE.equals(snap.getValue(Boolean.class))) {
-                    updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
-                }
+                if (!Boolean.TRUE.equals(snap.getValue(Boolean.class))) applyResults.run();
             })
-            .addOnFailureListener(e -> updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName));
+            .addOnFailureListener(e -> applyResults.run());
     }
 
     private void updateStarsAndNotify(android.content.Context context, String uid, int myScore, int opponentScore, String opponentName) {

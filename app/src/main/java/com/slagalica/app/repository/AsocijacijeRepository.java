@@ -25,6 +25,7 @@ public class AsocijacijeRepository {
     private DatabaseReference matchRef;
     private DatabaseReference gameRef;
     private DatabaseReference statsRef;
+    private DatabaseReference scoresRef;
 
     private final Map<ValueEventListener, DatabaseReference> activeListeners = new HashMap<>();
 
@@ -34,7 +35,8 @@ public class AsocijacijeRepository {
     }
 
     public void initMatch(String matchId) {
-        matchRef = rtdb.child(MATCHES_PATH).child(matchId);
+        matchRef  = rtdb.child(MATCHES_PATH).child(matchId);
+        scoresRef = matchRef.child("scores").child("2");
         setRound(1);
     }
 
@@ -46,7 +48,7 @@ public class AsocijacijeRepository {
 
         if (matchRef != null) {
             gameRef  = matchRef.child("asocijacije").child("round_" + roundNumber);
-            statsRef = matchRef.child("asocijacije").child("stats");
+            statsRef = matchRef.child("scores").child("2").child("stats");
             if (roundNumber > 1) {
                 matchRef.child("asocijacije").child("round_" + (roundNumber - 1) + "_state").setValue(null);
             }
@@ -147,8 +149,9 @@ public class AsocijacijeRepository {
         gameRef.child("columnSolved").child(String.valueOf(col)).setValue(true);
     }
 
-    public void writeFinalSolved(boolean solved) {
+    public void writeFinalSolved(boolean solved, boolean isPlayer1) {
         gameRef.child("finalSolved").setValue(solved);
+        gameRef.child("finalSolvedPlayer").setValue(isPlayer1 ? "p1" : "p2");
     }
 
     public ValueEventListener listenForSolvedState(SolvedStateCallback callback) {
@@ -162,7 +165,8 @@ public class AsocijacijeRepository {
                     cols[i] = Boolean.TRUE.equals(v);
                 }
                 Boolean finalSolved = snap.child("finalSolved").getValue(Boolean.class);
-                callback.onUpdate(cols, Boolean.TRUE.equals(finalSolved));
+                String finalSolvedPlayer = snap.child("finalSolvedPlayer").getValue(String.class);
+                callback.onUpdate(cols, Boolean.TRUE.equals(finalSolved), finalSolvedPlayer);
             }
             @Override public void onCancelled(DatabaseError e) {}
         };
@@ -202,14 +206,14 @@ public class AsocijacijeRepository {
     }
 
     public void writeScore(boolean isPlayer1, int score) {
-        if (gameRef != null) {
-            gameRef.child(isPlayer1 ? "p1Score" : "p2Score").setValue(score);
+        if (scoresRef != null) {
+            scoresRef.child(isPlayer1 ? "p1Score" : "p2Score").setValue(score);
         }
     }
 
     public ValueEventListener listenForOpponentScore(boolean isPlayer1, RepositoryCallback<Integer> callback) {
         String key = isPlayer1 ? "p2Score" : "p1Score";
-        DatabaseReference ref = gameRef.child(key);
+        DatabaseReference ref = scoresRef.child(key);
         ValueEventListener listener = new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot snap) {
                 Integer v = snap.getValue(Integer.class);
@@ -244,14 +248,12 @@ public class AsocijacijeRepository {
         return listener;
     }
 
-    public void writeStats(int p1ColsSolved, boolean p1FinalSolved, int p1Score, int p2ColsSolved, boolean p2FinalSolved, int p2Score, RepositoryCallback<Void> callback) {
+    public void writeStats(int p1FinalSolved, int p2FinalSolved, RepositoryCallback<Void> callback) {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("p1ColsSolved", p1ColsSolved);
-        stats.put("p1FinalSolved", p1FinalSolved);
-        stats.put("p1Score", p1Score);
-        stats.put("p2ColsSolved", p2ColsSolved);
-        stats.put("p2FinalSolved", p2FinalSolved);
-        stats.put("p2Score", p2Score);
+        stats.put("p1Solved", p1FinalSolved);
+        stats.put("p1Unsolved", 2 - p1FinalSolved);
+        stats.put("p2Solved", p2FinalSolved);
+        stats.put("p2Unsolved", 2 - p2FinalSolved);
         statsRef.setValue(stats).addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(null); })
                 .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
     }
@@ -292,7 +294,7 @@ public class AsocijacijeRepository {
     }
 
     public interface SolvedStateCallback {
-        void onUpdate(boolean[] columnsSolved, boolean finalSolved);
+        void onUpdate(boolean[] columnsSolved, boolean finalSolved, String finalSolvedPlayer);
     }
 
     public void writeRoundStartTime(int round) {
