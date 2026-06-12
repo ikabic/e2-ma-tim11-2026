@@ -262,6 +262,7 @@ public class SpojniceActivity extends AppCompatActivity {
 
     private void revealCorrectLayout(Map<Integer, Integer> correctPairs) {
         isRevealScreen = true;
+        binding.tvActivePlayer.setText("Round over – showing results");
 
         Integer round = viewModel.getCurrentRound().getValue();
         List<SpojniceQuestion> qs = viewModel.getQuestions().getValue();
