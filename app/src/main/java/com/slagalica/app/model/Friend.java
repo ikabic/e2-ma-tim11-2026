@@ -45,10 +45,6 @@ public class Friend {
         return avatarUrl;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
     public int getStars() {
         return stars;
     }
@@ -61,16 +57,8 @@ public class Friend {
         return online;
     }
 
-    public void setOnline(boolean online) {
-        this.online = online;
-    }
-
     public boolean isInGame() {
         return inGame;
-    }
-
-    public void setInGame(boolean inGame) {
-        this.inGame = inGame;
     }
 
     public int getMonthlyRank() {

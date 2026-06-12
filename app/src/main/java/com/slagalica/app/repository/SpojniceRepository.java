@@ -294,6 +294,23 @@ public class SpojniceRepository {
         return listener;
     }
 
+    public ValueEventListener listenForForfeit(boolean isPlayer1, Runnable onForfeit) {
+        if (gameRef == null) return null;
+        String forfeitKey = isPlayer1 ? "p2Forfeit" : "p1Forfeit";
+        DatabaseReference ref = gameRef.child(forfeitKey);
+
+        ValueEventListener listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snap) {
+                if (Boolean.TRUE.equals(snap.getValue(Boolean.class)))
+                    onForfeit.run();
+            }
+            @Override public void onCancelled(DatabaseError e) {}
+        };
+        addListenerWithTracking(ref, listener);
+        return listener;
+    }
+
     private void addListenerWithTracking(DatabaseReference ref, ValueEventListener listener) {
         ref.addValueEventListener(listener);
         activeListeners.put(listener, ref);

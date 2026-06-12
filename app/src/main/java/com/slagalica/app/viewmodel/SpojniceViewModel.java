@@ -33,6 +33,7 @@ public class SpojniceViewModel extends ViewModel {
     private boolean isMatchGame = false;
     private boolean isPlayer1 = true;
     private String matchId = null;
+    private boolean isSoloMatch = false;
 
     private final MutableLiveData<List<SpojniceQuestion>> questions = new MutableLiveData<>();
     private final MutableLiveData<Integer> currentRound = new MutableLiveData<>(0);
@@ -64,6 +65,7 @@ public class SpojniceViewModel extends ViewModel {
     private boolean inLeftoverChance = false;
     private boolean leftoverAlreadyPlayed = false;
     private boolean isInRevealPhase = false;
+    private boolean isWaitingForGameFinish = false;
     private int round1MyScore = 0;
     private int round1OpponentScore = 0;
 
@@ -76,6 +78,7 @@ public class SpojniceViewModel extends ViewModel {
     private ValueEventListener questionIdsListener;
     private ValueEventListener opponentGuessEventListener;
     private ValueEventListener opponentLeftIdxListener;
+    private ValueEventListener forfeitListener;
 
     public void initMatchMode(String matchId, boolean isPlayer1) {
         this.isMatchGame = true;
@@ -94,11 +97,74 @@ public class SpojniceViewModel extends ViewModel {
                     @Override public void onFailure(Exception e) { }
                 });
 
+        String myUid = matchRepo.getUid();
+        if (myUid != null) forfeitListener = matchRepo.listenForForfeit(matchId, myUid, this::handleOpponentForfeit);
+
         loadQuestions();
     }
 
+    public void initMatchSoloMode(String matchId, boolean isPlayer1) {
+        this.isMatchGame = true;
+        this.isPlayer1 = isPlayer1;
+        this.matchId = matchId;
+        this.isSoloMatch = true;
+        loadQuestions();
+    }
+
+    private void handleOpponentForfeit() {
+        cancelOpponentWaitTimer();
+        opponentLeft.postValue(true);
+        isSoloMatch = true;
+
+        if (questions.getValue() == null) {
+            if (questionIdsListener != null) {
+                spojRepo.removeListener(questionIdsListener);
+                questionIdsListener = null;
+            }
+            loadQuestions();
+            return;
+        }
+
+        if (Boolean.TRUE.equals(waitingForOpp.getValue())) {
+            waitingForOpp.postValue(false);
+
+            if (opponentTurnDoneListener != null) {
+                spojRepo.removeListener(opponentTurnDoneListener);
+                opponentTurnDoneListener = null;
+
+                if (isWaitingForGameFinish) {
+                    isWaitingForGameFinish = false;
+                    resolveAndFinish();
+                } else {
+                    int round = currentRound.getValue() != null ? currentRound.getValue() : 0;
+                    boolean isOpponentPrimaryTurn = ((round == 0) != isPlayer1);
+
+                    if (isOpponentPrimaryTurn && !leftoverAlreadyPlayed) {
+                        leftoverAlreadyPlayed = true;
+                        if (opponentPairsListener != null) {
+                            spojRepo.removeListener(opponentPairsListener);
+                            opponentPairsListener = null;
+                        }
+                        spojRepo.readOpponentPairs(isPlayer1, round, new RepositoryCallback<>() {
+                            @Override
+                            public void onSuccess(Map<Integer, Integer> oppPairs) {
+                                opponentPairs.clear();
+                                opponentPairs.putAll(oppPairs);
+                                myPairs.clear();
+                                confirmedPairs.postValue(getCombinedPairs());
+                                startMyLeftoverChance(round);
+                            }
+                            @Override
+                            public void onFailure(Exception e) { endRoundAndReveal(round); }
+                        });
+                    } else endRoundAndReveal(round);
+                }
+            }
+        }
+    }
+
     public void loadQuestionsForSolo() {
-        if (!isMatchGame) loadQuestions();
+        if (!isMatchGame || isSoloMatch) loadQuestions();
     }
 
     private void loadQuestions() {
@@ -107,7 +173,7 @@ public class SpojniceViewModel extends ViewModel {
         spojRepo.getRandomQuestions(seed, new RepositoryCallback<List<SpojniceQuestion>>() {
             @Override
             public void onSuccess(List<SpojniceQuestion> all) {
-                if (!isMatchGame) {
+                if (!isMatchGame || isSoloMatch) {
                     applyQuestions(all);
                     return;
                 }
@@ -171,6 +237,7 @@ public class SpojniceViewModel extends ViewModel {
 
     private void startRound(int round) {
         currentRound.postValue(round);
+        isWaitingForGameFinish = false;
 
         if (round == 1) {
             round1MyScore = myPairs.size() * 2;
@@ -193,12 +260,12 @@ public class SpojniceViewModel extends ViewModel {
         if (opponentLeftIdxListener != null) spojRepo.removeListener(opponentLeftIdxListener);
         opponentActiveLeftIdx.postValue(-1);
 
-        boolean iAmPrimary = (round == 0) == isPlayer1;
+        boolean iAmPrimary = isSoloMatch || ((round == 0) == isPlayer1);
 
         if (iAmPrimary) {
             myActiveTurn.postValue(true);
             waitingForOpp.postValue(false);
-            if (isMatchGame) spojRepo.writeActiveLeftIdx(isPlayer1, 0);
+            if (isMatchGame && !isSoloMatch) spojRepo.writeActiveLeftIdx(isPlayer1, 0);
             startRoundTimer();
         } else {
             myActiveTurn.postValue(false);
@@ -252,7 +319,7 @@ public class SpojniceViewModel extends ViewModel {
         int currentScore = round1MyScore + (myPairs.size() * 2);
         myRunningScore.postValue(currentScore + prevMyScore);
 
-        if (isMatchGame) spojRepo.writeLastGuess(isPlayer1, rightIdx, isCorrect);
+        if (isMatchGame && !isSoloMatch) spojRepo.writeLastGuess(isPlayer1, rightIdx, isCorrect);
 
         if (isCorrect) {
             myPairs.put(activeLeft, rightIdx);
@@ -267,7 +334,7 @@ public class SpojniceViewModel extends ViewModel {
 
             myRunningScore.postValue(currentGameScore + prevMyScore);
 
-            if (isMatchGame) {
+            if (isMatchGame && !isSoloMatch) {
                 spojRepo.writeRunningScore(isPlayer1, currentGameScore);
                 spojRepo.writePairs(isPlayer1, round, myPairs);
             }
@@ -319,7 +386,7 @@ public class SpojniceViewModel extends ViewModel {
         else {
             activeLeft = next;
             activeLeftIdx.postValue(activeLeft);
-            if (isMatchGame) spojRepo.writeActiveLeftIdx(isPlayer1, activeLeft);
+            if (isMatchGame && !isSoloMatch) spojRepo.writeActiveLeftIdx(isPlayer1, activeLeft);
         }
     }
 
@@ -335,7 +402,7 @@ public class SpojniceViewModel extends ViewModel {
 
         persistMyPairs(round);
 
-        if (!isMatchGame) {
+        if (!isMatchGame || isSoloMatch) {
             endRoundAndReveal(round);
             return;
         }
@@ -519,7 +586,7 @@ public class SpojniceViewModel extends ViewModel {
     private void finishGame() {
         int myCumulative = myRunningScore.getValue() != null ? myRunningScore.getValue() : prevMyScore;
 
-        if (!isMatchGame) {
+        if (!isMatchGame || isSoloMatch) {
             finalScores.postValue(isPlayer1 ? new int[]{myCumulative, 0} : new int[]{0, myCumulative});
             return;
         }
@@ -528,6 +595,7 @@ public class SpojniceViewModel extends ViewModel {
 
         spojRepo.writeDone(isPlayer1);
         waitingForOpp.postValue(true);
+        isWaitingForGameFinish = true;
 
         opponentTurnDoneListener = spojRepo.listenForOpponentDone(isPlayer1, () -> {
             opponentTurnDoneListener = null;
@@ -589,7 +657,7 @@ public class SpojniceViewModel extends ViewModel {
     }
 
     private void persistMyPairs(int round) {
-        if (!isMatchGame) return;
+        if (!isMatchGame || isSoloMatch) return;
 
         Map<Integer, Integer> snapshot = new HashMap<>(myPairs);
         spojRepo.writePairs(isPlayer1, round, snapshot);
@@ -640,5 +708,8 @@ public class SpojniceViewModel extends ViewModel {
         if (opponentPairsListener != null) spojRepo.removeListener(opponentPairsListener);
         if (opponentGuessEventListener != null) spojRepo.removeListener(opponentGuessEventListener);
         if (opponentLeftIdxListener != null) spojRepo.removeListener(opponentLeftIdxListener);
+        if (forfeitListener != null) spojRepo.removeListener(forfeitListener);
+
+        questionIdsListener = opponentTurnDoneListener = opponentScoreListener = opponentPairsListener = opponentGuessEventListener = opponentLeftIdxListener = forfeitListener = null;
     }
 }

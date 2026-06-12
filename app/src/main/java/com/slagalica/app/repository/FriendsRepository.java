@@ -8,6 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.slagalica.app.model.Friend;
 
 import java.util.ArrayList;
@@ -47,26 +48,55 @@ public class FriendsRepository {
 
     private void fetchFriends(List<String> uids, RepositoryCallback<List<Friend>> callback) {
         List<Friend> result = new ArrayList<>();
-        int[] pending = {uids.size()};
+        String cycleId = RankingRepository.currentCycleId("monthly");
 
-        for (String uid : uids) {
-            db.collection(USERS_COLLECTION).document(uid).get()
-                    .addOnSuccessListener(userDoc -> {
-                        db.collection(PROFILES_COLLECTION).document(uid).get()
-                                .addOnSuccessListener(profileDoc -> {
-                                    fetchStatusAndBuildFriend(uid, userDoc, profileDoc, friend -> {
-                                        synchronized (result) { result.add(friend); }
-                                        if (--pending[0] == 0) sortAndDeliver(result, callback);
-                                    });
+        db.collection("rankingCycles").document(cycleId).collection("entries")
+                .orderBy("cycleStars", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(rankingSnap -> {
+                    Map<String, Integer> rankMap = new HashMap<>();
+                    int currentRank = 1;
+                    for (DocumentSnapshot doc : rankingSnap) rankMap.put(doc.getId(), currentRank++);
+
+                    int[] pending = {uids.size()};
+                    for (String uid : uids) {
+                        db.collection(USERS_COLLECTION).document(uid).get()
+                                .addOnSuccessListener(userDoc -> {
+                                    db.collection(PROFILES_COLLECTION).document(uid).get()
+                                            .addOnSuccessListener(profileDoc -> {
+                                                int friendRank = rankMap.getOrDefault(uid, 0);
+
+                                                fetchStatusAndBuildFriend(uid, userDoc, profileDoc, friendRank, friend -> {
+                                                    synchronized (result) { result.add(friend); }
+                                                    if (--pending[0] == 0) sortAndDeliver(result, callback);
+                                                });
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                if (--pending[0] == 0) sortAndDeliver(result, callback);
+                                            });
                                 })
                                 .addOnFailureListener(e -> {
                                     if (--pending[0] == 0) sortAndDeliver(result, callback);
                                 });
-                    })
-                    .addOnFailureListener(e -> {
-                        if (--pending[0] == 0) sortAndDeliver(result, callback);
-                    });
-        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    int[] pending = {uids.size()};
+                    for (String uid : uids) {
+                        db.collection(USERS_COLLECTION).document(uid).get()
+                                .addOnSuccessListener(userDoc -> {
+                                    db.collection(PROFILES_COLLECTION).document(uid).get()
+                                            .addOnSuccessListener(profileDoc -> {
+                                                fetchStatusAndBuildFriend(uid, userDoc, profileDoc, 0, friend -> {
+                                                    synchronized (result) { result.add(friend); }
+                                                    if (--pending[0] == 0) sortAndDeliver(result, callback);
+                                                });
+                                            })
+                                            .addOnFailureListener(exc -> { if (--pending[0] == 0) sortAndDeliver(result, callback); });
+                                })
+                                .addOnFailureListener(exc -> { if (--pending[0] == 0) sortAndDeliver(result, callback); });
+                    }
+                });
     }
 
     private void sortAndDeliver(List<Friend> result, RepositoryCallback<List<Friend>> callback) {
@@ -90,7 +120,7 @@ public class FriendsRepository {
         void onFriend(Friend friend);
     }
 
-    private void fetchStatusAndBuildFriend(String uid, DocumentSnapshot userDoc, DocumentSnapshot profileDoc, FriendCallback callback) {
+    private void fetchStatusAndBuildFriend(String uid, DocumentSnapshot userDoc, DocumentSnapshot profileDoc, int calculatedRank, FriendCallback callback) {
         rtdb.getReference("presence")
                 .child(uid)
                 .get()
@@ -99,20 +129,17 @@ public class FriendsRepository {
                     if (status == null) status = "offline";
                     boolean online = "online".equals(status) || "in_game".equals(status);
                     boolean inGame = "in_game".equals(status);
-                    Friend friend = buildFriendFromData(uid, userDoc, profileDoc, online, inGame);
+                    Friend friend = buildFriendFromData(uid, userDoc, profileDoc, online, inGame, calculatedRank);
                     callback.onFriend(friend);
                 });
     }
 
-    private Friend buildFriendFromData(String uid, DocumentSnapshot userDoc, DocumentSnapshot profileDoc, boolean online, boolean inGame) {
+    private Friend buildFriendFromData(String uid, DocumentSnapshot userDoc, DocumentSnapshot profileDoc, boolean online, boolean inGame, int rank) {
         String username = userDoc.getString("username");
         String avatarUrl = profileDoc.getString("avatarUrl");
 
         Long starsLong = profileDoc.getLong("stars");
         int stars = starsLong != null ? starsLong.intValue() : 0;
-
-        Long rankLong = profileDoc.getLong("monthlyRank");
-        int rank = rankLong != null ? rankLong.intValue() : 0;
 
         Long cycleLong = profileDoc.getLong("prevCycleRegionRank");
         int cycle = cycleLong != null ? cycleLong.intValue() : 0;

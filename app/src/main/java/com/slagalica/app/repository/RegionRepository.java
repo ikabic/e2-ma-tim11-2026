@@ -239,6 +239,9 @@ public class RegionRepository {
                     Map<String, List<GeoPoint>> dots = new HashMap<>();
                     Map<String, Integer> totals = new HashMap<>();
 
+                    if (borderCache.isEmpty())
+                        loadRegions(db.getApp().getApplicationContext());
+
                     for (QueryDocumentSnapshot doc : snap) {
                         String region = doc.getString("region");
                         if (region == null) continue;
@@ -327,14 +330,6 @@ public class RegionRepository {
             } else
                 cb.onSuccess(null);
         }).addOnFailureListener(cb::onFailure);
-    }
-
-    public void fetchCurrentUserRegion(RepositoryCallback<String> cb) {
-        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
-        if (uid == null) { cb.onSuccess(null); return; }
-        db.collection(USERS_COLLECTION).document(uid).get()
-                .addOnSuccessListener(doc -> cb.onSuccess(doc.getString("region")))
-                .addOnFailureListener(cb::onFailure);
     }
 
     public void observeActivePlayers(RepositoryCallback<Map<String, Integer>> cb) {

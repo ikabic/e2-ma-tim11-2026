@@ -65,7 +65,7 @@ dependencies {
 
     implementation("org.osmdroid:osmdroid-android:6.1.20")
 
-    implementation("com.cloudinary:cloudinary-android:2.2.0")
+    implementation("com.cloudinary:cloudinary-android:3.1.2")
 
     implementation("com.google.firebase:firebase-messaging")
 }
