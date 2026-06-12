@@ -1,6 +1,8 @@
 package com.slagalica.app.viewmodel;
 
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -182,30 +184,33 @@ public class KoZnaZnaViewModel extends ViewModel {
     }
 
     private void readOpponentAnswerOnceThenScore(int idx, int correct, int myAnswer, long myElapsed, int skipped) {
-        kzzRepo.readOpponentAnswerOnce(isPlayer1, idx, new RepositoryCallback<long[]>() {
-            @Override
-            public void onSuccess(long[] oppData) {
-                int oppAnswer = (int) oppData[0];
-                long oppElapsed = oppData[1];
-                boolean oppCorrect = (oppAnswer != -1 && oppAnswer == correct);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            kzzRepo.readOpponentAnswerOnce(isPlayer1, idx, new RepositoryCallback<>() {
+                @Override
+                public void onSuccess(long[] oppData) {
+                    int oppAnswer = (int) oppData[0];
+                    long oppElapsed = oppData[1];
+                    boolean oppCorrect = (oppAnswer != -1 && oppAnswer == correct);
 
-                if (!oppCorrect)
-                    applyFinalDelta(idx, 10, correct, myAnswer, skipped, false);
-                else {
-                    boolean faster = myElapsed <= oppElapsed;
-                    if (faster)
+                    if (!oppCorrect)
                         applyFinalDelta(idx, 10, correct, myAnswer, skipped, false);
                     else {
-                        speedLostPoints.postValue(idx);
-                        applyFinalDelta(idx, 0, correct, myAnswer, skipped, true);
+                        boolean faster = myElapsed <= oppElapsed;
+                        if (faster)
+                            applyFinalDelta(idx, 10, correct, myAnswer, skipped, false);
+                        else {
+                            speedLostPoints.postValue(idx);
+                            applyFinalDelta(idx, 0, correct, myAnswer, skipped, true);
+                        }
                     }
                 }
-            }
-            @Override
-            public void onFailure(Exception e) {
-                applyFinalDelta(idx, 10, correct, myAnswer, skipped, false);
-            }
-        });
+
+                @Override
+                public void onFailure(Exception e) {
+                    applyFinalDelta(idx, 10, correct, myAnswer, skipped, false);
+                }
+            });
+        }, 250);
     }
 
     private void applyFinalDelta(int idx, int delta, int correct, int answerIndex, int skipped, boolean lostToSpeed) {
@@ -276,19 +281,37 @@ public class KoZnaZnaViewModel extends ViewModel {
 
     private void commitFinalScores(DataSnapshot snap) {
         List<KoZnaZnaQuestion> qs = questions.getValue();
+        int p1Score = 0, p2Score = 0;
         int p1Correct = 0, p1Wrong = 0, p2Correct = 0, p2Wrong = 0;
         if (qs != null) {
             for (int i = 0; i < QUESTION_COUNT; i++) {
                 int correct = qs.get(i).getCorrectAnswerIndex();
+
                 int p1A = getInt(snap, "p1Answer" + i, -1);
+                long p1T = getLong(snap, "p1Time" + i, Long.MAX_VALUE);
+
                 int p2A = getInt(snap, "p2Answer" + i, -1);
+                long p2T = getLong(snap, "p2Time" + i, Long.MAX_VALUE);
+
                 if (p1A != -1) { if (p1A == correct) p1Correct++; else p1Wrong++; }
                 if (p2A != -1) { if (p2A == correct) p2Correct++; else p2Wrong++; }
+
+                int p1Delta = 0;
+                if (p1A != -1) {
+                    if (p1A != correct) p1Delta = -5;
+                    else p1Delta = (p2A == correct && p2T < p1T) ? 0 : 10;
+                }
+                p1Score = clamp(p1Score + p1Delta, -25, 50);
+
+                int p2Delta = 0;
+                if (p2A != -1) {
+                    if (p2A != correct) p2Delta = -5;
+                    else p2Delta = (p1A == correct && p1T <= p2T) ? 0 : 10;
+                }
+                p2Score = clamp(p2Score + p2Delta, -25, 50);
             }
         }
 
-        int p1Score = isPlayer1 ? myRunningScore.getValue() : opponentRunningScore.getValue();
-        int p2Score = isPlayer1 ? opponentRunningScore.getValue() : myRunningScore.getValue();
         finalScores.postValue(new int[]{ p1Score, p2Score });
 
         kzzRepo.writeStats(p1Correct, p1Wrong, p2Correct, p2Wrong, new RepositoryCallback<Void>() {
@@ -318,6 +341,11 @@ public class KoZnaZnaViewModel extends ViewModel {
     private int getInt(DataSnapshot snap, String key, int fallback) {
         Long v = snap.child(key).getValue(Long.class);
         return v != null ? v.intValue() : fallback;
+    }
+
+    private long getLong(DataSnapshot snap, String key, long fallback) {
+        Long v = snap.child(key).getValue(Long.class);
+        return v != null ? v : fallback;
     }
 
     @Override
