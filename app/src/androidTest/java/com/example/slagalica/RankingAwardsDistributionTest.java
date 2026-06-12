@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,6 +27,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RunWith(AndroidJUnit4.class)
 public class RankingAwardsDistributionTest {
 
+    private final String testCycleId = "monthly_2026_test_cycle";
+
     @Test
     public void runAwardDistributionTest() throws Exception {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -33,7 +36,6 @@ public class RankingAwardsDistributionTest {
         Tasks.await(auth.signInAnonymously(), 5, TimeUnit.SECONDS);
         RankingRepository repository = new RankingRepository();
 
-        String testCycleId = "monthly_2026_test_cycle";
         String type = "monthly";
 
         for (int i = 1; i <= 11; i++) {
@@ -93,5 +95,19 @@ public class RankingAwardsDistributionTest {
         assertNotNull("Rank 11 profile missing", rank11Snap);
         assertEquals("Rank 11 tokens mismatch", 0, rank11Snap.getLong("tokens").intValue());
         assertEquals("Rank 11 stars mismatch", 70, rank11Snap.getLong("stars").intValue()); // 30% penalty
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        for (int i = 1; i <= 11; i++) {
+            String uid = "test_user_" + i;
+            Tasks.await(db.collection("profiles").document(uid).delete(), 5, TimeUnit.SECONDS);
+            Tasks.await(db.collection("rankingCycles").document(testCycleId)
+                    .collection("entries").document(uid).delete(), 5, TimeUnit.SECONDS);
+        }
+
+        Tasks.await(db.collection("rankingCycles").document(testCycleId).delete(), 5, TimeUnit.SECONDS);
     }
 }

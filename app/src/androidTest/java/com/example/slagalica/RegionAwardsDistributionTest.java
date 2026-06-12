@@ -8,12 +8,14 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.model.Region;
 import com.slagalica.app.repository.RegionRepository;
@@ -28,6 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @RunWith(AndroidJUnit4.class)
 public class RegionAwardsDistributionTest {
+
+    private final String testCycleId = "regional_test_cycle_2026";
+    private final String[] userIds = {"user_vojvodina", "user_beograd", "user_sumadija", "user_juzna"};
 
     @Test
     public void runRegionRewardDistributionTest() throws Exception {
@@ -47,13 +52,10 @@ public class RegionAwardsDistributionTest {
         });
         assertTrue("Loading regions timed out.", loadLatch.await(10, TimeUnit.SECONDS));
 
-        String testCycleId = "regional_test_cycle_2026";
-
         Map<String, Object> cycleMetadata = new HashMap<>();
         cycleMetadata.put("regionRewardsDistributed", false);
         Tasks.await(db.collection("rankingCycles").document(testCycleId).set(cycleMetadata), 5, TimeUnit.SECONDS);
 
-        String[] userIds = {"user_vojvodina", "user_beograd", "user_sumadija", "user_juzna"};
         String[] regions = {"vojvodina", "beogradski_region", "sumadija_i_zapadna_srbija", "juzna_i_istocna_srbija"};
         long[] scores = {600L, 450L, 300L, 150L};
 
@@ -116,5 +118,26 @@ public class RegionAwardsDistributionTest {
         assertTrue("Vojvodina gold count should be incremented", rGold.getLong("goldCount") >= 1);
         assertTrue("Beograd silver count should be incremented", rSilver.getLong("silverCount") >= 1);
         assertTrue("Šumadija bronze count should be incremented", rBronze.getLong("bronzeCount") >= 1);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Tasks.await(db.collection("regions").document("vojvodina")
+                .update("goldCount", FieldValue.increment(-1)), 5, TimeUnit.SECONDS);
+        Tasks.await(db.collection("regions").document("beogradski_region")
+                .update("silverCount", FieldValue.increment(-1)), 5, TimeUnit.SECONDS);
+        Tasks.await(db.collection("regions").document("sumadija_i_zapadna_srbija")
+                .update("bronzeCount", FieldValue.increment(-1)), 5, TimeUnit.SECONDS);
+
+        for (String uid : userIds) {
+            Tasks.await(db.collection("users").document(uid).delete(), 5, TimeUnit.SECONDS);
+            Tasks.await(db.collection("profiles").document(uid).delete(), 5, TimeUnit.SECONDS);
+            Tasks.await(db.collection("rankingCycles").document(testCycleId)
+                    .collection("entries").document(uid).delete(), 5, TimeUnit.SECONDS);
+        }
+
+        Tasks.await(db.collection("rankingCycles").document(testCycleId).delete(), 5, TimeUnit.SECONDS);
     }
 }
