@@ -119,12 +119,13 @@ public class ProfileFragment extends Fragment {
             if (profile == null) return;
             int stars = profile.getStars();
             int points = Integer.parseInt(profile.getLeague("points"));
-            int progress = (stars * 100) / points;
 
             setLeague(profile.getLeague("name"));
 
             binding.tvStars.setText(stars + " / " + points + " stars");
-            binding.lpiLeagueProgress.setProgress(progress, true);
+            binding.lpiLeagueProgress.setMin(points == 100 ? 0 : points / 2);
+            binding.lpiLeagueProgress.setMax(points);
+            binding.lpiLeagueProgress.setProgress(stars, true);
 
             int needed = Math.max(points - stars, 0);
             binding.tvNextLeague.setText(needed + " stars until " + profile.getLeague("next") + " League");

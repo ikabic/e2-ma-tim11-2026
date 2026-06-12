@@ -734,11 +734,11 @@ public class MatchRepository {
     }
 
     private String leagueForStars(long stars) {
-        if (stars < 50)   return "Unranked";
+        if (stars < 100)   return "Unranked";
         if (stars < 200)  return "Bronze";
-        if (stars < 500)  return "Silver";
-        if (stars < 1000) return "Gold";
-        if (stars < 2000) return "Platinum";
+        if (stars < 400)  return "Silver";
+        if (stars < 800) return "Gold";
+        if (stars < 1600) return "Platinum";
         return "Diamond";
     }
 }
