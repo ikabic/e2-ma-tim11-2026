@@ -3,6 +3,8 @@ package com.slagalica.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,6 +36,10 @@ import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.RankingViewModel;
 import com.slagalica.app.viewmodel.RegionViewModel;
+import com.slagalica.app.ui.tournament.TournamentMatchmakingActivity;
+import com.slagalica.app.FCMTokenManager;
+import com.slagalica.app.ui.profile.ProfileFragment;
+import com.slagalica.app.model.Profile;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -45,6 +51,8 @@ import java.util.List;
 public class HomeActivity extends BaseActivity {
 
     private String playerUsername = "You";
+    private String playerAvatarUrl = "";
+    private String playerLeague = "Unranked";
     private ActivityHomeBinding binding;
     private NotificationViewModel notifViewModel;
     private RankingViewModel rankingViewModel;
@@ -61,6 +69,10 @@ public class HomeActivity extends BaseActivity {
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        binding.btnFindTournament.setEnabled(false);
+        binding.btnFindMatch.setEnabled(false);
+
+        FCMTokenManager.refreshAndSave();
 
         AuthViewModel authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
         binding.btnLogout.setOnClickListener(v ->
@@ -145,6 +157,7 @@ public class HomeActivity extends BaseActivity {
                 binding.rowTokenInfo.setVisibility(View.GONE);
                 binding.btnLogout.setVisibility(View.GONE);
                 binding.btnGuestLogin.setVisibility(View.VISIBLE);
+                binding.cardTournament.setVisibility(View.GONE);
                 binding.btnGuestLogin.setOnClickListener(v -> {
                     FirebaseAuth.getInstance().signOut();
                     startActivity(new Intent(this, LoginActivity.class));
@@ -154,6 +167,15 @@ public class HomeActivity extends BaseActivity {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
                 binding.btnLogout.setVisibility(View.VISIBLE);
+                binding.cardTournament.setVisibility(View.VISIBLE);
+
+                AtomicInteger profileLoadCount = new AtomicInteger(0);
+                Runnable onBothLoaded = () -> {
+                    if (profileLoadCount.incrementAndGet() >= 2) {
+                        binding.btnFindTournament.setEnabled(true);
+                        binding.btnFindMatch.setEnabled(true);
+                    }
+                };
 
                 db.collection("users").document(currentUser.getUid()).get()
                     .addOnSuccessListener(doc -> {
@@ -166,24 +188,39 @@ public class HomeActivity extends BaseActivity {
 
                         if (rankingViewModel.getActiveType().getValue() == RankingViewModel.CycleType.REGIONAL)
                             displayRegionalList(regionViewModel.getLeaderboard().getValue());
+
+                        onBothLoaded.run();
                     })
                     .addOnFailureListener(e -> {
                         playerUsername = currentUser.getEmail();
                         binding.tvWelcome.setText(playerUsername);
+                        onBothLoaded.run();
                     });
 
                 db.collection("profiles").document(currentUser.getUid()).get()
-                    .addOnSuccessListener(doc -> {
-                        if (doc.exists()) {
-                            Long tokens = doc.getLong("tokens");
-                            Long stars  = doc.getLong("stars");
-                            int t = tokens != null ? tokens.intValue() : 5;
-                            int s = stars  != null ? stars.intValue()  : 0;
-                            binding.tvTokenCount.setText(String.valueOf(t));
-                            binding.tvStarCount.setText(String.valueOf(s));
-                            binding.tvTokenInfo.setText(t + " left");
-                        }
-                    });
+                        .addOnSuccessListener(doc -> {
+                            if (doc.exists()) {
+                                Long tokens = doc.getLong("tokens");
+                                Long stars  = doc.getLong("stars");
+                                int t = tokens != null ? tokens.intValue() : 5;
+                                int s = stars  != null ? stars.intValue()  : 0;
+                                binding.tvTokenCount.setText(String.valueOf(t));
+                                binding.tvStarCount.setText(String.valueOf(s));
+                                binding.tvTokenInfo.setText(t + " left");
+
+                                playerAvatarUrl = doc.getString("avatarUrl") != null ? doc.getString("avatarUrl") : "";
+                                Profile p = doc.toObject(Profile.class);
+                                if (p != null) playerLeague = p.getLeague(null);
+                            }
+                            binding.btnFindTournament.setEnabled(true);
+                            binding.btnFindMatch.setEnabled(true);
+                            onBothLoaded.run();
+                        })
+                        .addOnFailureListener(e -> {
+                            onBothLoaded.run();
+                            binding.btnFindTournament.setEnabled(true);
+                            binding.btnFindMatch.setEnabled(true);
+                        });
             }
         }
 
@@ -237,6 +274,14 @@ public class HomeActivity extends BaseActivity {
         binding.btnFindMatch.setOnClickListener(v -> {
             Intent i = new Intent(HomeActivity.this, MatchmakingActivity.class);
             i.putExtra("username", playerUsername);
+            startActivity(i);
+        });
+
+        binding.btnFindTournament.setOnClickListener(v -> {
+            Intent i = new Intent(HomeActivity.this, TournamentMatchmakingActivity.class);
+            i.putExtra("username", playerUsername);
+            i.putExtra("avatarUrl",  playerAvatarUrl);
+            i.putExtra("league", playerLeague);
             startActivity(i);
         });
 

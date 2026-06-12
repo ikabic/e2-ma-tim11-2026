@@ -352,6 +352,103 @@
                         android:textSize="13sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cardTournament"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card"
+                    android:padding="22dp"
+                    android:layout_marginTop="14dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="6dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_ranks"
+                            app:tint="@color/accent"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="Tournament"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TOURNAMENT"
+                            android:textColor="@color/accent"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.12"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tournament competition"
+                        android:textColor="@color/text"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4 players · 2 semifinals · 1 winner"
+                        android:textColor="@color/text_mute"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="14dp"/>
+\
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@drawable/ic_token"
+                            app:tint="@color/text_mute"
+                            android:layout_marginEnd="6dp"
+                            android:contentDescription="Cost"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Entry: 3 tokens"
+                            android:textColor="@color/text_mute"
+                            android:textSize="13sp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Reward: 5 tokens + stars"
+                            android:textColor="@color/text_mute"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFindTournament"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Join tournament"
+                        android:textColor="@color/accent_ink"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"/>
+
+                </LinearLayout>
             </LinearLayout>
 
             <!-- ===== GAMES SECTION ===== -->
