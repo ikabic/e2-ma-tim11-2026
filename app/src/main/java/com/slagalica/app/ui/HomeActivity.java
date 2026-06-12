@@ -42,6 +42,12 @@ import com.slagalica.app.ui.tournament.TournamentMatchmakingActivity;
 import com.slagalica.app.FCMTokenManager;
 import com.slagalica.app.ui.profile.ProfileFragment;
 import com.slagalica.app.model.Profile;
+import com.slagalica.app.repository.DailyMissionRepository;
+import com.slagalica.app.ui.missions.DailyMissionsActivity;
+import com.slagalica.app.repository.RepositoryCallback;
+
+import com.google.firebase.firestore.ListenerRegistration;
+import com.slagalica.app.repository.DailyMissionRepository;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -64,6 +70,8 @@ public class HomeActivity extends BaseActivity {
     private Handler countdownHandler  = new Handler(Looper.getMainLooper());
     private long nextRefreshAtMs = 0;
     private String userRegionKey = "";
+    private final DailyMissionRepository missionRepo = new DailyMissionRepository();
+    private ListenerRegistration missionBadgeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -221,6 +229,7 @@ public class HomeActivity extends BaseActivity {
                             binding.btnFindTournament.setEnabled(true);
                             binding.btnFindMatch.setEnabled(true);
                             onBothLoaded.run();
+                            startMissionBadgeListener();
                         })
                         .addOnFailureListener(e -> {
                             onBothLoaded.run();
@@ -229,6 +238,13 @@ public class HomeActivity extends BaseActivity {
                         });
             }
         }
+
+        binding.btnDailyMissions.setOnClickListener(v ->
+           startActivity(new Intent(this, DailyMissionsActivity.class))
+       );
+       binding.frameMissions.setOnClickListener(v ->
+           startActivity(new Intent(this, DailyMissionsActivity.class))
+       );
 
         binding.btnFriends.setOnClickListener(v ->
                 startActivity(new Intent(this, FriendsActivity.class))
@@ -325,6 +341,52 @@ public class HomeActivity extends BaseActivity {
         maybeRequestNotificationPermission();
     }
 
+    private void startMissionBadgeListener() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null || u.isAnonymous()) return;
+
+        if (missionBadgeListener != null) missionBadgeListener.remove();
+
+        missionBadgeListener = new DailyMissionRepository().listenTodayMissions(missions -> {
+            boolean hasBadge = missions.hasUnclaimedRewards();
+            binding.tvMissionBadge.setVisibility(hasBadge ? View.VISIBLE : View.GONE);
+        });
+    }
+
+    private void refreshMissionBadge() {
+        missionRepo.hasUnclaimedRewards(new RepositoryCallback<Boolean>() {
+            @Override public void onSuccess(Boolean has) {
+                binding.tvMissionBadge.setVisibility(
+                        Boolean.TRUE.equals(has) ? View.VISIBLE : View.GONE);
+            }
+            @Override public void onFailure(Exception e) {
+                binding.tvMissionBadge.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null || u.isAnonymous()) return;
+
+        startMissionBadgeListener();
+
+        FirebaseFirestore.getInstance()
+                .collection("profiles").document(u.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    Long tokens = doc.getLong("tokens");
+                    Long stars  = doc.getLong("stars");
+                    int t = tokens != null ? tokens.intValue() : 0;
+                    int s = stars  != null ? stars.intValue()  : 0;
+                    binding.tvTokenCount.setText(String.valueOf(t));
+                    binding.tvStarCount.setText(String.valueOf(s));
+                    binding.tvTokenInfo.setText(t + " left");
+                });
+    }
+
     private void maybeRequestNotificationPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -380,6 +442,7 @@ public class HomeActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         countdownHandler.removeCallbacks(countdownTick);
+        if (missionBadgeListener != null) missionBadgeListener.remove();
     }
 
     private final Runnable countdownTick = new Runnable() {

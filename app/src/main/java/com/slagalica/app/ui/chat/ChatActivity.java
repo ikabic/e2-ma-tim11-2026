@@ -19,6 +19,7 @@ import com.slagalica.app.model.RegionRegistry;
 import com.slagalica.app.util.ChatNotificationManager;
 import com.slagalica.app.util.GameToast;
 import com.slagalica.app.viewmodel.ChatViewModel;
+import com.slagalica.app.repository.DailyMissionRepository;
 
 public class ChatActivity extends BaseActivity {
 
@@ -29,6 +30,8 @@ public class ChatActivity extends BaseActivity {
 
     private String regionKey;
     private String myUsername = "You";
+    private final DailyMissionRepository missionRepo = new DailyMissionRepository();
+    private boolean chatMissionDone = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,6 +89,11 @@ public class ChatActivity extends BaseActivity {
         if (text.isEmpty()) return;
         viewModel.send(myUsername, text);
         etMessage.setText("");
+
+        if (!chatMissionDone) {
+            chatMissionDone = true;
+            missionRepo.completeMission(DailyMissionRepository.KEY_SEND_CHAT);
+        }
     }
 
     @Override

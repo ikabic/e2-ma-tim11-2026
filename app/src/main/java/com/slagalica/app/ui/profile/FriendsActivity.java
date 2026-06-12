@@ -26,6 +26,7 @@ import com.slagalica.app.model.Friend;
 import com.slagalica.app.ui.HomeActivity;
 import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.viewmodel.FriendsViewModel;
+import com.slagalica.app.repository.DailyMissionRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class FriendsActivity extends BaseActivity {
 
     private String resolvedMatchId;
     private String username = "Player";
+    private final DailyMissionRepository missionRepo = new DailyMissionRepository();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,6 +178,8 @@ public class FriendsActivity extends BaseActivity {
                     intent.putExtra("opponentUsername", viewModel.getPendingInviteUsername().getValue());
                     intent.putExtra("username", username);
                     startActivity(intent);
+
+                    missionRepo.completeMission(DailyMissionRepository.KEY_PLAY_FRIENDLY);
 
                     viewModel.clearPendingInvite();
 

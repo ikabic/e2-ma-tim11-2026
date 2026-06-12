@@ -26,6 +26,7 @@ import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.mojbroj.MojBrojActivity;
 import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
+import com.slagalica.app.repository.DailyMissionRepository;
 import com.slagalica.app.util.UserStatusManager;
 
 public class MatchActivity extends AppCompatActivity {
@@ -80,6 +81,8 @@ public class MatchActivity extends AppCompatActivity {
     private View[] dots = new View[6];
 
     private ActivityResultLauncher<Intent> gameLauncher;
+
+    private final DailyMissionRepository missionRepo = new DailyMissionRepository();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -485,6 +488,10 @@ public class MatchActivity extends AppCompatActivity {
         else if (oppTotal > myTotal)  result = opponentUsername + " wins!";
         else                          result = "Draw!";
         tvWinner.setText(result);
+
+        if (opponentForfeited || myTotal > oppTotal) {
+            missionRepo.completeMission(DailyMissionRepository.KEY_WIN_MATCH);
+        }
 
         String myUid = matchRepository.getUid();
         if (myUid != null) {

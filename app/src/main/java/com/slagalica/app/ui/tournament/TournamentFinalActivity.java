@@ -23,6 +23,7 @@ import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.mojbroj.MojBrojActivity;
 import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
+import com.slagalica.app.repository.DailyMissionRepository;
 
 public class TournamentFinalActivity extends AppCompatActivity {
 
@@ -65,6 +66,7 @@ public class TournamentFinalActivity extends AppCompatActivity {
     private View sectionInProgress, sectionGameOver;
     private TextView tvFinalResult;
     private View[] dots = new View[6];
+    private final DailyMissionRepository missionRepo = new DailyMissionRepository();
 
     private ActivityResultLauncher<Intent> gameLauncher;
 
@@ -335,6 +337,10 @@ public class TournamentFinalActivity extends AppCompatActivity {
         int myTotal = isPlayer1 ? totalP1 : totalP2;
         int oppTotal = isPlayer1 ? totalP2 : totalP1;
         boolean iWon = myTotal > oppTotal || opponentForfeited;
+
+        if (iWon) {
+            missionRepo.completeMission(DailyMissionRepository.KEY_WIN_TOURNAMENT);
+        }
 
         String winnerUid  = iWon ? myUid : null;
         String winnerName = iWon ? myUsername : opponentUsername;
