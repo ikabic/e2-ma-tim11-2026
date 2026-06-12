@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -59,6 +60,10 @@ public class KoZnaZnaActivity extends AppCompatActivity {
 
         binding.header.tvGameTitle.setText("Who knows, knows");
         binding.header.btnClose.setOnClickListener(v -> showExitConfirm());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { showExitConfirm(); }
+        });
 
         binding.header.tvPlayerName.setText(you);
         binding.header.tvOpponentName.setText(opponentUsername);
@@ -216,6 +221,9 @@ public class KoZnaZnaActivity extends AppCompatActivity {
         ConfirmDialog.show(this, "Quit game?", "Your progress will be lost.", "Quit", "Keep playing",
                 () -> {
                     viewModel.writeForfeit();
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("quitMatch", true);
+                    setResult(RESULT_OK, resultIntent);
                     finish();
                 });
     }
