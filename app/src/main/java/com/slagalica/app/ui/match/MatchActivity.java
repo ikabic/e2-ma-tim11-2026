@@ -489,7 +489,8 @@ public class MatchActivity extends AppCompatActivity {
         String myUid = matchRepository.getUid();
         if (myUid != null) {
             int oppForStars = opponentForfeited ? -1 : oppTotal;
-            matchRepository.finishMatch(this, matchId, myUid, myTotal, oppForStars, opponentUsername);
+            boolean shouldUpdateStats = isPlayer1 || opponentForfeited;
+            matchRepository.finishMatch(this, matchId, myUid, myTotal, oppForStars, opponentUsername, shouldUpdateStats);
         }
     }
 
