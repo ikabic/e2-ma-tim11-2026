@@ -256,8 +256,6 @@ public class MatchRepository {
         Map<String, Object> scores = new HashMap<>();
         scores.put("p1", p1Score);
         scores.put("p2", p2Score);
-        scores.put("p1Done", true);
-        scores.put("p2Done", true);
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
             .updateChildren(scores)

@@ -70,6 +70,13 @@ public class SkockoViewModel extends ViewModel {
     public LiveData<List<GuessEntry>> getGuessHistory()   { return guessHistory; }
     public LiveData<int[]>  getFinalScores() { return finalScores; }
 
+    private boolean soloContinue = false;
+    public void setSoloContinue(boolean solo){
+        this.soloContinue = solo;
+    }
+
+    private boolean isSoloMatch = false;
+
     public void setInitialScores(int p1Total, int p2Total) {
         prevP1Score = p1Total;
         prevP2Score = p2Total;
@@ -104,7 +111,7 @@ public class SkockoViewModel extends ViewModel {
         }
 
         int round = safeGetRound();
-        boolean iAmActiveThisRound = (round == 1) ? isPlayer1 : !isPlayer1;
+        boolean iAmActiveThisRound = soloContinue || ((round == 1) ? isPlayer1 : !isPlayer1);
 
         if (iAmActiveThisRound) {
             skockoRepo.getRandomQuestion(new RepositoryCallback<SkockoQuestion>() {
@@ -230,14 +237,18 @@ public class SkockoViewModel extends ViewModel {
             feedbackMsg.postValue("Time's up! No more attempts.");
             recordSolve(false, 0);
             if (isMatchGame) {
-                int fbRound = safeGetRound() - 1;
-                skockoRepo.writeBonusActive(fbRound, true);
-                gameState.postValue(GameState.WAITING_FOR_BONUS);
-                removeListener(roundDoneListener);
-                roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
-                    removeListener(roundDoneListener); roundDoneListener = null;
+                if (soloContinue) {
                     advanceRound();
-                });
+                } else {
+                    int fbRound = safeGetRound() - 1;
+                    skockoRepo.writeBonusActive(fbRound, true);
+                    gameState.postValue(GameState.WAITING_FOR_BONUS);
+                    removeListener(roundDoneListener);
+                    roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
+                        removeListener(roundDoneListener); roundDoneListener = null;
+                        advanceRound();
+                    });
+                }
             } else {
                 gameState.postValue(GameState.BONUS_TURN);
             }
@@ -285,14 +296,18 @@ public class SkockoViewModel extends ViewModel {
             feedbackMsg.setValue("No more attempts!");
             recordSolve(false, 0);
             if (isMatchGame) {
-                int fbRound = safeGetRound() - 1;
-                skockoRepo.writeBonusActive(fbRound, true);
-                gameState.setValue(GameState.WAITING_FOR_BONUS);
-                removeListener(roundDoneListener);
-                roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
-                    removeListener(roundDoneListener); roundDoneListener = null;
+                if (soloContinue) {
                     advanceRound();
-                });
+                } else {
+                    int fbRound = safeGetRound() - 1;
+                    skockoRepo.writeBonusActive(fbRound, true);
+                    gameState.setValue(GameState.WAITING_FOR_BONUS);
+                    removeListener(roundDoneListener);
+                    roundDoneListener = skockoRepo.listenForRoundDone(fbRound, !isPlayer1, () -> {
+                        removeListener(roundDoneListener); roundDoneListener = null;
+                        advanceRound();
+                    });
+                }
             } else {
                 gameState.setValue(GameState.BONUS_TURN);
             }
@@ -393,13 +408,47 @@ public class SkockoViewModel extends ViewModel {
     }
 
     private void listenForOpponentForfeit() {
+        if (soloContinue) {
+            removeListener(forfeitListener);
+            forfeitListener = null;
+            return;
+        }
+
         removeListener(forfeitListener);
         String myUid = matchRepo.getUid();
         if (myUid == null) return;
         forfeitListener = matchRepo.listenForForfeit(matchId, myUid, () -> {
-            feedbackMsg.postValue(opponentUsername + " left the game.");
-            finishGame(true);
+            removeListener(forfeitListener);
+            forfeitListener = null;
+
+            handleOpponentLeft();
         });
+    }
+
+    private void handleOpponentLeft() {
+        feedbackMsg.postValue(opponentUsername + " left the game.");
+
+        isSoloMatch = true;
+        soloContinue = true;
+
+        removeListener(questionIdListener);
+        removeListener(guessHistoryListener);
+        removeListener(roundDoneListener);
+        removeListener(bonusListener);
+        removeListener(opponentScoreListener);
+
+        questionIdListener = null;
+        guessHistoryListener = null;
+        roundDoneListener = null;
+        bonusListener = null;
+        opponentScoreListener = null;
+
+        isMyTurn.postValue(true);
+        if (currentRound.getValue() == null) {
+            currentRound.postValue(1);
+        }
+
+        loadQuestion();
     }
 
     public void writeForfeit() {

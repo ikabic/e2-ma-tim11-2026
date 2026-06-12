@@ -51,6 +51,8 @@ public class SkockoActivity extends AppCompatActivity {
     private boolean gameFinished = false;
     private String opponentUsername = "Opponent";
 
+    private boolean matchFinishedNormally = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +74,9 @@ public class SkockoActivity extends AppCompatActivity {
         if (isMatchGame && matchId != null) {
             viewModel.setInitialScores(prevTotalP1, prevTotalP2);
             viewModel.initMatchMode(matchId, isPlayer1, opponentUsername);
+            if (getIntent().getBooleanExtra("soloContinue", false)) {
+                viewModel.setSoloContinue(true);
+            }
         } else {
             viewModel.loadQuestion();
         }
@@ -245,6 +250,7 @@ public class SkockoActivity extends AppCompatActivity {
             if (scores == null) return;
             gameFinished = true;
             if (getIntent().getBooleanExtra("isMatchGame", false)) {
+                matchFinishedNormally = true;
                 Intent result = new Intent();
                 result.putExtra("p1Score", scores[0]);
                 result.putExtra("p2Score", scores[1]);
@@ -432,7 +438,7 @@ public class SkockoActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         cancelTimer();
-        if (isMatchGame && !gameFinished) {
+        if (isMatchGame && !matchFinishedNormally) {
             viewModel.writeForfeit();
         }
     }
