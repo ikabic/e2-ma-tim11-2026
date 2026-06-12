@@ -28,7 +28,7 @@ public class ProfileRepository {
 
         String finalUid = uid == null ? firebaseUser.getUid() : uid;
 
-        db.collection("users").document(uid).get()
+        db.collection("users").document(finalUid).get()
                 .addOnSuccessListener(userDoc -> {
                     db.collection(PROFILES_COLLECTION).document(finalUid).get()
                             .addOnSuccessListener(profileDoc ->
