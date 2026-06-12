@@ -93,6 +93,22 @@
             android:name=".ui.match.MatchActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.tournament.TournamentMatchmakingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.tournament.TournamentMatchActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.tournament.TournamentFinalActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.tournament.TournamentPodiumActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name="com.slagalica.app.SlagalicaMessagingService"
