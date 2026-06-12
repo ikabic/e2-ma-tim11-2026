@@ -218,9 +218,9 @@ public class ProfileFragment extends Fragment {
 
                     case 5: // Moj Broj
                         updateRangeBar(binding.tvMinMojBroj, binding.tvMaxMojBroj, binding.rangeBarMojBrojLeft, binding.rangeBarMojBrojFill, binding.rangeBarMojBrojRight, binding.tvRangeMojBroj,
-                                gs.getMinPoints(), gs.getMaxPoints(), points, played);
+                                gs.getMinPoints(), gs.getMaxPoints(), points, played * 2);
 
-                        int exactNumPct = played != 0 ? (int) ((gs.getMetric("exactMatches") * 100) / played) : 0;
+                        int exactNumPct = played != 0 ? (int) ((gs.getMetric("exactMatches") * 100) / (played * 2)) : 0;
                         binding.tvMojBrojPct.setText(String.valueOf(exactNumPct));
                         binding.pbMojBroj.setProgress(exactNumPct, true);
                         break;
