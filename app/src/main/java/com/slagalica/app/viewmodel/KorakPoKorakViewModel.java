@@ -27,6 +27,10 @@ public class KorakPoKorakViewModel extends ViewModel {
     private final MutableLiveData<GameState> gameState = new MutableLiveData<>(GameState.LOADING);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
+    private boolean isMatchGame = false;
+    private boolean isPlayer1 = true;
+    private String matchId = null;
+
     public enum GameState {
         LOADING,
         PLAYER_TURN,
@@ -52,6 +56,12 @@ public class KorakPoKorakViewModel extends ViewModel {
     public LiveData<GameState> getGameState() { return gameState; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
 
+    public void initMatchMode(String matchId, boolean isPlayer1) {
+        this.isMatchGame = true;
+        this.isPlayer1 = isPlayer1;
+        this.matchId = matchId;
+    }
+
     public void loadQuestion() {
         gameState.setValue(GameState.LOADING);
         repository.getRandomQuestion(new RepositoryCallback<KorakPoKorakQuestion>() {
@@ -76,6 +86,10 @@ public class KorakPoKorakViewModel extends ViewModel {
         if (isCorrect(userAnswer, q)) {
             int step = currentStep.getValue();
             int points = MAX_POINTS - (step * POINTS_PER_STEP);
+
+            if (isMatchGame)
+                repository.writeStats(matchId, isPlayer1, step + 1, null);
+
             addPointsToCurrentPlayer(points);
             advanceRound();
             return true;

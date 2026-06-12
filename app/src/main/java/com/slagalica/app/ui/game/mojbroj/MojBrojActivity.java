@@ -31,7 +31,9 @@ import com.slagalica.app.repository.RepositoryCallback;
 import com.slagalica.app.viewmodel.MojBrojViewModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MojBrojActivity extends AppCompatActivity implements SensorEventListener {
@@ -77,6 +79,7 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     private MatchRepository matchRepository;
     private int matchRound;
     private int p1Total, p2Total;
+    private int p1ExactCount = 0, p2ExactCount = 0;
     private int matchTarget;
     private int[] matchNumbers;
     private boolean targetStopped, numbersStopped, myResultSubmitted, roundResolved;
@@ -540,6 +543,8 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         matchRound = soloContinue ? (isPlayer1 ? 1 : 2) : 1;
         p1Total = 0;
         p2Total = 0;
+        p1ExactCount = 0;
+        p2ExactCount = 0;
         tvScore.setText("0");
         tvScoreOpponent.setText("0");
         btnSubmit.setOnClickListener(v -> submitMatchResult());
@@ -675,6 +680,13 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
             matchRepository.removeMojBrojResultsListener(matchId, matchRound, matchResultsListener);
             matchResultsListener = null;
         }
+
+        if (p1Result != null && matchTarget != 0 && p1Result == matchTarget)
+            p1ExactCount++;
+
+        if (p2Result != null && matchTarget != 0 && p2Result == matchTarget)
+            p2ExactCount++;
+
         int[] pts = MojBrojViewModel.scoreRound(p1Result, p2Result, matchTarget, currentStarter());
         p1Total += pts[0];
         p2Total += pts[1];
@@ -693,8 +705,15 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
         if (roundResolved) return;
         roundResolved = true;
         int pts = (myRoundResult != null && matchTarget != 0 && myRoundResult == matchTarget) ? 10 : 0;
-        if (isPlayer1) p1Total += pts;
-        else           p2Total += pts;
+        if (isPlayer1) {
+            p1Total += pts;
+            if (myRoundResult != null && matchTarget != 0 && myRoundResult == matchTarget)
+                p1ExactCount++;
+        } else {
+            p2Total += pts;
+            if (myRoundResult != null && matchTarget != 0 && myRoundResult == matchTarget)
+                p2ExactCount++;
+        }
         updateMatchScoreDisplay();
         finishMatchGame();
     }
@@ -707,6 +726,18 @@ public class MojBrojActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void finishMatchGame() {
+        if (isMatchGame && matchId != null) {
+            Map<String, Object> statsUpdates = new HashMap<>();
+            if (soloContinue) {
+                if (isPlayer1) statsUpdates.put("p1ExactMatches", p1ExactCount);
+                else statsUpdates.put("p2ExactMatches", p2ExactCount);
+            } else {
+                statsUpdates.put("p1ExactMatches", p1ExactCount);
+                statsUpdates.put("p2ExactMatches", p2ExactCount);
+            }
+            matchRepository.writeMojBrojStats(matchId, statsUpdates, noop);
+        }
+
         Intent matchResult = new Intent();
         matchResult.putExtra("p1Score", p1Total);
         matchResult.putExtra("p2Score", p2Total);
