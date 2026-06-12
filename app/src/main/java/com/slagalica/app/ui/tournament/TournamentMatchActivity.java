@@ -36,6 +36,7 @@ public class TournamentMatchActivity extends AppCompatActivity {
     private static final int GAME_ASOC = 2;
     private static final int GAME_SKOCK = 3;
     private static final int GAME_KPK = 4;
+    private static final int GAME_MB    = 5;
 
     private static final String[] GAME_NAMES = {
             "Who knows, knows", "Connections", "Asocijacije", "Skočko", "Step by step", "My number"
@@ -212,10 +213,6 @@ public class TournamentMatchActivity extends AppCompatActivity {
     private void advanceToGame(int idx) {
         currentGame = idx;
         updateProgressDots();
-        if (idx >= 4) {
-            showSemifinalOver();
-            return;
-        }
         if (idx >= 6) { showSemifinalOver(); return; }
 
         tvCurrentGame.setText("GAME " + (idx + 1) + " / 6");
@@ -232,7 +229,7 @@ public class TournamentMatchActivity extends AppCompatActivity {
             return;
         }
 
-        if (idx == GAME_ASOC || idx == GAME_SKOCK) {
+        if (idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) {
             if (isPlayer1) showPlayButton(idx);
             else {
                 showWaitingForOpponent("Waiting for " + opponentUsername + "...");
@@ -276,7 +273,7 @@ public class TournamentMatchActivity extends AppCompatActivity {
     private void launchGame(int idx) {
         btnPlayGame.setEnabled(false);
         gameInProgress = true;
-        if ((idx == GAME_ASOC || idx == GAME_SKOCK) && isPlayer1) {
+        if ((idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) && isPlayer1) {
             matchRepo.writeAsocSkockoStarted(matchId, String.valueOf(idx));
         }
         Intent intent = new Intent(this, GAME_CLASSES[idx]);
@@ -297,7 +294,8 @@ public class TournamentMatchActivity extends AppCompatActivity {
     private void listenForBothScores(int idx) {
         if (idx == GAME_KPK) {
             if (isPlayer1) {
-                currentScoreListener = matchRepo.listenForGameScore(matchId, idx, (p1, p2, ignored) -> {
+                currentScoreListener = matchRepo.listenForGameScore(matchId, idx, (p1, p2, bothDone) -> {
+                    if (!bothDone) return;
                     currentScoreListener = null;
                     handleGame4P1Side(p1, p2);
                 });
@@ -380,18 +378,18 @@ public class TournamentMatchActivity extends AppCompatActivity {
 
         finalReadyListener = tournamentRepo.listenForFinalReady(tournamentId, (fmId, fp1u, fp1n, fp2u, fp2n, iAmIn, iP1) -> runOnUiThread(() -> onFinalReady(fmId, fp1u, fp1n, fp2u, fp2n, iAmIn, iP1)));
 
-        tournamentRepo.reportSemifinalResult(this,
-                tournamentId, semifinal,
-                winnerUid != null ? winnerUid : "unknown", winnerUsername,
-                loserUid != null ? loserUid : "unknown",
-                winnerScore, loserScore,
-                (finalMatchId, p1Uid, p1Username, p2Uid, p2Username, iAmInFinal, isP1InFinal) -> {
-
-                    if (finalMatchId != null) {
-                        runOnUiThread(() -> onFinalReady(finalMatchId, p1Uid, p1Username,
-                                p2Uid, p2Username, iAmInFinal, isP1InFinal));
-                    }
-                });
+        if (iWon) {
+            tournamentRepo.reportSemifinalResult(this,
+                    tournamentId, semifinal,
+                    winnerUid != null ? winnerUid : "unknown", winnerUsername,
+                    loserUid != null ? loserUid : "unknown",
+                    winnerScore, loserScore,
+                    (finalMatchId, p1Uid, p1Username, p2Uid, p2Username, iAmInFinal, isP1InFinal) -> {
+                        if (finalMatchId != null) {
+                            runOnUiThread(() -> onFinalReady(finalMatchId, p1Uid, p1Username, p2Uid, p2Username, iAmInFinal, isP1InFinal));
+                        }
+                    });
+        }
     }
 
     private void showWaitingForFinal(boolean iWon, int myTotal, int oppTotal) {

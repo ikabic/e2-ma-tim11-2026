@@ -31,6 +31,7 @@ public class TournamentFinalActivity extends AppCompatActivity {
     private static final int GAME_ASOC  = 2;
     private static final int GAME_SKOCK = 3;
     private static final int GAME_KPK = 4;
+    private static final int GAME_MB    = 5;
 
     private static final String[] GAME_NAMES = {
             "Who knows, knows", "Connections", "Asocijacije", "Skočko", "Step by step", "My number"
@@ -210,7 +211,6 @@ public class TournamentFinalActivity extends AppCompatActivity {
     private void advanceToGame(int idx) {
         currentGame = idx;
         updateProgressDots();
-        if (idx >= 4) { showFinalOver(); return; }
         if (idx >= 6) { showFinalOver(); return; }
 
         tvCurrentGame.setText("FINALE – GAME " + (idx + 1) + " / 6");
@@ -223,7 +223,7 @@ public class TournamentFinalActivity extends AppCompatActivity {
             }
             return;
         }
-        if (idx == GAME_ASOC || idx == GAME_SKOCK) {
+        if (idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) {
             if (isPlayer1) showPlayButton(idx);
             else {
                 showWaiting("Waiting...");
@@ -258,7 +258,7 @@ public class TournamentFinalActivity extends AppCompatActivity {
     private void launchGame(int idx) {
         btnPlayGame.setEnabled(false);
         gameInProgress = true;
-        if ((idx == GAME_ASOC || idx == GAME_SKOCK) && isPlayer1)
+        if ((idx == GAME_ASOC || idx == GAME_SKOCK || idx == GAME_MB) && isPlayer1)
             matchRepo.writeAsocSkockoStarted(matchId, String.valueOf(idx));
 
         Intent intent = new Intent(this, GAME_CLASSES[idx]);
@@ -279,7 +279,8 @@ public class TournamentFinalActivity extends AppCompatActivity {
     private void listenForBothScores(int idx) {
         if (idx == GAME_KPK) {
             if (isPlayer1) {
-                currentScoreListener = matchRepo.listenForGameScore(matchId, idx, (p1, p2, ig) -> {
+                currentScoreListener = matchRepo.listenForGameScore(matchId, idx, (p1, p2, bothDone) -> {
+                    if (!bothDone) return;
                     currentScoreListener = null;
                     matchRepo.readKpkP2StealQuestion(matchId, new RepositoryCallback<String>() {
                         @Override public void onSuccess(String q) {
