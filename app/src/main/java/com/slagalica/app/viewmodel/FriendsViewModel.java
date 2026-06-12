@@ -53,6 +53,7 @@ public class FriendsViewModel extends ViewModel {
     public LiveData<List<Friend>> getFriends() { return friends; }
     public LiveData<List<Friend>> getSearchResults() { return searchResults; }
     public LiveData<String> getError() { return error; }
+    public LiveData<Boolean> getLoading() { return loading; }
 
     public LiveData<String> getPendingMatchId() { return pendingMatchId; }
 

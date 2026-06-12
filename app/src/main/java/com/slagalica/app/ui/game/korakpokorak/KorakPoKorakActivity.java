@@ -136,6 +136,11 @@ public class KorakPoKorakActivity extends AppCompatActivity {
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(KorakPoKorakViewModel.class);
 
+        if (isMatchGame) {
+            String matchId = getIntent().getStringExtra("matchId");
+            viewModel.initMatchMode(matchId, isPlayer1);
+        }
+
         viewModel.getQuestion().observe(this, this::displayQuestion);
 
         viewModel.getCurrentStep().observe(this, step -> {
@@ -423,7 +428,16 @@ public class KorakPoKorakActivity extends AppCompatActivity {
 
     private void showExitConfirm() {
         ConfirmDialog.show(this, "Quit game?", "Your progress will be lost.",
-            "Quit", "Keep playing", this::finish);
+            "Quit", "Keep playing", this::quitGame);
+    }
+
+    private void quitGame() {
+        if (isMatchGame) {
+            Intent result = new Intent();
+            result.putExtra("quitMatch", true);
+            setResult(RESULT_OK, result);
+        }
+        finish();
     }
 
     @Override

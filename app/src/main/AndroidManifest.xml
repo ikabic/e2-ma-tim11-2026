@@ -82,6 +82,10 @@
             android:name=".ui.notifications.NotificationsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.chat.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.match.MatchmakingActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

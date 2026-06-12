@@ -1,5 +1,7 @@
 package com.slagalica.app.repository;
 
+import android.util.Log;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -223,20 +225,18 @@ public class SkockoRepository {
         return listener;
     }
 
-    public void writeStats(boolean p1SolvedR1, int p1AttemptR1, boolean p1SolvedR2, int p1AttemptR2, boolean p2SolvedR1, int p2AttemptR1, boolean p2SolvedR2, int p2AttemptR2, int p1Score, int p2Score, RepositoryCallback<Void> callback) {
+    public void writeStats(int r1Attempt, int r2Attempt, RepositoryCallback<Void> callback) {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("p1SolvedR1",  p1SolvedR1);
-        stats.put("p1AttemptR1", p1AttemptR1);
-        stats.put("p1SolvedR2",  p1SolvedR2);
-        stats.put("p1AttemptR2", p1AttemptR2);
-        stats.put("p2SolvedR1",  p2SolvedR1);
-        stats.put("p2AttemptR1", p2AttemptR1);
-        stats.put("p2SolvedR2",  p2SolvedR2);
-        stats.put("p2AttemptR2", p2AttemptR2);
-        stats.put("p1Score", p1Score);
-        stats.put("p2Score", p2Score);
-        statsRef.setValue(stats).addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(null); })
-                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+
+        if (r1Attempt != 0) stats.put("p1GuessedInAttempt" + r1Attempt, 1);
+        if (r2Attempt != 0) stats.put("p2GuessedInAttempt" + r2Attempt, 1);
+        statsRef.setValue(stats)
+                .addOnSuccessListener(unused -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
     }
 
     private void addTracked(DatabaseReference ref, ValueEventListener l) {

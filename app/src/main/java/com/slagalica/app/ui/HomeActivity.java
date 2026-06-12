@@ -26,11 +26,13 @@ import com.slagalica.app.ui.game.skocko.SkockoActivity;
 import com.slagalica.app.ui.game.spojnice.SpojniceActivity;
 import com.slagalica.app.ui.match.MatchmakingActivity;
 import com.slagalica.app.ui.auth.LoginActivity;
+import com.slagalica.app.ui.chat.ChatActivity;
 import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileFragment;
 import com.slagalica.app.ui.ranking.RankingAdapter;
 import com.slagalica.app.ui.regions.RegionFragment;
+import com.slagalica.app.util.ChatNotificationManager;
 import com.slagalica.app.util.ConfirmDialog;
 import com.slagalica.app.viewmodel.AuthViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel;
@@ -156,6 +158,7 @@ public class HomeActivity extends BaseActivity {
                 binding.chipStarsHeader.setVisibility(View.GONE);
                 binding.rowTokenInfo.setVisibility(View.GONE);
                 binding.btnLogout.setVisibility(View.GONE);
+                binding.btnChat.setVisibility(View.GONE);
                 binding.btnGuestLogin.setVisibility(View.VISIBLE);
                 binding.cardTournament.setVisibility(View.GONE);
                 binding.btnGuestLogin.setOnClickListener(v -> {
@@ -185,6 +188,9 @@ public class HomeActivity extends BaseActivity {
 
                         String region = doc.getString("region");
                         userRegionKey = region != null ? region : "";
+
+                        if (!userRegionKey.isEmpty())
+                            ChatNotificationManager.get().start(getApplicationContext(), userRegionKey, currentUser.getUid());
 
                         if (rankingViewModel.getActiveType().getValue() == RankingViewModel.CycleType.REGIONAL)
                             displayRegionalList(regionViewModel.getLeaderboard().getValue());
@@ -227,6 +233,17 @@ public class HomeActivity extends BaseActivity {
         binding.btnFriends.setOnClickListener(v ->
                 startActivity(new Intent(this, FriendsActivity.class))
         );
+
+        binding.btnChat.setOnClickListener(v -> {
+            if (userRegionKey == null || userRegionKey.isEmpty()) {
+                android.widget.Toast.makeText(this, "Region not loaded yet.", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent i = new Intent(this, ChatActivity.class);
+            i.putExtra("regionKey", userRegionKey);
+            i.putExtra("username", playerUsername);
+            startActivity(i);
+        });
 
         notifViewModel = new ViewModelProvider(this).get(NotificationViewModel.class);
         notifViewModel.getUnreadCount().observe(this, count -> {
@@ -290,7 +307,6 @@ public class HomeActivity extends BaseActivity {
                 selectTab(0);
         });
 
-        // Bottom navigation
         boolean isGuest = currentUser != null && currentUser.isAnonymous();
         binding.navBtnHome.setOnClickListener(v -> selectTab(0));
         binding.navBtnGames.setOnClickListener(v -> selectTab(1));
@@ -305,7 +321,17 @@ public class HomeActivity extends BaseActivity {
             }
         });
 
-        selectTab(0); // start on Home
+        selectTab(0);
+        maybeRequestNotificationPermission();
+    }
+
+    private void maybeRequestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 2001);
+            }
+        }
     }
 
     private void displayRegionalList(List<Region> list) {

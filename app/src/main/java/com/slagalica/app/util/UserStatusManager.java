@@ -42,6 +42,7 @@ public class UserStatusManager {
         ref.updateChildren(values);
 
         InviteManager.get().stopListening();
+        ChatNotificationManager.get().stop();
         auth.signOut();
     }
 

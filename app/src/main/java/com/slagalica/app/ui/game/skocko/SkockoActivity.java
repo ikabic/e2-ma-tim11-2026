@@ -48,6 +48,7 @@ public class SkockoActivity extends AppCompatActivity {
     private CountDownTimer activeTimer;
 
     private boolean isMatchGame = false;
+    private boolean gameFinished = false;
     private String opponentUsername = "Opponent";
 
     @Override
@@ -242,6 +243,7 @@ public class SkockoActivity extends AppCompatActivity {
 
         viewModel.getFinalScores().observe(this, scores -> {
             if (scores == null) return;
+            gameFinished = true;
             if (getIntent().getBooleanExtra("isMatchGame", false)) {
                 Intent result = new Intent();
                 result.putExtra("p1Score", scores[0]);
@@ -430,7 +432,7 @@ public class SkockoActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         cancelTimer();
-        if (isMatchGame) {
+        if (isMatchGame && !gameFinished) {
             viewModel.writeForfeit();
         }
     }

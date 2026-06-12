@@ -171,6 +171,47 @@ public class MojBrojViewModel extends ViewModel {
         gameState.setValue(GameState.SPINNING_TARGET);
     }
 
+    public int generateTarget() {
+        return 100 + random.nextInt(900);
+    }
+
+    public int[] generateNumbers() {
+        int[] nums = new int[6];
+        for (int i = 0; i < 4; i++) nums[i] = 1 + random.nextInt(9);
+        nums[4] = SMALL_NUMBERS[random.nextInt(SMALL_NUMBERS.length)];
+        nums[5] = LARGE_NUMBERS[random.nextInt(LARGE_NUMBERS.length)];
+        return nums;
+    }
+
+    public void setSharedTarget(int target) {
+        targetNumber.setValue(target);
+    }
+
+    public void setSharedNumbers(int[] nums) {
+        numbers.setValue(nums);
+    }
+
+    public static int[] scoreRound(Integer p1Result, Integer p2Result, int target, int starter) {
+        boolean p1Exact = p1Result != null && p1Result == target;
+        boolean p2Exact = p2Result != null && p2Result == target;
+        if (p1Exact && p2Exact) return new int[]{EXACT_POINTS, EXACT_POINTS};
+        if (p1Exact) return new int[]{EXACT_POINTS, 0};
+        if (p2Exact) return new int[]{0, EXACT_POINTS};
+
+        if (p1Result == null && p2Result == null) return new int[]{0, 0};
+        if (p1Result == null) return new int[]{0, CLOSER_POINTS};
+        if (p2Result == null) return new int[]{CLOSER_POINTS, 0};
+
+        if (p1Result.equals(p2Result)) {
+            return starter == 1 ? new int[]{CLOSER_POINTS, 0} : new int[]{0, CLOSER_POINTS};
+        }
+        int diff1 = Math.abs(p1Result - target);
+        int diff2 = Math.abs(p2Result - target);
+        if (diff1 < diff2) return new int[]{CLOSER_POINTS, 0};
+        if (diff2 < diff1) return new int[]{0, CLOSER_POINTS};
+        return starter == 1 ? new int[]{CLOSER_POINTS, 0} : new int[]{0, CLOSER_POINTS};
+    }
+
     public Integer tryEvaluate(String expression) {
         if (expression.isEmpty()) return null;
         try {

@@ -171,7 +171,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
@@ -207,56 +207,69 @@
 
             </LinearLayout>
 
-            <!-- Empty state -->
-            <LinearLayout
-                android:id="@+id/sectionEmpty"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingTop="48dp"
-                android:paddingBottom="48dp"
-                android:visibility="gone">
+                android:layout_height="match_parent">
 
-                <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@drawable/ic_friends"
-                    app:tint="@color/text_mute"
-                    android:alpha="0.4"
-                    android:contentDescription="No friends yet" />
-
-                <TextView
+                <!-- Loading -->
+                <ProgressBar
+                    android:id="@+id/pbLoading"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No friends yet"
-                    android:textColor="@color/text_dim"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="12dp" />
+                    android:layout_gravity="center"
+                    android:visibility="gone"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Empty state -->
+                <LinearLayout
+                    android:id="@+id/sectionEmpty"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Search for players or share your QR code"
-                    android:textColor="@color/text_mute"
-                    android:textSize="13sp"
-                    android:layout_marginTop="4dp" />
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="48dp"
+                    android:paddingBottom="48dp"
+                    android:visibility="gone">
 
-            </LinearLayout>
+                    <ImageView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:src="@drawable/ic_friends"
+                        app:tint="@color/text_mute"
+                        android:alpha="0.4"
+                        android:contentDescription="No friends yet" />
 
-            <!-- Friends RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvFriends"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:clipToPadding="false"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_friend" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No friends yet"
+                        android:textColor="@color/text_dim"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="12dp" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Search for players or share your QR code"
+                        android:textColor="@color/text_mute"
+                        android:textSize="13sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+                <!-- Friends RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFriends"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:clipToPadding="false"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_friend" />
+
+            </FrameLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

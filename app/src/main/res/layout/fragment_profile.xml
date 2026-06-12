@@ -6,8 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment">
 
+    <!-- Loading -->
+    <ProgressBar
+        android:id="@+id/pbLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <!-- Page -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/profile"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -223,7 +232,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="340 / 500"
-                        android:textColor="@color/text_dim"
+                        android:textColor="@color/text_mute"
                         android:textSize="12sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
@@ -258,44 +267,45 @@
                 android:background="@color/border"/>
 
             <!-- Statistics -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="22dp"
-                android:paddingEnd="22dp"
                 android:paddingTop="22dp"
+                android:paddingEnd="22dp"
                 android:paddingBottom="8dp">
 
                 <!-- Section header row -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
                     android:layout_marginBottom="16dp"
                     android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:letterSpacing="0.1"
                     android:text="STATISTICS"
                     android:textColor="@color/text_mute"
                     android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.1"/>
+                    android:textStyle="bold" />
 
                 <!-- Overall -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:layout_marginBottom="18dp"
                     android:background="@drawable/bg_card"
-                    android:padding="18dp"
-                    android:layout_marginBottom="18dp">
+                    android:orientation="vertical"
+                    android:padding="18dp">
 
                     <!-- Card title row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="16dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
@@ -304,19 +314,19 @@
                             android:text="TOTAL"
                             android:textColor="@color/text"
                             android:textSize="14sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <!-- Total games badge -->
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
                             android:background="@drawable/bg_chip"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
                             android:paddingStart="10dp"
-                            android:paddingEnd="10dp"
                             android:paddingTop="4dp"
-                            android:paddingBottom="4dp"
-                            android:gravity="center_vertical">
+                            android:paddingEnd="10dp"
+                            android:paddingBottom="4dp">
 
                             <TextView
                                 android:id="@+id/tvTotalGames"
@@ -325,15 +335,15 @@
                                 android:text="128"
                                 android:textColor="@color/accent"
                                 android:textSize="13sp"
-                                android:textStyle="bold"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text=" GAMES"
-                                android:textStyle="bold"
+                                android:text=" MATCHES"
                                 android:textColor="@color/text_mute"
-                                android:textSize="12sp"/>
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -341,28 +351,28 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Wins"
-                            android:textStyle="bold"
                             android:textColor="@color/text_mute"
-                            android:textSize="12sp"/>
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvWinCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="12dp"
                             android:text="93"
                             android:textColor="@color/accent"
                             android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:layout_marginEnd="12dp"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -370,51 +380,53 @@
                             android:layout_weight="1"
                             android:text="Losses"
                             android:textAlignment="textStart"
-                            android:textStyle="bold"
                             android:textColor="@color/text_mute"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvLossCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="35"
-                            android:textStyle="bold"
                             android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Segmented bar -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="10dp"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="6dp">
+                        android:layout_marginBottom="6dp"
+                        android:orientation="horizontal">
 
                         <View
+                            android:id="@+id/vTotalWins"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="73"
-                            android:background="@color/accent"/>
+                            android:background="@color/accent" />
 
                         <View
                             android:layout_width="3dp"
                             android:layout_height="match_parent"
-                            android:background="@color/bg_card"/>
+                            android:background="@color/bg_card" />
 
                         <View
+                            android:id="@+id/vTotalLosses"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="27"
-                            android:background="@color/bg"/>
+                            android:background="@color/bg" />
                     </LinearLayout>
 
                     <!-- Win % label row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="16dp"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:id="@+id/tvWinPct"
@@ -423,54 +435,54 @@
                             android:text="73%"
                             android:textColor="@color/accent"
                             android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="1dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/tvLossPct"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="27%"
-                            android:textStyle="bold"
                             android:textColor="@color/text_mute"
-                            android:textSize="11sp"/>
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/border"
-                        android:layout_marginBottom="14dp"/>
+                        android:layout_marginBottom="14dp"
+                        android:background="@color/border" />
 
                     <!-- Avg points row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Average points"
-                            android:textStyle="bold"
                             android:textColor="@color/text_mute"
-                            android:textSize="13sp"/>
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvAvgPoints"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="120 – 180"
+                            android:text="180"
                             android:textColor="@color/accent"
                             android:textSize="15sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -478,28 +490,28 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:layout_marginBottom="18dp"
                     android:background="@drawable/bg_card"
-                    android:padding="18dp"
-                    android:layout_marginBottom="18dp">
+                    android:orientation="vertical"
+                    android:padding="18dp">
 
                     <!-- Card header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="18dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="18dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:letterSpacing="0.1"
                             android:text="AVG POINTS RANGE"
                             android:textColor="@color/text"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.1"/>
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -507,432 +519,656 @@
                             android:text="per game"
                             android:textColor="@color/text_mute"
                             android:textSize="10sp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <!-- Scale labels: 0 … 50 … 100 … 150 … 200 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginStart="88dp"
-                        android:layout_marginBottom="6dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="0"
-                            android:textColor="@color/text_mute"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:gravity="start"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="50"
-                            android:textColor="@color/text_mute"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:gravity="center"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="100"
-                            android:textColor="@color/text_mute"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:gravity="center"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="150"
-                            android:textColor="@color/text_mute"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:gravity="center"/>
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="200"
-                            android:textColor="@color/text_mute"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Row: Who knows, knows -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Who knows"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <!-- track background -->
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinKzz"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="Who knows, knows"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxKzz"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="40"
-                                    android:background="@android:color/transparent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="40"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="20"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="80–160"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarKzz"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarKzzLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="40"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarKzzFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="40"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarKzzRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="20"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeKzz"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="-25 – -20"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Row: My number -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="My number"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinMojBroj"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="My number"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxMojBroj"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="30"
-                                    android:background="@android:color/transparent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="30"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="40"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="60–120"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarMojBroj"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarMojBrojLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="30"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarMojBrojFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="30"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarMojBrojRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="40"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeMojBroj"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="60 – 120"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Row: Associations -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Associations"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinAsoc"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="Associations"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxAsoc"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="50"
-                                    android:background="@android:color/transparent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="40"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="10"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="100–180"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarAsoc"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarAsocLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="50"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarAsocFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="40"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarAsocRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="10"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeAsoc"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="90 – 180"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Row: Connections -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Connections"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinSpojnice"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="Connections"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxSpojnice"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="45"
-                                    android:background="@android:color/transparent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="30"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="25"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="90–150"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarSpojnice"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarSpojniceLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="45"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarSpojniceFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="30"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarSpojniceRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="25"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeSpojnice"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="90 – 150"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Row: Step by step -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
                         android:gravity="center_vertical"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Step by step"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinKpk"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="Step by step"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxKpk"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="20"
-                                    android:background="@android:color/transparent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="30"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="50"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="40–100"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarKpk"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarKpkLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="20"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarKpkFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="30"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarKpkRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="50"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeKpk"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="40 – 100"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Row: Mastermind -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="88dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Mastermind"
-                            android:textColor="@color/text_mute"
-                            android:textSize="11sp"
-                            android:textStyle="bold"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:layout_marginEnd="50dp">
 
-                        <FrameLayout
-                            android:layout_width="0dp"
-                            android:layout_height="8dp"
-                            android:layout_weight="1">
+                            <TextView
+                                android:id="@+id/tvMinSkocko"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="start" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/bg_elev"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="Mastermind"
+                                android:textColor="@color/accent"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tvMaxSkocko"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="200"
+                                android:textColor="@color/text_mute"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:gravity="end" />
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="35"
-                                    android:background="@android:color/transparent"/>
+                        </LinearLayout>
 
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="30"
-                                    android:background="@color/accent"/>
-
-                                <View
-                                    android:layout_width="0dp"
-                                    android:layout_height="match_parent"
-                                    android:layout_weight="35"
-                                    android:background="@android:color/transparent"/>
-                            </LinearLayout>
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="52dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="70–130"
-                            android:textColor="@color/accent"
-                            android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Track background -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="8dp"
+                                android:layout_weight="1">
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@color/bg_elev" />
+
+                                <LinearLayout
+                                    android:id="@+id/rangeBarSkocko"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:id="@+id/rangeBarSkockoLeft"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="35"
+                                        android:background="@color/bg_elev" />
+
+                                    <View
+                                        android:id="@+id/rangeBarSkockoFill"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="30"
+                                        android:background="@color/accent" />
+
+                                    <View
+                                        android:id="@+id/rangeBarSkockoRight"
+                                        android:layout_width="0dp"
+                                        android:layout_height="match_parent"
+                                        android:layout_weight="35"
+                                        android:background="@color/bg_elev" />
+                                </LinearLayout>
+                            </FrameLayout>
+
+                            <TextView
+                                android:id="@+id/tvRangeSkocko"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:text="70 – 130"
+                                android:textColor="@color/accent"
+                                android:textSize="10sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>
@@ -942,65 +1178,67 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
 
                     <!-- Ko zna zna -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:background="@drawable/bg_card"
-                        android:padding="14dp"
-                        android:layout_marginEnd="5dp">
+                        android:orientation="vertical"
+                        android:padding="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.08"
                             android:text="Who knows, knows"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="10dp"/>
+                            android:textStyle="bold" />
 
                         <!-- Big stat -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
+                            android:layout_marginBottom="10dp"
                             android:gravity="bottom"
-                            android:layout_marginBottom="10dp">
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/tvKzzCorrect"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:lineHeight="28sp"
                                 android:text="84"
                                 android:textColor="@color/text"
                                 android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:lineHeight="28sp"/>
+                                android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvKzzTotal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:paddingBottom="3dp"
                                 android:text=" / 100"
-                                android:textStyle="bold"
                                 android:textColor="@color/text_mute"
                                 android:textSize="13sp"
-                                android:paddingBottom="3dp"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <!-- Mini bar -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="6dp"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="6dp">
+                            android:layout_marginBottom="6dp"
+                            android:orientation="horizontal">
 
                             <View
+                                android:id="@+id/vKzzCorrect"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="84"
@@ -1009,90 +1247,91 @@
                             <View
                                 android:layout_width="2dp"
                                 android:layout_height="match_parent"
-                                android:background="@color/bg_card"/>
+                                android:background="@color/bg_card" />
 
                             <View
+                                android:id="@+id/vKzzWrong"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="16"
-                                android:background="@color/bg"/>
+                                android:background="@color/bg" />
                         </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="correct answers"
-                            android:textStyle="bold"
+                            android:text="correct answers picked"
                             android:textColor="@color/text_mute"
-                            android:textSize="11sp"/>
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Moj broj -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:background="@drawable/bg_card"
-                        android:padding="14dp"
-                        android:layout_marginStart="5dp">
+                        android:orientation="vertical"
+                        android:padding="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.08"
                             android:text="My number"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="10dp"/>
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
+                            android:layout_marginBottom="10dp"
                             android:gravity="bottom"
-                            android:layout_marginBottom="10dp">
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/tvMojBrojPct"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:lineHeight="28sp"
                                 android:text="62"
                                 android:textColor="@color/text"
                                 android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:lineHeight="28sp"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:paddingBottom="3dp"
                                 android:text="%"
-                                android:textStyle="bold"
                                 android:textColor="@color/text_mute"
                                 android:textSize="13sp"
-                                android:paddingBottom="3dp"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
                             android:id="@+id/pbMojBroj"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp"
                             android:max="100"
                             android:progress="62"
-                            android:layout_marginBottom="6dp"
-                            app:trackThickness="6dp"
-                            app:trackCornerRadius="3dp"
                             app:indicatorColor="@color/accent"
-                            app:trackColor="@color/bg_elev"/>
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="exact number"
-                            android:textStyle="bold"
+                            android:text="exact number found"
                             android:textColor="@color/text_mute"
-                            android:textSize="11sp"/>
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -1100,155 +1339,158 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="18dp">
+                    android:layout_marginBottom="18dp"
+                    android:orientation="horizontal">
 
                     <!-- Asocijacije -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:background="@drawable/bg_card"
-                        android:padding="14dp"
-                        android:layout_marginEnd="5dp">
+                        android:orientation="vertical"
+                        android:padding="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.08"
                             android:text="Associations"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="10dp"/>
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
+                            android:layout_marginBottom="10dp"
                             android:gravity="bottom"
-                            android:layout_marginBottom="10dp">
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/tvAsocSolved"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:lineHeight="28sp"
                                 android:text="71"
                                 android:textColor="@color/text"
                                 android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:lineHeight="28sp"/>
+                                android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/tvAsocTotal"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:paddingBottom="3dp"
                                 android:text=" / 100"
-                                android:textStyle="bold"
                                 android:textColor="@color/text_mute"
                                 android:textSize="13sp"
-                                android:paddingBottom="3dp"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="6dp"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="6dp">
+                            android:layout_marginBottom="6dp"
+                            android:orientation="horizontal">
 
                             <View
+                                android:id="@+id/vAsocComplete"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="71"
-                                android:background="@color/accent"/>
+                                android:background="@color/accent" />
 
                             <View
                                 android:layout_width="2dp"
                                 android:layout_height="match_parent"
-                                android:background="@color/bg_card"/>
+                                android:background="@color/bg_card" />
 
                             <View
+                                android:id="@+id/vAsocIncomplete"
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="29"
-                                android:background="@color/bg"/>
+                                android:background="@color/bg" />
                         </LinearLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="completed"
-                            android:textStyle="bold"
+                            android:text="fully solved"
                             android:textColor="@color/text_mute"
-                            android:textSize="11sp"/>
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Spojnice -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:background="@drawable/bg_card"
-                        android:padding="14dp"
-                        android:layout_marginStart="5dp">
+                        android:orientation="vertical"
+                        android:padding="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.08"
                             android:text="Connections"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="10dp"/>
+                            android:textStyle="bold" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
+                            android:layout_marginBottom="10dp"
                             android:gravity="bottom"
-                            android:layout_marginBottom="10dp">
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:id="@+id/tvSpojnicePct"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:lineHeight="28sp"
                                 android:text="78"
                                 android:textColor="@color/text"
                                 android:textSize="28sp"
-                                android:textStyle="bold"
-                                android:lineHeight="28sp"/>
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:paddingBottom="3dp"
                                 android:text="%"
-                                android:textStyle="bold"
                                 android:textColor="@color/text_mute"
                                 android:textSize="13sp"
-                                android:paddingBottom="3dp"/>
+                                android:textStyle="bold" />
                         </LinearLayout>
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
                             android:id="@+id/pbSpojnice"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp"
                             android:max="100"
                             android:progress="78"
-                            android:layout_marginBottom="6dp"
-                            app:trackThickness="6dp"
-                            app:trackCornerRadius="3dp"
                             app:indicatorColor="@color/accent"
-                            app:trackColor="@color/bg_elev"/>
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="connections"
-                            android:textStyle="bold"
+                            android:text="connections made"
                             android:textColor="@color/text_mute"
-                            android:textSize="11sp"/>
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -1256,362 +1498,320 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:layout_marginBottom="18dp"
                     android:background="@drawable/bg_card"
-                    android:padding="18dp"
-                    android:layout_marginBottom="18dp">
+                    android:orientation="vertical"
+                    android:padding="18dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="14dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="14dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:letterSpacing="0.08"
                             android:text="Step by step"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 1 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel1"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="1"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk1"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="38"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="62"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="38"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep1"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="38%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 2 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel2"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="2"
                             android:textColor="@color/accent"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk2"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="52"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="48"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="52"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep2"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="52%"
                             android:textColor="@color/accent"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 3 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel3"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="3"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk3"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="45"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="55"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="45"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep3"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="45%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 4 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel4"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="4"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk4"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="31"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="69"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="31"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep4"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="31%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 5 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel5"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="5"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk5"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="22"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="78"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="22"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep5"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="22%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 6 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel6"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="6"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk6"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="14"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="86"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="14"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep6"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="14%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Step 7 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvKpkStepLabel7"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="7"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbKpk7"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="8"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="92"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="8"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvKpkStep7"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="8%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -1619,314 +1819,277 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:layout_marginBottom="18dp"
                     android:background="@drawable/bg_card"
-                    android:padding="18dp"
-                    android:layout_marginBottom="18dp">
+                    android:orientation="vertical"
+                    android:padding="18dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="14dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="14dp">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:letterSpacing="0.08"
                             android:text="Mastermind"
                             android:textColor="@color/accent"
                             android:textSize="10sp"
-                            android:textStyle="bold"
-                            android:letterSpacing="0.08"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 1 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel1"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="1"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko1"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="12"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="88"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="12"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvSkockoAttempt1"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="12%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 2 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel2"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="2"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko2"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="38"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="62"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="38"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvSkockoAttempt2"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="38%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 3 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel3"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="3"
                             android:textColor="@color/accent"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko3"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="55"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="45"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="55"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvSkockoAttempt3"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="55%"
                             android:textColor="@color/accent"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 4 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel4"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="4"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko4"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="33"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="67"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
-
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="33"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
                         <TextView
                             android:id="@+id/tvSkockoAttempt4"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="33%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 5 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel5"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="5"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko5"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="18"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="82"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="18"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvSkockoAttempt5"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="18%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Attempt 6 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:id="@+id/tvSkockoAttemptLabel6"
                             android:layout_width="20dp"
                             android:layout_height="wrap_content"
                             android:text="6"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="bold" />
 
-                        <LinearLayout
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/pbSkocko6"
                             android:layout_width="0dp"
                             android:layout_height="6dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
                             android:layout_marginStart="8dp"
-                            android:layout_marginEnd="10dp">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="9"
-                                android:background="@color/accent"/>
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="91"
-                                android:background="@color/bg_elev"/>
-                        </LinearLayout>
+                            android:layout_marginEnd="10dp"
+                            android:layout_weight="1"
+                            android:max="100"
+                            android:progress="9"
+                            app:indicatorColor="@color/accent"
+                            app:trackColor="@color/bg_elev"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp" />
 
                         <TextView
                             android:id="@+id/tvSkockoAttempt6"
                             android:layout_width="36dp"
                             android:layout_height="wrap_content"
+                            android:gravity="end"
                             android:text="9%"
                             android:textColor="@color/text_mute"
                             android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:gravity="end"/>
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
