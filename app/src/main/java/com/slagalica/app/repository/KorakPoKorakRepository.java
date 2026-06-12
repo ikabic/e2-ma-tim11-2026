@@ -2,6 +2,8 @@ package com.slagalica.app.repository;
 
 import android.util.Log;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
@@ -13,10 +15,14 @@ import java.util.List;
 public class KorakPoKorakRepository {
 
     private final FirebaseFirestore db;
+    private final DatabaseReference rtdb;
+
+    private DatabaseReference statsRef;
     private static final String COLLECTION = "korak_po_korak_questions";
 
     public KorakPoKorakRepository() {
         db = FirebaseFirestore.getInstance();
+        rtdb = FirebaseDatabase.getInstance("https://slagalica-66578-default-rtdb.europe-west1.firebasedatabase.app/").getReference();
     }
 
     public void getRandomQuestion(RepositoryCallback<KorakPoKorakQuestion> callback) {
@@ -145,5 +151,18 @@ public class KorakPoKorakRepository {
                 ))
 
         );
+    }
+
+    public void writeStats(String matchId, boolean isPlayer1, int step, RepositoryCallback<Void> callback) {
+        String key = (isPlayer1 ? "p1GuessedInStep" : "p2GuessedInStep") + step;
+        statsRef = rtdb.child("matches").child(String.valueOf(matchId)).child("scores").child("4").child("stats").child(key);
+
+        statsRef.setValue(1)
+                .addOnSuccessListener(unused -> {
+                    if (callback != null) callback.onSuccess(null);
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
     }
 }
