@@ -113,21 +113,6 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" · "
-                        android:textColor="@color/text_mute"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/tvFriendRank"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="#14 this month"
-                        android:textColor="@color/text_mute"
-                        android:textSize="12sp" />
-
                 </LinearLayout>
 
                 <!-- Stars count -->
@@ -153,6 +138,21 @@
                         android:textColor="@color/text_mute"
                         android:textSize="12sp"
                         android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" · "
+                        android:textColor="@color/text_mute"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvFriendRank"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="#14 this month"
+                        android:textColor="@color/text_mute"
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 
