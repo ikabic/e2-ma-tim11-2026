@@ -64,7 +64,7 @@ public class Profile {
     }
 
     @Exclude
-    List<String> leagueNames = List.of("Unranked", "Bronze", "Silver", "Gold", "Platinum", "Diamond");
+    public List<String> leagueNames = List.of("Unranked", "Bronze", "Silver", "Gold", "Platinum", "Diamond");
 
     public String getLeague(String info) {
         int league = 0;

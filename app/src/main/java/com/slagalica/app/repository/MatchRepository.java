@@ -13,8 +13,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.slagalica.app.model.Profile;
 import com.slagalica.app.util.UserStatusManager;
 
 import java.util.HashMap;
@@ -595,7 +597,7 @@ public class MatchRepository {
                 if (lastRefresh == null) {
                     upd.put("lastTokenRefresh", now);
                 } else if (now - lastRefresh >= oneDayMs) {
-                    afterRefresh = current + 5;
+                    afterRefresh = current + calculateDailyTokens(doc);
                     upd.put("lastTokenRefresh", now);
                 }
                 if (afterRefresh <= 0) { callback.onSuccess(false); return; }
@@ -617,10 +619,28 @@ public class MatchRepository {
                 Long tokens = doc.getLong("tokens");
                 int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
                 boolean refreshDue = lastRefresh != null && now - lastRefresh >= oneDayMs;
-                int available = current + (refreshDue ? 5 : 0);
+                int refreshAmount = refreshDue ? calculateDailyTokens(doc) : 0;
+                int available = current + refreshAmount;
                 callback.onSuccess(available > 0);
             })
             .addOnFailureListener(e -> callback.onSuccess(false));
+    }
+
+    private int calculateDailyTokens(DocumentSnapshot doc) {
+        int initialTokens = 5;
+
+        Long currentStarsLong = doc.getLong("stars");
+        int stars = currentStarsLong != null ? currentStarsLong.intValue() : 0;
+
+        Profile profile = new Profile();
+        profile.setStars(stars);
+
+        String currentLeague = profile.getLeague("current");
+
+        int leagueIndex = profile.leagueNames.indexOf(currentLeague);
+        if (leagueIndex < 0) leagueIndex = 0;
+
+        return initialTokens + leagueIndex;
     }
 
     public void writeAsocSkockoStarted(String matchId, String gameIdx) {
