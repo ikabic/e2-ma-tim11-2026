@@ -3,6 +3,7 @@ package com.slagalica.app.ui.regions;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.view.ViewGroup;
 import com.slagalica.app.R;
 import com.slagalica.app.databinding.FragmentRegionBinding;
 import com.slagalica.app.model.Region;
+import com.slagalica.app.ui.challenge.ChallengeActivity;
 import com.slagalica.app.viewmodel.RegionViewModel;
 
 import org.osmdroid.config.Configuration;
@@ -73,6 +75,9 @@ public class RegionFragment extends Fragment {
         setupMap();
         setupDetailCard();
         observeViewModel();
+
+        binding.btnSendChallenge.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), ChallengeActivity.class)));
     }
 
     private void observeViewModel() {

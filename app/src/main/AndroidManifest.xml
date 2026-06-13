@@ -93,6 +93,18 @@
             android:name=".ui.match.MatchActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.challenge.ChallengeActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.challenge.ChallengeLobbyActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.challenge.ChallengePartijaActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <service
             android:name="com.slagalica.app.SlagalicaMessagingService"

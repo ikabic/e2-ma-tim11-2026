@@ -112,6 +112,19 @@
                     android:textSize="12sp"
                     android:gravity="center" />
 
+                <Button
+                    android:id="@+id/btnSendChallenge"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="18dp"
+                    android:layout_marginEnd="18dp"
+                    android:layout_marginTop="14dp"
+                    android:text="Send a challenge"
+                    android:textColor="@color/accent_ink"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:background="@drawable/bg_btn_accent" />
+
                 <!-- Region statistics -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardRegionDetail"
