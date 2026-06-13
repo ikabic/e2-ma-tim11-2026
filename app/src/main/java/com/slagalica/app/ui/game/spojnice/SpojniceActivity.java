@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -55,13 +56,18 @@ public class SpojniceActivity extends AppCompatActivity {
         if (isPlayer1) viewModel.setPreviousScores(prevTotalP1, prevTotalP2);
         else viewModel.setPreviousScores(prevTotalP2, prevTotalP1);
 
-        if (isMatchGame && matchId != null)
-            viewModel.initMatchMode(matchId, isPlayer1);
-        else
-            viewModel.loadQuestionsForSolo();
+        boolean soloContinue = getIntent().getBooleanExtra("soloContinue", false);
+        if (isMatchGame && matchId != null) {
+            if (soloContinue) viewModel.initMatchSoloMode(matchId, isPlayer1);
+            else viewModel.initMatchMode(matchId, isPlayer1);
+        } else viewModel.loadQuestionsForSolo();
 
         binding.header.tvGameTitle.setText("Connections");
         binding.header.btnClose.setOnClickListener(v -> showExitConfirm());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() { showExitConfirm(); }
+        });
 
         binding.header.tvPlayerName.setText(you);
         binding.header.tvOpponentName.setText(opponent);
@@ -256,6 +262,7 @@ public class SpojniceActivity extends AppCompatActivity {
 
     private void revealCorrectLayout(Map<Integer, Integer> correctPairs) {
         isRevealScreen = true;
+        binding.tvActivePlayer.setText("Round over – showing results");
 
         Integer round = viewModel.getCurrentRound().getValue();
         List<SpojniceQuestion> qs = viewModel.getQuestions().getValue();
@@ -333,6 +340,9 @@ public class SpojniceActivity extends AppCompatActivity {
     private void showExitConfirm() {
         ConfirmDialog.show(this, "Quit game?", "Your progress will be lost.", "Quit", "Keep playing",
                 () -> {
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("quitMatch", true);
+                    setResult(RESULT_OK, resultIntent);
                     viewModel.writeForfeit();
                     finish();
                 });

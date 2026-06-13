@@ -62,6 +62,9 @@ public class StatisticsRepository {
             int p1MatchScore = isPlayer1 ? myScore : opponentScore;
             int p2MatchScore = isPlayer1 ? opponentScore : myScore;
 
+            p1MatchScore = p1MatchScore == -999 ? 0 : p1MatchScore;
+            p2MatchScore = p2MatchScore == -999 ? 0 : p2MatchScore;
+
             WriteBatch batch = db.batch();
 
             Map<String, Object> p1MatchUpdates = new HashMap<>();
@@ -101,6 +104,9 @@ public class StatisticsRepository {
                 int p2GameScore = p2GameScoreObj != null ? p2GameScoreObj.intValue() : -999;
 
                 if (p1GameScore == -999 && p2GameScore == -999) continue;
+
+                p1GameScore = p1GameScore == -999 ? 0 : p1GameScore;
+                p2GameScore = p2GameScore == -999 ? 0 : p2GameScore;
 
                 Map<String, Object> p1GameUpdates = new HashMap<>();
                 p1GameUpdates.put("totalPlayed", FieldValue.increment(1));

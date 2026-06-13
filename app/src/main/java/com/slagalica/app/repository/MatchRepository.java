@@ -256,8 +256,6 @@ public class MatchRepository {
         Map<String, Object> scores = new HashMap<>();
         scores.put("p1", p1Score);
         scores.put("p2", p2Score);
-        scores.put("p1Done", true);
-        scores.put("p2Done", true);
         rtdb.child(MATCHES_PATH).child(matchId)
             .child("scores").child(String.valueOf(gameIdx))
             .updateChildren(scores)
@@ -517,6 +515,14 @@ public class MatchRepository {
             .child("round" + round).removeEventListener(listener);
     }
 
+    public void writeMojBrojStats(String matchId, Map<String, Object> statsUpdates, RepositoryCallback<Void> callback) {
+        rtdb.child(MATCHES_PATH).child(matchId)
+                .child("scores").child("5").child("stats")
+                .updateChildren(statsUpdates)
+                .addOnSuccessListener(v -> callback.onSuccess(null))
+                .addOnFailureListener(callback::onFailure);
+    }
+
     public void writeKzzOrCnnStarted(String matchId, String game) {
         rtdb.child(MATCHES_PATH).child(matchId).child("scores").child(game).child("data").child("started").setValue(true);
 
@@ -550,14 +556,6 @@ public class MatchRepository {
         UserStatusManager.setInGame(auth, false);
         rtdb.child(MATCHES_PATH).child(matchId).child("forfeit").setValue(uid);
         rtdb.child(MATCHES_PATH).child(matchId).child("status").setValue("finished");
-    }
-
-    public void setupForfeitOnDisconnect(String matchId, String uid) {
-        rtdb.child(MATCHES_PATH).child(matchId).child("forfeit").onDisconnect().setValue(uid);
-    }
-
-    public void cancelForfeitOnDisconnect(String matchId) {
-        rtdb.child(MATCHES_PATH).child(matchId).child("forfeit").onDisconnect().cancel();
     }
 
     public ValueEventListener listenForForfeit(String matchId, String myUid, Runnable onOpponentForfeit) {
@@ -658,16 +656,19 @@ public class MatchRepository {
         rtdb.child(MATCHES_PATH).child(matchId).child("gameStarted").child(gameIdx).removeEventListener(listener);
     }
 
-    public void finishMatch(android.content.Context context, String matchId, String myUid, int myScore, int opponentScore, String opponentName) {
+    public void finishMatch(android.content.Context context, String matchId, String myUid, int myScore, int opponentScore, String opponentName, boolean opponentForfeited, boolean shouldUpdateStats) {
         UserStatusManager.setInGame(auth, false);
         DatabaseReference matchRef = rtdb.child(MATCHES_PATH).child(matchId);
         matchRef.child("status").setValue("finished");
         Runnable applyResults = () -> {
             updateStarsAndNotify(context, myUid, myScore, opponentScore, opponentName);
-            statsRepository.updateStats(matchId, myUid, myScore, opponentScore, new RepositoryCallback<>() {
-                @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
-                @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
-            });
+            if (shouldUpdateStats) {
+                int opp = opponentForfeited ? -999 : opponentScore;
+                statsRepository.updateStats(matchId, myUid, myScore, opp, new RepositoryCallback<>() {
+                    @Override public void onSuccess(Void v) { Log.d("Stats", "Stats updated"); }
+                    @Override public void onFailure(Exception e) { Log.e("Stats", "Failed to save match stats", e); }
+                });
+            }
         };
         matchRef.child("invite").get()
             .addOnSuccessListener(snap -> {
@@ -731,11 +732,11 @@ public class MatchRepository {
     }
 
     private String leagueForStars(long stars) {
-        if (stars < 50)   return "Unranked";
+        if (stars < 100)   return "Unranked";
         if (stars < 200)  return "Bronze";
-        if (stars < 500)  return "Silver";
-        if (stars < 1000) return "Gold";
-        if (stars < 2000) return "Platinum";
+        if (stars < 400)  return "Silver";
+        if (stars < 800) return "Gold";
+        if (stars < 1600) return "Platinum";
         return "Diamond";
     }
 }

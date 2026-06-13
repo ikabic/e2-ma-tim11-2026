@@ -119,12 +119,13 @@ public class ProfileFragment extends Fragment {
             if (profile == null) return;
             int stars = profile.getStars();
             int points = Integer.parseInt(profile.getLeague("points"));
-            int progress = (stars * 100) / points;
 
             setLeague(profile.getLeague("name"));
 
             binding.tvStars.setText(stars + " / " + points + " stars");
-            binding.lpiLeagueProgress.setProgress(progress, true);
+            binding.lpiLeagueProgress.setMin(points == 100 ? 0 : points / 2);
+            binding.lpiLeagueProgress.setMax(points);
+            binding.lpiLeagueProgress.setProgress(stars, true);
 
             int needed = Math.max(points - stars, 0);
             binding.tvNextLeague.setText(needed + " stars until " + profile.getLeague("next") + " League");
@@ -218,9 +219,9 @@ public class ProfileFragment extends Fragment {
 
                     case 5: // Moj Broj
                         updateRangeBar(binding.tvMinMojBroj, binding.tvMaxMojBroj, binding.rangeBarMojBrojLeft, binding.rangeBarMojBrojFill, binding.rangeBarMojBrojRight, binding.tvRangeMojBroj,
-                                gs.getMinPoints(), gs.getMaxPoints(), points, played);
+                                gs.getMinPoints(), gs.getMaxPoints(), points, played * 2);
 
-                        int exactNumPct = played != 0 ? (int) ((gs.getMetric("exactMatches") * 100) / played) : 0;
+                        int exactNumPct = played != 0 ? (int) ((gs.getMetric("exactMatches") * 100) / (played * 2)) : 0;
                         binding.tvMojBrojPct.setText(String.valueOf(exactNumPct));
                         binding.pbMojBroj.setProgress(exactNumPct, true);
                         break;

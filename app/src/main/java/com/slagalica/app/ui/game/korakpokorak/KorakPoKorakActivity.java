@@ -136,6 +136,11 @@ public class KorakPoKorakActivity extends AppCompatActivity {
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(KorakPoKorakViewModel.class);
 
+        if (isMatchGame) {
+            String matchId = getIntent().getStringExtra("matchId");
+            viewModel.initMatchMode(matchId, isPlayer1);
+        }
+
         viewModel.getQuestion().observe(this, this::displayQuestion);
 
         viewModel.getCurrentStep().observe(this, step -> {

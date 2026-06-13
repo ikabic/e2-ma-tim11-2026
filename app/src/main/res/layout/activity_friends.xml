@@ -80,6 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
+            android:gravity="center_vertical"
             app:boxCornerRadiusBottomEnd="14dp"
             app:boxCornerRadiusBottomStart="14dp"
             app:boxCornerRadiusTopEnd="14dp"
@@ -93,8 +94,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
                 android:hint="Search by username…"
+                android:gravity="center_vertical"
                 android:textColor="@color/text"
                 android:textSize="14sp"
                 android:inputType="text"

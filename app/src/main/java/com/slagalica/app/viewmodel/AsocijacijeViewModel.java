@@ -75,6 +75,12 @@ public class AsocijacijeViewModel extends ViewModel {
     public LiveData<Long>  getTimerStartMs() { return timerStartMs; }
     public boolean hasOpenedField()  { return hasOpenedFieldInThisTurn; }
 
+    private boolean soloContinue = false;
+
+    public void setSoloContinue(boolean solo){
+        this.soloContinue = solo;
+    }
+
     public void setInitialScores(int p1Subtotal, int p2Subtotal) {
         this.prevP1Score = p1Subtotal;
         this.prevP2Score = p2Subtotal;
@@ -90,20 +96,37 @@ public class AsocijacijeViewModel extends ViewModel {
         player2Score.setValue(prevP2Score);
 
         asocRepo.initMatch(matchId);
+        asocRepo.cleanupMatchData();
 
-        if (isPlayer1) {
-            asocRepo.writeInitialScores(prevP1Score, prevP2Score);
-        } else {
-            asocRepo.listenForInitialScores(new RepositoryCallback<int[]>() {
-                @Override public void onSuccess(int[] scores) {
-                    prevP1Score = scores[0];
-                    prevP2Score = scores[1];
-                    player1Score.postValue(prevP1Score);
-                    player2Score.postValue(prevP2Score);
-                }
-                @Override public void onFailure(Exception e) {}
-            });
+        if (!soloContinue) {
+            if (isPlayer1) {
+                asocRepo.writeInitialScores(prevP1Score, prevP2Score);
+            } else {
+                asocRepo.listenForInitialScores(new RepositoryCallback<int[]>() {
+                    @Override public void onSuccess(int[] scores) {
+                        prevP1Score = scores[0];
+                        prevP2Score = scores[1];
+                        player1Score.postValue(prevP1Score);
+                        player2Score.postValue(prevP2Score);
+                    }
+                    @Override public void onFailure(Exception e) {}
+                });
+            }
         }
+
+        loadQuestion();
+    }
+
+    public void initSoloMode(String matchId, boolean isPlayer1) {
+        this.isMatchGame = true;
+        this.isPlayer1 = isPlayer1;
+        this.matchId = matchId;
+        this.soloContinue = true;
+
+        asocRepo.initMatch(matchId);
+
+        player1Score.setValue(prevP1Score);
+        player2Score.setValue(prevP2Score);
 
         loadQuestion();
     }
@@ -126,14 +149,16 @@ public class AsocijacijeViewModel extends ViewModel {
         }
 
         int round = safeGet(currentRound);
-        boolean iPickQuestion = (round == 1) == isPlayer1;
+        boolean iPickQuestion = isTrueSolo() || ((round == 1) == isPlayer1);
 
         if (iPickQuestion) {
             asocRepo.getRandomQuestion(new RepositoryCallback<AsocijacijeQuestion>() {
                 @Override public void onSuccess(AsocijacijeQuestion q) {
                     question.setValue(q);
-                    asocRepo.writeQuestionId(q.getId());
-                    asocRepo.writeActivePlayer(round == 1);
+                    if (!isTrueSolo()) {
+                        asocRepo.writeQuestionId(q.getId());
+                        asocRepo.writeActivePlayer(round == 1);
+                    }
                     startMatchListeners();
                 }
                 @Override public void onFailure(Exception e) { errorMessage.setValue(e.getMessage()); }
@@ -156,7 +181,6 @@ public class AsocijacijeViewModel extends ViewModel {
     }
 
     private void startMatchListeners() {
-        // Remove all old listeners first
         asocRepo.removeListener(activePlayerListener);
         asocRepo.removeListener(boardListener);
         asocRepo.removeListener(solvedListener);
@@ -169,6 +193,12 @@ public class AsocijacijeViewModel extends ViewModel {
         lastActionListener = null;
         opponentScoreListener = null;
         forfeitListener = null;
+        if (isTrueSolo()) {
+            isMyTurn.postValue(true);
+            gameState.postValue(GameState.PLAYER_TURN);
+            timerStartMs.postValue(ROUND_DURATION_MS);
+            return;
+        }
 
         activePlayerListener = asocRepo.listenForActivePlayer(new RepositoryCallback<Boolean>() {
             @Override public void onSuccess(Boolean isP1Turn) {
@@ -324,7 +354,7 @@ public class AsocijacijeViewModel extends ViewModel {
 
     public boolean openField(int col, int field) {
         if (!canAct()) return false;
-        if (hasOpenedFieldInThisTurn) {
+        if (!soloContinue && hasOpenedFieldInThisTurn) {
             feedbackMsg.setValue("You've already opened a field this turn. Guess or pass.");
             return false;
         }
@@ -354,7 +384,7 @@ public class AsocijacijeViewModel extends ViewModel {
 
         boolean correct = guess.trim().equalsIgnoreCase(q.getColumnAnswers().get(col));
 
-        if (isMatchGame) {
+        if (isMatchGame && !soloContinue) {
             asocRepo.writeLastAction("guessColumn", col, correct, guess);
             if (correct) {
                 asocRepo.writeColumnSolved(col);
@@ -363,9 +393,11 @@ public class AsocijacijeViewModel extends ViewModel {
                 addMyPoints(pts);
                 feedbackMsg.setValue("Column correct! +" + pts + " pts");
             } else {
-                feedbackMsg.setValue("Wrong — opponent's turn");
-                hasOpenedFieldInThisTurn = false;
-                asocRepo.writeActivePlayer(!isPlayer1);
+                feedbackMsg.setValue("Wrong — " + (soloContinue ? "try again" : "opponent's turn"));
+                if (!soloContinue) {
+                    hasOpenedFieldInThisTurn = false;
+                    asocRepo.writeActivePlayer(!isPlayer1);
+                }
             }
         } else {
             if (correct) {
@@ -391,7 +423,7 @@ public class AsocijacijeViewModel extends ViewModel {
 
         boolean correct = guess.trim().equalsIgnoreCase(q.getFinalAnswer());
 
-        if (isMatchGame) {
+        if (isMatchGame && !soloContinue) {
             asocRepo.writeLastAction("guessFinal", -1, correct, guess);
             if (correct) {
                 int pts = calcFinalPoints();
@@ -401,9 +433,11 @@ public class AsocijacijeViewModel extends ViewModel {
                 asocRepo.writeFinalSolved(true, isPlayer1);
                 scheduleRoundEnd();
             } else {
-                feedbackMsg.setValue("Wrong final answer — opponent's turn");
-                hasOpenedFieldInThisTurn = false;
-                asocRepo.writeActivePlayer(!isPlayer1);
+                feedbackMsg.setValue("Wrong final answer" + (soloContinue ? " — try again" : " — opponent's turn"));
+                if (!soloContinue) {
+                    hasOpenedFieldInThisTurn = false;
+                    asocRepo.writeActivePlayer(!isPlayer1);
+                }
             }
         } else {
             if (correct) {
@@ -422,6 +456,7 @@ public class AsocijacijeViewModel extends ViewModel {
     }
 
     public void passTurn() {
+        if (soloContinue) return;
         if (!isMatchGame || !Boolean.TRUE.equals(isMyTurn.getValue())) return;
         if (gameState.getValue() != GameState.PLAYER_TURN) return;
         feedbackMsg.setValue("You passed the turn.");
@@ -564,6 +599,10 @@ public class AsocijacijeViewModel extends ViewModel {
         if (roundStartTimeListener != null) {
             asocRepo.removeRoundStartTimeListener(roundStartTimeListenerRound, roundStartTimeListener);
         }
+    }
+
+    private boolean isTrueSolo() {
+        return isMatchGame && soloContinue;
     }
 
     public enum GameState {

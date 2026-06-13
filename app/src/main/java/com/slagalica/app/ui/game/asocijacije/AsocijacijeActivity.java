@@ -42,8 +42,6 @@ public class AsocijacijeActivity extends AppCompatActivity {
     private boolean isMatchGame = false;
     private boolean isPlayer1Local = true;
     private String  opponentUsername = "Opponent";
-
-    // Guard so onDestroy does NOT writeForfeit when the game ends normally
     private boolean matchFinishedNormally = false;
 
 
@@ -52,7 +50,7 @@ public class AsocijacijeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asocijacije);
 
-        isMatchGame     = getIntent().getBooleanExtra("isMatchGame", false);
+        isMatchGame = getIntent().getBooleanExtra("isMatchGame", false);
         isPlayer1Local  = getIntent().getBooleanExtra("isPlayer1", true);
         String matchId  = getIntent().getStringExtra("matchId");
         opponentUsername = getIntent().getStringExtra("opponentUsername");
@@ -68,7 +66,11 @@ public class AsocijacijeActivity extends AppCompatActivity {
 
         if (isMatchGame && matchId != null) {
             viewModel.setInitialScores(prevTotalP1, prevTotalP2);
-            viewModel.initMatchMode(matchId, isPlayer1Local, opponentUsername);
+            if (getIntent().getBooleanExtra("soloContinue", false)) {
+                viewModel.initSoloMode(matchId, isPlayer1Local);
+            } else {
+                viewModel.initMatchMode(matchId, isPlayer1Local, opponentUsername);
+            }
         } else {
             viewModel.loadQuestion();
         }
@@ -303,7 +305,7 @@ public class AsocijacijeActivity extends AppCompatActivity {
     }
 
     private void refreshBoard(boolean[][] board, AsocijacijeQuestion q) {
-        if (board == null) return;
+        if (board == null || q == null) return;
         boolean[] solved = viewModel.getColumnSolved().getValue();
         Boolean myTurn   = viewModel.getIsMyTurn().getValue();
         AsocijacijeViewModel.GameState state = viewModel.getGameState().getValue();

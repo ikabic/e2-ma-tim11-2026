@@ -26,8 +26,6 @@ public class RankingRepository {
     private static final String ENTRIES_COL = "entries";
     private static final String USERS_COL   = "users";
     private static final String PROFILES_COL = "profiles";
-    private static final int[] WEEKLY_REWARDS  = {0, 5, 3, 2, 1};
-    private static final int[] MONTHLY_REWARDS = {0, 10, 6, 4, 2};
 
     private final FirebaseFirestore db;
     private final FirebaseAuth auth;
@@ -107,19 +105,43 @@ public class RankingRepository {
         db.collection(CYCLES_COL).document(cycleId)
                 .collection(ENTRIES_COL)
                 .orderBy("cycleStars", Query.Direction.DESCENDING)
-                .limit(10)
                 .get()
                 .addOnSuccessListener(snap -> {
-                    int[] rewards = type.equals("weekly") ? WEEKLY_REWARDS : MONTHLY_REWARDS;
                     List<RewardResult> results = new ArrayList<>();
                     int rank = 1;
                     for (QueryDocumentSnapshot doc : snap) {
                         String uid = doc.getId();
-                        int tokens = rank < rewards.length ? rewards[rank] : 0;
+                        int tokens = 0;
+
+                        if (type.equals("weekly")) {
+                            if (rank == 1) tokens = 5;
+                            else if (rank == 2) tokens = 3;
+                            else if (rank == 3) tokens = 2;
+                            else if (rank >= 4 && rank <= 10) tokens = 1;
+                        } else { // monthly
+                            if (rank == 1) tokens = 10;
+                            else if (rank == 2) tokens = 6;
+                            else if (rank == 3) tokens = 4;
+                            else if (rank >= 4 && rank <= 10) tokens = 2;
+                        }
+
                         if (tokens > 0) {
                             db.collection(PROFILES_COL).document(uid)
                                     .update("tokens", FieldValue.increment(tokens));
                         }
+                        else if (type.equals("monthly") && rank > 10) {
+                            db.collection(PROFILES_COL).document(uid).get()
+                                    .addOnSuccessListener(profileDoc -> {
+                                        if (profileDoc.exists()) {
+                                            Long currentStars = profileDoc.getLong("stars");
+                                            if (currentStars != null && currentStars > 0) {
+                                                long newStars = Math.round(currentStars * 0.7);
+                                                db.collection(PROFILES_COL).document(uid).update("stars", newStars);
+                                            }
+                                        }
+                                    });
+                        }
+
                         String username = doc.getString("username");
                         results.add(new RewardResult(uid, username, rank, tokens, type));
                         rank++;
