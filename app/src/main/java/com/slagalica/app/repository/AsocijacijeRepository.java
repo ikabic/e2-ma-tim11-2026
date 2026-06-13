@@ -356,4 +356,122 @@ public class AsocijacijeRepository {
         addTracked(ref, listener);
         return listener;
     }
+
+    public void writeUsedQuestionId(int round, String questionId) {
+        if (matchRef == null) return;
+        matchRef.child("asocijacije").child("usedQuestion_round_" + round).setValue(questionId);
+    }
+
+    public ValueEventListener listenForUsedQuestionIds(RepositoryCallback<List<String>> callback) {
+        if (matchRef == null) return null;
+        DatabaseReference ref = matchRef.child("asocijacije");
+        ValueEventListener listener = new ValueEventListener() {
+            @Override public void onDataChange(DataSnapshot snap) {
+                List<String> used = new ArrayList<>();
+                for (int r = 1; r <= 2; r++) {
+                    String id = snap.child("usedQuestion_round_" + r).getValue(String.class);
+                    if (id != null) used.add(id);
+                }
+                callback.onSuccess(used);
+            }
+            @Override public void onCancelled(DatabaseError e) { callback.onFailure(e.toException()); }
+        };
+        ref.addListenerForSingleValueEvent(listener);
+        return listener;
+    }
+
+    public void getRandomQuestionExcluding(List<String> excludeIds,
+                                           RepositoryCallback<AsocijacijeQuestion> callback) {
+        db.collection(COLLECTION).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.isEmpty()) {
+                        callback.onFailure(new Exception("No questions available"));
+                        return;
+                    }
+                    List<com.google.firebase.firestore.DocumentSnapshot> available = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : snapshot.getDocuments()) {
+                        if (!excludeIds.contains(doc.getId())) available.add(doc);
+                    }
+                    List<com.google.firebase.firestore.DocumentSnapshot> pool = available.isEmpty() ? snapshot.getDocuments() : available;
+
+                    int idx = (int) (Math.random() * pool.size());
+                    AsocijacijeQuestion q = pool.get(idx).toObject(AsocijacijeQuestion.class);
+                    if (q != null) q.setId(pool.get(idx).getId());
+                    callback.onSuccess(q);
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    public void seedAdditionalData() {
+        List<AsocijacijeQuestion> questions = new ArrayList<>();
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Sahara", "Gobi", "Kalahari", "Atacama"),
+                java.util.Arrays.asList("Amazon", "Congo", "Daintree", "Borneo"),
+                java.util.Arrays.asList("Everest", "K2", "Mont Blanc", "Kilimanjaro"),
+                java.util.Arrays.asList("Pacific", "Atlantic", "Indian", "Arctic"),
+                java.util.Arrays.asList("Deserts", "Rainforests", "Mountains", "Oceans"),
+                "Geography"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Oxygen", "Hydrogen", "Carbon", "Nitrogen"),
+                java.util.Arrays.asList("Newton", "Einstein", "Curie", "Tesla"),
+                java.util.Arrays.asList("Mitochondria", "Nucleus", "Ribosome", "Membrane"),
+                java.util.Arrays.asList("Photosynthesis", "Respiration", "Osmosis", "Diffusion"),
+                java.util.Arrays.asList("Elements", "Scientists", "Cell parts", "Processes"),
+                "Science"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Hamlet", "Macbeth", "Othello", "Romeo"),
+                java.util.Arrays.asList("Frodo", "Gandalf", "Aragorn", "Legolas"),
+                java.util.Arrays.asList("Sherlock", "Watson", "Moriarty", "Irene"),
+                java.util.Arrays.asList("Gatsby", "Daisy", "Tom", "Jordan"),
+                java.util.Arrays.asList("Shakespeare", "Lord of the Rings", "Holmes", "Great Gatsby"),
+                "Literature"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Mona Lisa", "Louvre", "Da Vinci", "Smile"),
+                java.util.Arrays.asList("Starry Night", "Van Gogh", "MoMA", "Swirls"),
+                java.util.Arrays.asList("The Scream", "Munch", "Oslo", "Anxiety"),
+                java.util.Arrays.asList("Girl with Pearl", "Vermeer", "Hague", "Earring"),
+                java.util.Arrays.asList("Mona Lisa", "Starry Night", "The Scream", "Girl with Pearl Earring"),
+                "Famous Paintings"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Goal", "Offside", "Penalty", "Dribble"),
+                java.util.Arrays.asList("Ace", "Deuce", "Love", "Volley"),
+                java.util.Arrays.asList("Slam dunk", "Rebound", "Foul", "Three-pointer"),
+                java.util.Arrays.asList("Home run", "Strikeout", "Pitcher", "Inning"),
+                java.util.Arrays.asList("Football", "Tennis", "Basketball", "Baseball"),
+                "Sports"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Paris", "Eiffel", "Baguette", "Macron"),
+                java.util.Arrays.asList("Tokyo", "Sushi", "Samurai", "Fuji"),
+                java.util.Arrays.asList("Cairo", "Pyramid", "Nile", "Pharaoh"),
+                java.util.Arrays.asList("Rio", "Carnival", "Amazon", "Samba"),
+                java.util.Arrays.asList("France", "Japan", "Egypt", "Brazil"),
+                "Countries"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("RAM", "CPU", "GPU", "SSD"),
+                java.util.Arrays.asList("Python", "Java", "C++", "JavaScript"),
+                java.util.Arrays.asList("Google", "Apple", "Microsoft", "Amazon"),
+                java.util.Arrays.asList("Wi-Fi", "Bluetooth", "Ethernet", "5G"),
+                java.util.Arrays.asList("Hardware", "Languages", "Tech companies", "Connectivity"),
+                "Technology"));
+
+        questions.add(new AsocijacijeQuestion(null,
+                java.util.Arrays.asList("Beethoven", "Symphony", "Deaf", "Vienna"),
+                java.util.Arrays.asList("Mozart", "Prodigy", "Salzburg", "Opera"),
+                java.util.Arrays.asList("Bach", "Baroque", "Leipzig", "Fugue"),
+                java.util.Arrays.asList("Chopin", "Piano", "Poland", "Nocturne"),
+                java.util.Arrays.asList("Beethoven", "Mozart", "Bach", "Chopin"),
+                "Classical Music"));
+
+        for (AsocijacijeQuestion q : questions) {
+            db.collection(COLLECTION).add(q);
+        }
+    }
+
 }

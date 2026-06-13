@@ -62,8 +62,6 @@ public class AsocijacijeActivity extends AppCompatActivity {
         initViews();
         setupViewModel();
 
-        new AsocijacijeRepository().seedTestData();
-
         if (isMatchGame && matchId != null) {
             viewModel.setInitialScores(prevTotalP1, prevTotalP2);
             if (getIntent().getBooleanExtra("soloContinue", false)) {
@@ -80,8 +78,6 @@ public class AsocijacijeActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         cancelTimer();
-        // Only forfeit on abnormal exit (back press, app kill).
-        // Normal game completion sets matchFinishedNormally = true first.
         if (isMatchGame && !matchFinishedNormally) {
             viewModel.writeForfeit();
         }

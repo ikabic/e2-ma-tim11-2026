@@ -3,6 +3,7 @@ package com.slagalica.app.viewmodel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import java.util.List;
 
 import com.google.firebase.database.ValueEventListener;
 import com.slagalica.app.model.AsocijacijeQuestion;
@@ -152,16 +153,41 @@ public class AsocijacijeViewModel extends ViewModel {
         boolean iPickQuestion = isTrueSolo() || ((round == 1) == isPlayer1);
 
         if (iPickQuestion) {
-            asocRepo.getRandomQuestion(new RepositoryCallback<AsocijacijeQuestion>() {
-                @Override public void onSuccess(AsocijacijeQuestion q) {
-                    question.setValue(q);
-                    if (!isTrueSolo()) {
-                        asocRepo.writeQuestionId(q.getId());
-                        asocRepo.writeActivePlayer(round == 1);
-                    }
-                    startMatchListeners();
+            asocRepo.listenForUsedQuestionIds(new RepositoryCallback<List<String>>() {
+                @Override public void onSuccess(List<String> usedIds) {
+                    asocRepo.getRandomQuestionExcluding(usedIds,
+                            new RepositoryCallback<AsocijacijeQuestion>() {
+                                @Override public void onSuccess(AsocijacijeQuestion q) {
+                                    question.setValue(q);
+                                    if (!isTrueSolo()) {
+                                        asocRepo.writeUsedQuestionId(round, q.getId());
+                                        asocRepo.writeQuestionId(q.getId());
+                                        asocRepo.writeActivePlayer(round == 1);
+                                    }
+                                    startMatchListeners();
+                                }
+                                @Override public void onFailure(Exception e) {
+                                    errorMessage.setValue(e.getMessage());
+                                }
+                            });
                 }
-                @Override public void onFailure(Exception e) { errorMessage.setValue(e.getMessage()); }
+                @Override public void onFailure(Exception e) {
+                    // Fallback — učitaj bez excludovanja
+                    asocRepo.getRandomQuestion(new RepositoryCallback<AsocijacijeQuestion>() {
+                        @Override public void onSuccess(AsocijacijeQuestion q) {
+                            question.setValue(q);
+                            if (!isTrueSolo()) {
+                                asocRepo.writeUsedQuestionId(round, q.getId());
+                                asocRepo.writeQuestionId(q.getId());
+                                asocRepo.writeActivePlayer(round == 1);
+                            }
+                            startMatchListeners();
+                        }
+                        @Override public void onFailure(Exception ex) {
+                            errorMessage.setValue(ex.getMessage());
+                        }
+                    });
+                }
             });
         } else {
             questionIdListener = asocRepo.listenForQuestionId(new RepositoryCallback<String>() {
@@ -172,7 +198,9 @@ public class AsocijacijeViewModel extends ViewModel {
                             question.setValue(q);
                             startMatchListeners();
                         }
-                        @Override public void onFailure(Exception e) { errorMessage.setValue(e.getMessage()); }
+                        @Override public void onFailure(Exception e) {
+                            errorMessage.setValue(e.getMessage());
+                        }
                     });
                 }
                 @Override public void onFailure(Exception e) { errorMessage.setValue(e.getMessage()); }
