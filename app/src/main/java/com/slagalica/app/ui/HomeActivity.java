@@ -13,11 +13,13 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
 import com.slagalica.app.adapter.RegionRankingAdapter;
 import com.slagalica.app.databinding.ActivityHomeBinding;
 import com.slagalica.app.model.Region;
+import com.slagalica.app.repository.RankingRepository;
 import com.slagalica.app.ui.game.asocijacije.AsocijacijeActivity;
 import com.slagalica.app.ui.game.koznazna.KoZnaZnaActivity;
 import com.slagalica.app.ui.game.korakpokorak.KorakPoKorakActivity;
@@ -31,6 +33,7 @@ import com.slagalica.app.ui.notifications.NotificationsActivity;
 import com.slagalica.app.ui.profile.FriendsActivity;
 import com.slagalica.app.ui.profile.ProfileFragment;
 import com.slagalica.app.ui.ranking.RankingAdapter;
+import com.slagalica.app.ui.ranking.RankingRewardDialog;
 import com.slagalica.app.ui.regions.RegionFragment;
 import com.slagalica.app.util.ChatNotificationManager;
 import com.slagalica.app.util.ConfirmDialog;
@@ -72,6 +75,7 @@ public class HomeActivity extends BaseActivity {
     private String userRegionKey = "";
     private final DailyMissionRepository missionRepo = new DailyMissionRepository();
     private ListenerRegistration missionBadgeListener;
+    private boolean rewardDialogShown = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -338,6 +342,7 @@ public class HomeActivity extends BaseActivity {
         });
 
         selectTab(0);
+        handleIntentExtras(getIntent());
         maybeRequestNotificationPermission();
     }
 
@@ -372,6 +377,8 @@ public class HomeActivity extends BaseActivity {
         if (u == null || u.isAnonymous()) return;
 
         startMissionBadgeListener();
+        notifViewModel.reload();
+        checkAndShowRewardDialog();
 
         FirebaseFirestore.getInstance()
                 .collection("profiles").document(u.getUid()).get()
@@ -385,6 +392,7 @@ public class HomeActivity extends BaseActivity {
                     binding.tvStarCount.setText(String.valueOf(s));
                     binding.tvTokenInfo.setText(t + " left");
                 });
+        maybeDistributePastCycleRewards();
     }
 
     private void maybeRequestNotificationPermission() {
@@ -484,10 +492,125 @@ public class HomeActivity extends BaseActivity {
                 .commit();
     }
 
+    private void handleIntentExtras(Intent intent) {
+        if (intent == null) return;
+        int tab = intent.getIntExtra("openTab", -1);
+        if (tab >= 0) selectTab(tab);
+        if (intent.getBooleanExtra("showRewardDialog", false)) {
+            rewardDialogShown = false;
+            checkAndShowRewardDialog();
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
         String targetUid = intent.getStringExtra("TARGET_USER_UID");
         if (targetUid != null) showFriendProfile(targetUid);
+        handleIntentExtras(intent);
+    }
+
+    private void checkAndShowRewardDialog() {
+        if (rewardDialogShown) return;
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null || u.isAnonymous()) return;
+
+        // Provjeri prethodni ciklus za weekly i monthly
+        checkRewardForType("weekly", u.getUid());
+        checkRewardForType("monthly", u.getUid());
+    }
+
+    private void checkRewardForType(String type, String uid) {
+        String pastCycleId = RankingRepository.getPastCycleId(type);
+
+        FirebaseFirestore.getInstance()
+                .collection("rankingCycles")
+                .document(pastCycleId)
+                .collection("entries")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    FirebaseFirestore.getInstance()
+                            .collection("profiles").document(uid)
+                            .get()
+                            .addOnSuccessListener(profile -> {
+                                String shownKey = "rewardDialogShown_" + pastCycleId;
+                                Boolean alreadyShown = profile.getBoolean(shownKey);
+                                if (Boolean.TRUE.equals(alreadyShown)) return;
+
+                                FirebaseFirestore.getInstance()
+                                        .collection("rankingCycles")
+                                        .document(pastCycleId)
+                                        .collection("entries")
+                                        .orderBy("cycleStars", Query.Direction.DESCENDING)
+                                        .get()
+                                        .addOnSuccessListener(snap -> {
+                                            int rank = 1;
+                                            for (com.google.firebase.firestore.QueryDocumentSnapshot entry : snap) {
+                                                if (entry.getId().equals(uid)) break;
+                                                rank++;
+                                            }
+
+                                            int tokens = getTokensForRank(rank, type);
+                                            if (tokens == 0) return;
+
+                                            FirebaseFirestore.getInstance()
+                                                    .collection("profiles").document(uid)
+                                                    .update(shownKey, true);
+
+                                            final int finalRank   = rank;
+                                            final int finalTokens = tokens;
+                                            final String finalType = type;
+
+                                            rewardDialogShown = true;
+                                            runOnUiThread(() -> {
+                                                RankingRewardDialog dialog = new RankingRewardDialog(HomeActivity.this, finalRank, finalTokens, finalType);
+                                                dialog.show();
+                                            });
+                                        });
+                            });
+                });
+    }
+
+    private int getTokensForRank(int rank, String type) {
+        if (type.equals("weekly")) {
+            if (rank == 1) return 5;
+            if (rank == 2) return 3;
+            if (rank == 3) return 2;
+            if (rank <= 10) return 1;
+        } else {
+            if (rank == 1) return 10;
+            if (rank == 2) return 6;
+            if (rank == 3) return 4;
+            if (rank <= 10) return 2;
+        }
+        return 0;
+    }
+
+    private void maybeDistributePastCycleRewards() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u == null || u.isAnonymous()) return;
+
+        for (String type : new String[]{"weekly", "monthly"}) {
+            String pastCycleId = RankingRepository.getPastCycleId(type);
+            FirebaseFirestore.getInstance()
+                    .collection("rankingCycles")
+                    .document(pastCycleId)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (!doc.exists()) return;
+                        Boolean distributed = doc.getBoolean("rewardsDistributed");
+                        if (Boolean.TRUE.equals(distributed)) return;
+
+                        RankingRepository repo = new RankingRepository();
+                        repo.secureAwardDistribution(pastCycleId, new RepositoryCallback<Void>() {
+                            @Override public void onSuccess(Void r) {}
+                            @Override public void onFailure(Exception e) {}
+                        });
+                    });
+        }
     }
 }

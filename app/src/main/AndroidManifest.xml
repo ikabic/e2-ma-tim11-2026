@@ -46,6 +46,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.HomeActivity"
+            android:launchMode="singleTop"
             android:exported="false" />
         <activity
             android:name=".ui.auth.ChangePasswordActivity"

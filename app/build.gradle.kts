@@ -33,7 +33,9 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
+
 }
 
 dependencies {
@@ -68,4 +70,5 @@ dependencies {
     implementation("com.cloudinary:cloudinary-android:3.1.2")
 
     implementation("com.google.firebase:firebase-messaging")
+    implementation("com.airbnb.android:lottie:6.4.0")
 }

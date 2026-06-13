@@ -1,5 +1,6 @@
 package com.slagalica.app.ui.notifications;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -10,11 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
+import com.slagalica.app.model.NotificationItem;
 import com.slagalica.app.viewmodel.NotificationViewModel;
 import com.slagalica.app.viewmodel.NotificationViewModel.Filter;
 
-public class NotificationsActivity extends BaseActivity
-        implements NotificationsAdapter.OnMarkReadListener {
+public class NotificationsActivity extends BaseActivity implements NotificationsAdapter.OnMarkReadListener, NotificationsAdapter.OnNotifClickListener {
 
     private NotificationViewModel viewModel;
     private NotificationsAdapter adapter;
@@ -34,7 +35,7 @@ public class NotificationsActivity extends BaseActivity
         rvNotifications = findViewById(R.id.rvNotifications);
         layoutEmpty = findViewById(R.id.layoutEmpty);
 
-        adapter = new NotificationsAdapter(this);
+        adapter = new NotificationsAdapter(this, this);
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
         rvNotifications.setAdapter(adapter);
 
@@ -82,5 +83,37 @@ public class NotificationsActivity extends BaseActivity
             btn.setTextColor(getResources().getColor(R.color.text_mute, null));
             btn.setStrokeColor(getResources().getColorStateList(R.color.border, null));
         }
+    }
+
+    @Override
+    public void onChatNotifClick(NotificationItem item) {
+        if (!item.isRead()) viewModel.markRead(item.getId());
+
+        Intent i = new Intent(this, com.slagalica.app.ui.chat.ChatActivity.class);
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    String regionKey = doc.getString("region");
+                    String username  = doc.getString("username");
+                    if (regionKey != null) {
+                        i.putExtra("regionKey", regionKey != null ? regionKey : "");
+                        i.putExtra("username",  username  != null ? username  : "");
+                        startActivity(i);
+                    }
+                });
+    }
+
+    @Override
+    public void onRankingNotifClick(NotificationItem item) {
+        if (!item.isRead()) viewModel.markRead(item.getId());
+
+        Intent i = new Intent(this, com.slagalica.app.ui.HomeActivity.class);
+        i.putExtra("openTab", 2);
+        if (NotificationItem.CHANNEL_REWARD.equals(item.getChannel())) {
+            i.putExtra("showRewardDialog", true);
+        }
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(i);
     }
 }

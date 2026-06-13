@@ -23,11 +23,18 @@ public class NotificationsAdapter extends
         void onMarkRead(String notificationId);
     }
 
+    public interface OnNotifClickListener {
+        void onChatNotifClick(NotificationItem item);
+        void onRankingNotifClick(NotificationItem item);
+    }
+
     private List<NotificationItem> items = new ArrayList<>();
     private OnMarkReadListener listener;
+    private OnNotifClickListener clickListener;
 
-    public NotificationsAdapter(OnMarkReadListener listener) {
-        this.listener = listener;
+    public NotificationsAdapter(OnMarkReadListener markReadListener, OnNotifClickListener clickListener) {
+        this.listener = markReadListener;
+        this.clickListener = clickListener;
     }
 
     public void submitList(List<NotificationItem> newItems) {
@@ -38,8 +45,7 @@ public class NotificationsAdapter extends
     @NonNull
     @Override
     public NotifViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_notification, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_notification, parent, false);
         return new NotifViewHolder(v);
     }
 
@@ -88,6 +94,21 @@ public class NotificationsAdapter extends
                 btnMarkRead.setOnClickListener(v -> {
                     if (listener != null) listener.onMarkRead(item.getId());
                 });
+            }
+
+            String channel = item.getChannel();
+            if (NotificationItem.CHANNEL_CHAT.equals(channel)) {
+                itemView.setOnClickListener(v -> {
+                    if (clickListener != null) clickListener.onChatNotifClick(item);
+                });
+            } else if (NotificationItem.CHANNEL_RANKING.equals(channel)
+                    || NotificationItem.CHANNEL_REWARD.equals(channel)
+                    || NotificationItem.CHANNEL_OTHER.equals(channel)) {
+                itemView.setOnClickListener(v -> {
+                    if (clickListener != null) clickListener.onRankingNotifClick(item);
+                });
+            } else {
+                itemView.setOnClickListener(null);
             }
         }
 

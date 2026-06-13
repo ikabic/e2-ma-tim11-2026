@@ -126,19 +126,17 @@ public class RankingRepository {
                         }
 
                         if (tokens > 0) {
+                            final int finalTokens = tokens;
+                            final int finalRank   = rank;
+                            final String finalUid = uid;
+                            final String finalType = type;
+
                             db.collection(PROFILES_COL).document(uid)
-                                    .update("tokens", FieldValue.increment(tokens));
-                        }
-                        else if (type.equals("monthly") && rank > 10) {
-                            db.collection(PROFILES_COL).document(uid).get()
-                                    .addOnSuccessListener(profileDoc -> {
-                                        if (profileDoc.exists()) {
-                                            Long currentStars = profileDoc.getLong("stars");
-                                            if (currentStars != null && currentStars > 0) {
-                                                long newStars = Math.round(currentStars * 0.7);
-                                                db.collection(PROFILES_COL).document(uid).update("stars", newStars);
-                                            }
-                                        }
+                                    .update("tokens", FieldValue.increment(tokens))
+                                    .addOnSuccessListener(v -> {
+                                        NotificationRepository notifRepo = new NotificationRepository();
+                                        notifRepo.createRankingRewardNotif(finalUid, finalRank, finalTokens, finalType);
+                                        notifRepo.createRankingResultNotif(finalUid, finalRank, finalType);
                                     });
                         }
 

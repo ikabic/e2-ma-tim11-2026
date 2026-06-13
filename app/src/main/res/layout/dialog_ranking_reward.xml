@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="@drawable/bg_dialog_rounded">
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottieReward"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:lottie_rawRes="@raw/confetti"
+        app:lottie_autoPlay="false"
+        app:lottie_loop="false"/>
+
+    <TextView
+        android:id="@+id/tvRewardTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/text"
+        android:layout_marginTop="8dp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvRewardSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/text_mute"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:lineSpacingMultiplier="1.4"/>
+
+    <TextView
+        android:id="@+id/tvRewardTokens"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/accent"
+        android:layout_marginTop="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCloseReward"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Claim"
+        android:textSize="15sp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:layout_marginTop="24dp"
+        app:backgroundTint="@color/accent"
+        app:cornerRadius="24dp"
+        app:elevation="0dp"/>
+
+</LinearLayout>

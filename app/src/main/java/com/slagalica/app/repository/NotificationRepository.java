@@ -106,8 +106,7 @@ public class NotificationRepository {
         sendSystemPush(title, body, SlagalicaMessagingService.ANDROID_CHANNEL_MATCH);
     }
 
-    public void createMatchInviteNotif(String targetUserId, String fromUsername,
-                                       String matchId, RepositoryCallback<String> cb) {
+    public void createMatchInviteNotif(String targetUserId, String fromUsername, String matchId, RepositoryCallback<String> cb) {
         String notifId = UUID.randomUUID().toString();
 
         Map<String, Object> data = new HashMap<>();
@@ -174,7 +173,7 @@ public class NotificationRepository {
     public void createLeagueChangeNotif(String targetUserId, String newLeague) {
         String title = "Upgrade to " + newLeague + " league";
         String body  = "Congrats — you entered " + newLeague + " league!";
-        pushNotification(targetUserId, NotificationItem.CHANNEL_OTHER, title, body);
+        pushNotification(targetUserId, NotificationItem.CHANNEL_RANKING, title, body);
         sendSystemPush(title, body, SlagalicaMessagingService.ANDROID_CHANNEL_OTHER);
     }
 
