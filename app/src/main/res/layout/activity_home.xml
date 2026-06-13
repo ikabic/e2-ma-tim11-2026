@@ -279,6 +279,46 @@
                         app:rippleColor="@color/border" />
                 </LinearLayout>
 
+                <!-- Token info row -->
+                <LinearLayout
+                    android:id="@+id/rowTokenInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_chip"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:layout_marginBottom="14dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_token"
+                        app:tint="@color/accent"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="@string/tokens"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Tokens refresh daily · 5 per day"
+                        android:textColor="@color/text_mute"
+                        android:textSize="13sp"/>
+
+                    <TextView
+                        android:id="@+id/tvTokenInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5 left"
+                        android:textColor="@color/accent"
+                        android:textSize="13sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
                 <!-- Hero CTA: orange gradient card -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -328,45 +368,6 @@
                         app:backgroundTint="#FFFFFF"
                         app:cornerRadius="14dp"
                         app:elevation="0dp"/>
-                </LinearLayout>
-
-                <!-- Token info row -->
-                <LinearLayout
-                    android:id="@+id/rowTokenInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_chip"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_token"
-                        app:tint="@color/accent"
-                        android:layout_marginEnd="8dp"
-                        android:contentDescription="@string/tokens"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Tokens refresh daily · 5 per day"
-                        android:textColor="@color/text_mute"
-                        android:textSize="13sp"/>
-
-                    <TextView
-                        android:id="@+id/tvTokenInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="5 left"
-                        android:textColor="@color/accent"
-                        android:textSize="13sp"
-                        android:textStyle="bold"/>
                 </LinearLayout>
 
                 <LinearLayout

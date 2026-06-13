@@ -585,16 +585,13 @@ public class MatchRepository {
             .addOnSuccessListener(doc -> {
                 if (!doc.exists()) { callback.onSuccess(false); return; }
                 long now = System.currentTimeMillis();
-                long oneDayMs = 24L * 60 * 60 * 1000;
                 Long lastRefresh = doc.getLong("lastTokenRefresh");
                 Long tokens = doc.getLong("tokens");
                 int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
 
                 Map<String, Object> upd = new HashMap<>();
                 int afterRefresh = current;
-                if (lastRefresh == null) {
-                    upd.put("lastTokenRefresh", now);
-                } else if (now - lastRefresh >= oneDayMs) {
+                if (lastRefresh == null || !isSameDay(lastRefresh, now)) {
                     afterRefresh = current + 5;
                     upd.put("lastTokenRefresh", now);
                 }
@@ -612,15 +609,46 @@ public class MatchRepository {
             .addOnSuccessListener(doc -> {
                 if (!doc.exists()) { callback.onSuccess(false); return; }
                 long now = System.currentTimeMillis();
-                long oneDayMs = 24L * 60 * 60 * 1000;
                 Long lastRefresh = doc.getLong("lastTokenRefresh");
                 Long tokens = doc.getLong("tokens");
                 int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
-                boolean refreshDue = lastRefresh != null && now - lastRefresh >= oneDayMs;
+                boolean refreshDue = lastRefresh == null || !isSameDay(lastRefresh, now);
                 int available = current + (refreshDue ? 5 : 0);
                 callback.onSuccess(available > 0);
             })
             .addOnFailureListener(e -> callback.onSuccess(false));
+    }
+
+    public void refreshDailyTokens(String uid, RepositoryCallback<Integer> callback) {
+        db.collection("profiles").document(uid).get()
+            .addOnSuccessListener(doc -> {
+                if (!doc.exists()) { if (callback != null) callback.onSuccess(0); return; }
+                long now = System.currentTimeMillis();
+                Long lastRefresh = doc.getLong("lastTokenRefresh");
+                Long tokens = doc.getLong("tokens");
+                int current = Math.max(0, tokens != null ? tokens.intValue() : 0);
+                if (lastRefresh != null && isSameDay(lastRefresh, now)) {
+                    if (callback != null) callback.onSuccess(current);
+                    return;
+                }
+                int updated = current + 5;
+                Map<String, Object> upd = new HashMap<>();
+                upd.put("tokens", updated);
+                upd.put("lastTokenRefresh", now);
+                db.collection("profiles").document(uid).update(upd)
+                    .addOnSuccessListener(v -> { if (callback != null) callback.onSuccess(updated); })
+                    .addOnFailureListener(e -> { if (callback != null) callback.onSuccess(current); });
+            })
+            .addOnFailureListener(e -> { if (callback != null) callback.onSuccess(0); });
+    }
+
+    private boolean isSameDay(long t1, long t2) {
+        java.util.Calendar c1 = java.util.Calendar.getInstance();
+        c1.setTimeInMillis(t1);
+        java.util.Calendar c2 = java.util.Calendar.getInstance();
+        c2.setTimeInMillis(t2);
+        return c1.get(java.util.Calendar.YEAR) == c2.get(java.util.Calendar.YEAR)
+            && c1.get(java.util.Calendar.DAY_OF_YEAR) == c2.get(java.util.Calendar.DAY_OF_YEAR);
     }
 
     public void writeAsocSkockoStarted(String matchId, String gameIdx) {

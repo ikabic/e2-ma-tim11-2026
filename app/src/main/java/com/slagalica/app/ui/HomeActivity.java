@@ -15,6 +15,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.slagalica.app.BaseActivity;
 import com.slagalica.app.R;
+import com.slagalica.app.repository.MatchRepository;
+import com.slagalica.app.repository.RepositoryCallback;
 import com.slagalica.app.adapter.RegionRankingAdapter;
 import com.slagalica.app.databinding.ActivityHomeBinding;
 import com.slagalica.app.model.Region;
@@ -56,6 +58,7 @@ public class HomeActivity extends BaseActivity {
     private String playerAvatarUrl = "";
     private String playerLeague = "Unranked";
     private ActivityHomeBinding binding;
+    private final MatchRepository matchRepository = new MatchRepository();
     private NotificationViewModel notifViewModel;
     private RankingViewModel rankingViewModel;
     private RankingAdapter rankingAdapter;
@@ -227,6 +230,14 @@ public class HomeActivity extends BaseActivity {
                             binding.btnFindTournament.setEnabled(true);
                             binding.btnFindMatch.setEnabled(true);
                         });
+
+                matchRepository.refreshDailyTokens(currentUser.getUid(), new RepositoryCallback<Integer>() {
+                    @Override public void onSuccess(Integer refreshed) {
+                        binding.tvTokenCount.setText(String.valueOf(refreshed));
+                        binding.tvTokenInfo.setText(refreshed + " left");
+                    }
+                    @Override public void onFailure(Exception e) { }
+                });
             }
         }
 
